@@ -6,7 +6,7 @@
 
 要创建一个新的着色器，需要右击的资源面板并选择“着色器”进行创建。你会被要求为您的新的着色器文件输入名称。
 
-![新建着色器](_images/createshader.png)
+![新建着色器](../_images/createshader.png)
 
 ## 编辑着色器
 
@@ -80,12 +80,12 @@ interface NewShaderUniformsRaw
 
 进入材质属性面板（可以是从材质文件属性中进入，也可以通过层级树中游戏对象->MeshRenderer->matrial进入），选择使用创建的新材质
 
-![新建着色器](_images/useshader.jpg)
+![新建着色器](../_images/useshader.jpg)
 
 ## 调整材质中着色器值
 
-![新建着色器](_images/editshaderattr.jpg)
+![新建着色器](../_images/editshaderattr.jpg)
 
 ## 着色器示例
 
-![新建着色器](_images/shaderexample.jpg)
+![新建着色器](../_images/shaderexample.jpg)
