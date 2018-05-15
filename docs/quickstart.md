@@ -53,8 +53,8 @@ feng3d.ticker.onframe(() =>
 
 ## 完整代码
 
-[filename](../_media/quickstart.html ':include :type=code')
+[filename](_media/quickstart.html ':include :type=code')
 
 ## 运行结果
 
-[quickstart website](../_media/quickstart.html ':include :type=iframe width=100% height=400px')
+[quickstart website](_media/quickstart.html ':include :type=iframe width=100% height=400px')

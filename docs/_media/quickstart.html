@@ -15,12 +15,12 @@
 </head>
 
 <body>
-    <script src="http://feng3d.gitee.io/engine/feng3d.js"></script>
+    <script src="http://feng3d.com/engine/out/feng3d.js"></script>
     <script>
         window.onload = function ()
         {
             var engine = new feng3d.Engine();
-            var cube = feng3d.GameObjectFactory.createCube();
+            var cube = feng3d.gameObjectFactory.createCube();
             cube.transform.z = 4;
             cube.transform.y = -1;
             engine.scene.gameObject.addChild(cube);
