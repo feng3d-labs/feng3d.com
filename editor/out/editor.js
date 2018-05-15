@@ -5800,7 +5800,7 @@ var feng3d;
              * @param url 编辑器资源相对路径
              */
             EditorData.prototype.getEditorAssetsPath = function (url) {
-                return document.URL + "resource/" + url;
+                return document.URL.substring(0, document.URL.lastIndexOf("/") + 1) + "resource/" + url;
             };
             return EditorData;
         }());
@@ -10498,7 +10498,7 @@ var feng3d;
          * @param projectname
          */
         function downloadProject(projectname, callback) {
-            var path = "../project/" + projectname;
+            var path = "projects/" + projectname;
             feng3d.Loader.loadBinary(path, function (content) {
                 editor.fs.importProject(content, function () {
                     editor.editorAssets.initproject(editor.editorAssets.projectname, function () {
