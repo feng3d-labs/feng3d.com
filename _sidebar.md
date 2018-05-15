@@ -10,8 +10,3 @@
 * 资源
   * [脚本](docs/script.md)
   * [着色器](docs/shader.md)
-
-* 导航
-  * [![](_images/editor.png)](http://feng3d.gitee.io/editor)
-  * [![](_images/examples.png)](http://feng3d.gitee.io/examples)
-  * [![](_images/tests.png)](http://feng3d.gitee.io/tests)
