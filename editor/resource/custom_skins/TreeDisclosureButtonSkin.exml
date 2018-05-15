@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="TreeDisclosureButtonSkin" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing" states="up,down,disabled,upAndSelected,downAndSelected,disabledAndSelected" >
+	<e:Image id="image" width="100%" height="100%" source.up="tree_close_up_png" source.down="tree_close_down_png" source.upAndSelected="tree_open_up_png" source.downAndSelected="tree_open_down_png" source.disabled="tree_close_up_png" source.disabledAndSelected="tree_open_up_png" source="tree_close_up_png"/>
+</e:Skin>

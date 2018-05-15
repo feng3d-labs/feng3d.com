@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="CameraPreview" width="400" height="300" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing">
+	<e:Group width="100%" height="100%">
+		<e:Group width="100%" height="20" x="524" y="175">
+			<e:Rect width="100%" height="100%" fillAlpha="0.5" scaleX="1" scaleY="1"/>
+			<e:Label text="摄像机 预览" x="0" scaleX="1" scaleY="1" size="12" width="100%" textAlign="center" textColor="0xffffff" verticalCenter="0"/>
+		</e:Group>
+		<e:Group width="100%" height="100%" x="544" y="129">
+			<e:Rect width="100%" height="100%" fillColor="0x272727" fillAlpha="0" strokeColor="0x444444" strokeWeight="3"/>
+			<e:Group id="group" top="3" bottom="3" left="3" right="3"/>
+		</e:Group>
+		<e:layout>
+			<e:VerticalLayout gap="-1"/>
+		</e:layout>
+	</e:Group>
+</e:Skin>

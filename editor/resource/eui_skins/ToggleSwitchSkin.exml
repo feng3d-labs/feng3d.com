@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="skins.ToggleSwitchSkin" states="up,down,disabled,upAndSelected,downAndSelected,disabledAndSelected" xmlns:e="http://ns.egret.com/eui">
+    <e:Image source="on_png"
+             source.up="off_png"
+             source.down="off_png"
+             source.disabled="off_png" height="20" width="45"/>
+    <e:Image source="handle_png"
+             verticalCenter="0" width="18" height="18" right.disabledAndSelected="0" right.downAndSelected="0" right.upAndSelected="0" left.disabled="0" left.down="0" left.up="0"/>
+</e:Skin>

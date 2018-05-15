@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="RenameTextInputSkin" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing" >
+	<w:Config id="1630b9a091e" ></w:Config>
+	<e:TextInput id="nameeditTxt" width="100%" anchorOffsetX="0" anchorOffsetY="0" scaleX="1" scaleY="1" verticalCenter="0" visible="false"/>
+	<e:Label id="nameLabel" size="12" scaleX="1" scaleY="1" verticalCenter="0" textColor="0x000000" text="11111" left="5" right="5" textAlign="left"/>
+</e:Skin>

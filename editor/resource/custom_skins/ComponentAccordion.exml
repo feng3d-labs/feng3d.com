@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="ComponentAccordion" states="show,hide" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing" width="200">
+	<w:Config id="15a7457514f"></w:Config>
+	<e:Rect width="100%" height="100%" fillColor="0x747474" fillAlpha="0" strokeAlpha="1" strokeWeight="1" strokeColor="0x747474"/>
+	<e:Group scaleX="1" scaleY="1" width="100%" height="100%">
+		<e:layout>
+			<e:VerticalLayout horizontalAlign="justify" gap="0" paddingLeft="2" paddingRight="2"  paddingBottom="2" paddingTop="2"/>
+		</e:layout>
+		<e:Group y="0" left="0" width="100%">
+			<e:Group id="titleGroup" width="100%" height="100%">
+				<e:Button label="" includeIn="hide" verticalCenter="0" left="3" x="3" y="3" scaleX="1" scaleY="1">
+					<e:skinName>
+					<e:Skin states="up,down,disabled">
+						<e:Image width="100%" height="100%" source="tree_close_up_png" source.down="tree_close_down_png"/>
+						<e:Label id="labelDisplay" horizontalCenter="0" verticalCenter="0"/>
+					</e:Skin>
+					</e:skinName>
+				</e:Button>
+				<e:Button label="" includeIn="show" verticalCenter="0" left="3" x="3" y="3" scaleX="1" scaleY="1">
+					<e:skinName>
+					<e:Skin states="up,down,disabled">
+						<e:Image width="100%" height="100%" source="tree_open_up_png" source.down="tree_open_down_png"/>
+						<e:Label id="labelDisplay" horizontalCenter="0" verticalCenter="0"/>
+					</e:Skin>
+					</e:skinName>
+				</e:Button>
+				<e:Label id="titleLabel" size="12" bold="true" textColor="0x000000" touchEnabled="false" left="45" verticalCenter="0" right="2" text="标题" x="45" y="3" scaleX="1" scaleY="1"/>
+			</e:Group>
+
+
+			<e:CheckBox id="enabledCB" label="" left="32"/>
+			<e:Image id="componentIcon" x="14" source="Transform_png"/>
+			<e:Button id="helpBtn" label="" right="22" y="1">
+				<e:skinName>
+					<e:Skin states="up,down,disabled">
+					<e:Image width="100%" height="100%" source="component_help_png"/>
+					<e:Label id="labelDisplay" horizontalCenter="0" verticalCenter="0"/>
+					</e:Skin>
+				</e:skinName>
+			</e:Button>
+			<e:Button id="operationBtn" label="" right="3" y="1">
+				<e:skinName>
+					<e:Skin states="up,down,disabled">
+					<e:Image width="100%" height="100%" source="component_operation_png"/>
+					<e:Label id="labelDisplay" horizontalCenter="0" verticalCenter="0"/>
+					</e:Skin>
+				</e:skinName>
+			</e:Button>
+
+		</e:Group>
+		<e:Group id="contentGroup" includeIn="show" y="10" left="0" width="100%" x="10">
+			<e:layout>
+				<e:VerticalLayout  paddingLeft="18" gap="-1" horizontalAlign="justify"/>
+			</e:layout>
+		</e:Group>
+	</e:Group>
+</e:Skin>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="OVBaseDefault" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing">
+	<e:Label id="label" text="" size="12" textColor="0x000000" left="5" top="5" right="5" bottom="5"/>
+	<e:Image width="100" height="100" y="0" scaleX="1" scaleY="1" id="image" x="0"/>
+</e:Skin>

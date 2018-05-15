@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="ComboBoxSkin" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing"  width="100">
+	<w:Config id="163112bc777" ></w:Config>
+	<e:Image source="ComboBox_png" left="0" right="0"/>
+	<e:Label id="label" text="Label" textColor="0x000000" size="12" left="5" verticalCenter="0" right="5"/>
+</e:Skin>

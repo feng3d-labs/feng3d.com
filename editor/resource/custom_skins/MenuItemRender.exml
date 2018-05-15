@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="MenuItemRender" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing" states="normal,separator,sub" width="100" height="22"
+        height.separator="7">
+    <e:Rect width="100%" height="100%" fillColor.separator="0xf0f0f0" fillColor="0xf2f2f2" />
+	<e:Rect id="selectedRect" width="100%" height="100%" fillColor="0x91c9f7" includeIn="normal,sub"/>
+    <e:Rect width="100%" height="1" includeIn="separator" verticalCenter="0" fillColor="0xdadada" />
+    <e:Group id="contentGroup" left.normal="0" right.normal="0" includeIn="normal,sub" height="100%" width="100%">
+        <e:Label text="{data.label}" size="12" includeIn="normal,sub" verticalAlign="middle" multiline="false"
+                 textColor="0x000000" verticalCenter="0" left="5" right="20" />
+        <e:Label text="&gt;" includeIn="sub" size="14" textColor="0x000000" bold="true" right="5" verticalCenter="0" />
+        <e:layout>
+            <e:BasicLayout/>
+        </e:layout>
+    </e:Group>
+</e:Skin>

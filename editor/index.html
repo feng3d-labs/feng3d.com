@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title>editor</title>
+	<meta http-equiv="Access-Control-Allow-Origin" content="*" />
+	<meta name="renderer" content="webkit">
+	<meta name="viewport" content="width=device-width,initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="full-screen" content="true" />
+	<meta name="screen-orientation" content="portrait" />
+	<meta name="x5-fullscreen" content="true" />
+	<meta name="360-fullscreen" content="true" />
+
+	<style>
+		html,
+		body {
+			background: #a2a2a2;
+			padding: 0;
+			border: 0;
+			margin: 0;
+			height: 100%;
+		}
+	</style>
+
+	<!--这个标签为通过egret提供的第三方库的方式生成的 javascript 文件。删除 modules_files 标签后，库文件加载列表将不会变化，请谨慎操作！-->
+
+	<!-- 合并js -->
+	<script src="index.js"></script>
+</head>
+
+<body>
+
+	<div id="app"></div>
+	</div>
+	<canvas id="glcanvas" width="640" height="480" style="position: absolute;">
+		Your browser doesn't appear to support the HTML5
+		<code>&lt;canvas&gt;</code> element.
+	</canvas>
+	<div id="stats"></div>
+	<canvas id="sceneRotateToolCanvas" width="80" height="80" style="position: absolute;">
+		Your browser doesn't appear to support the HTML5
+		<code>&lt;canvas&gt;</code> element.
+	</canvas>
+	<canvas id="cameraPreviewCanvas" width="80" height="80" style="position: absolute;">
+		Your browser doesn't appear to support the HTML5
+		<code>&lt;canvas&gt;</code> element.
+	</canvas>
+	<input id="color" type="color" style="position: absolute;display: none;">
+	<div id="egretDiv" style="margin: auto;width: 100%;height: 100%;" class="egret-player" data-entry-class="feng3d.editor.Editor"
+	 data-orientation="auto" data-scale-mode="showAll" data-frame-rate="30" data-content-width="100%" data-content-height="100%"
+	 data-show-paint-rect="false" data-multi-fingered="2" data-show-fps="false" data-show-log="false" data-show-fps-style="x:0,y:0,size:12,textColor:0xffffff,bgAlpha:0.9">
+	</div>
+</body>
+
+</html>

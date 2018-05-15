@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="OAVGameObjectName" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing" xmlns:ns1="*">
+	<e:Group width="100%" height="42">
+		<e:Rect width="100%" height="100%" scaleX="1" scaleY="1" fillColor="0xdcdcdc"/>
+		<e:Image x="5" verticalCenter="0" source="gameobject_small_png"/>
+		<e:TextInput id="nameInput" scaleX="1" scaleY="1" y="3" left="66" right="5"/>
+		<e:CheckBox id="visibleCB" label="" x="46" y="2"/>
+		<e:CheckBox id="mouseEnabledCB" label="鼠标事件" y="20" x="46"/>
+	</e:Group>
+</e:Skin>

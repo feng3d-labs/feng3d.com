@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="OBVDefault" xmlns:e="http://ns.egret.com/eui" states="show,hide"
+        xmlns:w="http://ns.egret.com/wing">
+	<w:Config id="15a64cb93c1" />
+	<e:Rect id="border" width="100%" height="100%" fillColor="0x747474" fillAlpha="0" strokeColor="0x747474" strokeAlpha="1" strokeWeight="1"/>
+	<e:Group id="group" scaleX="1" scaleY="1" width="100%" height="100%" y="0">
+		<e:layout>
+			<e:VerticalLayout horizontalAlign="left" gap="0"  paddingLeft="0" paddingRight="0" paddingBottom="0" paddingTop="0"/>
+		</e:layout>
+		<e:Group id="titleGroup" y="0" left="0" width="100%">
+			<e:Rect id="titleButton" width="100%" height="100%" fillAlpha="0"/>
+
+
+			<e:Group x="5" y="2" touchChildren="false" touchEnabled="false">
+				<e:Label text="-" text.show="-" text.hide="+" size="16" textColor="0x000000" bold="true" x="0" y="0" touchEnabled="false" width="10"/>
+				<e:Label size="12" bold="true" text="{blockName}" textColor="0x000000" x="15" y="1" width="100%" touchEnabled="false"/>
+				<e:layout>
+					<e:HorizontalLayout verticalAlign="middle"/>
+				</e:layout>
+			</e:Group>
+		</e:Group>
+		<e:Group id="contentGroup" includeIn="show" y="10" left="0" width="100%" x="10">
+			<e:layout>
+				<e:VerticalLayout horizontalAlign="left" verticalAlign="middle"  gap="0"/>
+			</e:layout>
+		</e:Group>
+	</e:Group>
+</e:Skin>
