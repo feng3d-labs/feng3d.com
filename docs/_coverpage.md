@@ -8,4 +8,5 @@
 
 
 [Gitee](https://gitee.com/feng3d/feng3d)
+[issues](https://gitee.com/feng3d/feng3d/issues)
 [Get Started](#feng3d)

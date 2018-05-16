@@ -1,21 +1,7 @@
 # feng3d
 
-基于WebGL的3D渲染引擎
-
-## 编译项目
-
-    `ctrl+shift+B`
-
-    `node ShaderPack.js`
-
-## 相关项目
-
-1. [examples](https://git.oschina.net/feng3d/examples.git)
-
-## 相关网站
- [网站](http://www.feng3d.com/)
- [示例](http://feng3d.gitee.io/examples)
- [编辑器](http://feng3d.gitee.io/editor)
+feng3d基于WebGL的3D游戏引擎，致力于打造一个优秀的3d游戏引擎以及易用且可以快速开发项目的配套编辑器。
 
 ## 交流
+
 QQ群：519732759
