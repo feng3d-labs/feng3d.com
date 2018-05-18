@@ -97,3 +97,5 @@ xhr(url, (result) =>
     console.log(contributions);
 });
 
+// 更新 gitee 仓库文件
+// https://gitee.com/api/v5/swagger#/putV5ReposOwnerRepoContentsPath
