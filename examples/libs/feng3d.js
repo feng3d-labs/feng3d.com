@@ -158,77 +158,6 @@ Array.prototype.isUnique = function (compareFn) {
 };
 var feng3d;
 (function (feng3d) {
-    /**
-     * 测试代码运行时间
-     * @param fn 被测试的方法
-     * @param labal 标签
-     */
-    function time(fn, labal) {
-        labal = labal || fn["name"] || "Anonymous function " + Math.random();
-        console.time(labal);
-        fn();
-        console.timeEnd(labal);
-    }
-    feng3d.time = time;
-    /**
-     * 断言，测试不通过时报错
-     * @param test 测试项
-     * @param message 测试失败时提示信息
-     * @param optionalParams
-     */
-    function assert(test, message) {
-        var optionalParams = [];
-        for (var _i = 2; _i < arguments.length; _i++) {
-            optionalParams[_i - 2] = arguments[_i];
-        }
-        if (!test)
-            debugger;
-        console.assert.apply(null, arguments);
-    }
-    feng3d.assert = assert;
-    /**
-     * 输出错误
-     * @param message 错误信息
-     * @param optionalParams
-     */
-    function error(message) {
-        var optionalParams = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            optionalParams[_i - 1] = arguments[_i];
-        }
-        debugger;
-        console.error.apply(null, arguments);
-    }
-    feng3d.error = error;
-    /**
-     * 记录日志信息
-     * @param message 日志信息
-     * @param optionalParams
-     */
-    function log(message) {
-        var optionalParams = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            optionalParams[_i - 1] = arguments[_i];
-        }
-        console.log.apply(null, arguments);
-    }
-    feng3d.log = log;
-    /**
-     * 警告
-     * @param message 警告信息
-     * @param optionalParams
-     */
-    function warn(message) {
-        var optionalParams = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            optionalParams[_i - 1] = arguments[_i];
-        }
-        console.warn.apply(null, arguments);
-    }
-    feng3d.warn = warn;
-})(feng3d || (feng3d = {}));
-var feng3d;
-(function (feng3d) {
     feng3d.EVENT_KEY = "__event__";
     function getBubbleTargets(target) {
         return [target["parent"]];
@@ -375,6 +304,8 @@ var feng3d;
         __extends(EventProxy, _super);
         function EventProxy(target) {
             var _this = _super.call(this) || this;
+            _this.pageX = 0;
+            _this.pageY = 0;
             _this.clientX = 0;
             _this.clientY = 0;
             /**
@@ -389,11 +320,13 @@ var feng3d;
              * 键盘按下事件
              */
             _this.onMouseKey = function (event) {
-                _this.clear();
+                // this.clear();
                 if (event["clientX"] != undefined) {
                     event = event;
                     _this.clientX = event.clientX;
                     _this.clientY = event.clientY;
+                    _this.pageX = event.pageX;
+                    _this.pageY = event.pageY;
                 }
                 if (event instanceof MouseEvent) {
                     _this.rightmouse = event.button == 2;
@@ -405,6 +338,11 @@ var feng3d;
                 if (event instanceof WheelEvent) {
                     _this.wheelDelta = event.wheelDelta;
                 }
+                // 赋值上次鼠标事件值
+                event.clientX = _this.clientX;
+                event.clientY = _this.clientY;
+                event.pageX = _this.pageX;
+                event.pageY = _this.pageY;
                 _this.dispatchEvent(event);
             };
             _this.target = target;
@@ -874,6 +812,77 @@ var feng3d;
         { reg: /(\.png\b)/i, type: types.image },
         { reg: /(\.jpg\b)/i, type: types.image },
     ];
+})(feng3d || (feng3d = {}));
+var feng3d;
+(function (feng3d) {
+    /**
+     * 测试代码运行时间
+     * @param fn 被测试的方法
+     * @param labal 标签
+     */
+    function time(fn, labal) {
+        labal = labal || fn["name"] || "Anonymous function " + Math.random();
+        console.time(labal);
+        fn();
+        console.timeEnd(labal);
+    }
+    feng3d.time = time;
+    /**
+     * 断言，测试不通过时报错
+     * @param test 测试项
+     * @param message 测试失败时提示信息
+     * @param optionalParams
+     */
+    function assert(test, message) {
+        var optionalParams = [];
+        for (var _i = 2; _i < arguments.length; _i++) {
+            optionalParams[_i - 2] = arguments[_i];
+        }
+        if (!test)
+            debugger;
+        console.assert.apply(null, arguments);
+    }
+    feng3d.assert = assert;
+    /**
+     * 输出错误
+     * @param message 错误信息
+     * @param optionalParams
+     */
+    function error(message) {
+        var optionalParams = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            optionalParams[_i - 1] = arguments[_i];
+        }
+        debugger;
+        console.error.apply(null, arguments);
+    }
+    feng3d.error = error;
+    /**
+     * 记录日志信息
+     * @param message 日志信息
+     * @param optionalParams
+     */
+    function log(message) {
+        var optionalParams = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            optionalParams[_i - 1] = arguments[_i];
+        }
+        console.log.apply(null, arguments);
+    }
+    feng3d.log = log;
+    /**
+     * 警告
+     * @param message 警告信息
+     * @param optionalParams
+     */
+    function warn(message) {
+        var optionalParams = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            optionalParams[_i - 1] = arguments[_i];
+        }
+        console.warn.apply(null, arguments);
+    }
+    feng3d.warn = warn;
 })(feng3d || (feng3d = {}));
 var feng3d;
 (function (feng3d) {
@@ -1996,7 +2005,7 @@ var feng3d;
         Timer.prototype.runfunc = function () {
             this.currentCount++;
             this.repeatCount--;
-            this.func.call(this.thisObject);
+            this.func.call(this.thisObject, feng3d.lazy.getvalue(this.interval));
             if (this.repeatCount < 1)
                 this.stop();
         };
@@ -2043,7 +2052,7 @@ var feng3d;
             if (element.runtime < currenttime) {
                 // try
                 // {
-                element.func.call(element.thisObject);
+                element.func.call(element.thisObject, feng3d.lazy.getvalue(element.interval));
                 // } catch (error)
                 // {
                 //     warn(`${element.func} 方法执行错误，从 ticker 中移除`, error)
@@ -2363,7 +2372,7 @@ var feng3d;
          * @param callback 加载完成回调
          */
         ImageUtil.prototype.loadImage = function (url, callback) {
-            feng3d.assets.loadImage(url, callback);
+            feng3d.assets.readFileAsImage(url, callback);
         };
         /**
          * 获取图片数据
@@ -2388,7 +2397,7 @@ var feng3d;
          */
         ImageUtil.prototype.getImageDataFromUrl = function (url, callback) {
             var _this = this;
-            this.loadImage(url, function (image) {
+            this.loadImage(url, function (err, image) {
                 var imageData = _this.getImageData(image);
                 callback(imageData);
             });
@@ -2887,6 +2896,10 @@ var feng3d;
         Vector2.prototype.toArray = function () {
             return [this.x, this.y];
         };
+        /**
+         * 原点
+         */
+        Vector2.ZERO = new Vector2();
         __decorate([
             feng3d.oav(),
             feng3d.serialize
@@ -7825,6 +7838,8 @@ var feng3d;
             }
             return str.toUpperCase();
         };
+        Color3.WHITE = new Color3();
+        Color3.BLACK = new Color3(0, 0, 0);
         __decorate([
             feng3d.oav(),
             feng3d.serialize
@@ -7984,6 +7999,8 @@ var feng3d;
             vector4.w = this.a;
             return vector4;
         };
+        Color4.WHITE = new Color4();
+        Color4.BLACK = new Color4(0, 0, 0);
         __decorate([
             feng3d.oav(),
             feng3d.serialize
@@ -10315,19 +10332,10 @@ var feng3d;
              */
             this._indexBufferMap = new Map();
             this.name = name;
-            this._data = data;
+            this.data = data;
             this.size = size;
             this.divisor = divisor;
         }
-        Object.defineProperty(Attribute.prototype, "data", {
-            /**
-             * 属性数据
-             */
-            get: function () { return this._data; },
-            set: function (value) { this.invalid = true; this._data = value; },
-            enumerable: true,
-            configurable: true
-        });
         /**
          *
          * @param gl
@@ -10346,6 +10354,9 @@ var feng3d;
             //渲染时必须重置
             gl.advanced.vertexAttribDivisor(location, this.divisor);
         };
+        Attribute.prototype.invalidate = function () {
+            this.invalid = true;
+        };
         /**
          * 获取缓冲
          */
@@ -10359,7 +10370,7 @@ var feng3d;
                 }
                 buffer = newbuffer;
                 gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this._data), gl.STATIC_DRAW);
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.data), gl.STATIC_DRAW);
                 this._indexBufferMap.set(gl, buffer);
             }
             return buffer;
@@ -10373,6 +10384,9 @@ var feng3d;
             });
             this._indexBufferMap.clear();
         };
+        __decorate([
+            feng3d.watch("invalidate")
+        ], Attribute.prototype, "data", void 0);
         return Attribute;
     }());
     feng3d.Attribute = Attribute;
@@ -10786,6 +10800,10 @@ var feng3d;
                 "fragment": "precision mediump float;\r\n\r\nuniform vec4 u_outlineColor;\r\n\r\nvoid main(void) {\r\n   \r\n    gl_FragColor = u_outlineColor;\r\n}",
                 "vertex": "precision mediump float;  \r\n\r\n//此处将填充宏定义\r\n#define macros\r\n\r\n//坐标属性\r\nattribute vec3 a_position;\r\nattribute vec3 a_normal;\r\n\r\nuniform mat4 u_modelMatrix;\r\nuniform mat4 u_ITModelMatrix;\r\nuniform mat4 u_cameraMatrix;\r\nuniform mat4 u_viewProjection;\r\nuniform float u_scaleByDepth;\r\nuniform float u_outlineMorphFactor;\r\n\r\n#ifdef HAS_SKELETON_ANIMATION\r\n    #include<skeleton.vertex>\r\n#endif\r\n\r\nuniform float u_outlineSize;\r\n\r\nvoid main(void) {\r\n\r\n    vec4 position = vec4(a_position,1.0);\r\n\r\n    #ifdef HAS_SKELETON_ANIMATION\r\n        position = skeletonAnimation(position);\r\n    #endif\r\n    \r\n    vec3 normal = a_normal;\r\n\r\n    //全局坐标\r\n    vec4 globalPosition = u_modelMatrix * position;\r\n    //全局法线\r\n    vec3 globalNormal = normalize((u_ITModelMatrix * vec4(normal,0.0)).xyz);\r\n\r\n    float depth = distance(globalPosition.xyz , u_cameraMatrix[3].xyz);\r\n    \r\n    vec3 offsetDir = mix(globalNormal,normalize(globalPosition.xyz),u_outlineMorphFactor);\r\n    //摄像机远近保持粗细一致\r\n    offsetDir = offsetDir * depth * u_scaleByDepth;\r\n    //描边宽度\r\n    offsetDir = offsetDir * u_outlineSize;\r\n\r\n    globalPosition.xyz = globalPosition.xyz + offsetDir;//\r\n\r\n    //计算投影坐标\r\n    gl_Position = u_viewProjection * globalPosition;\r\n}"
             },
+            "particle": {
+                "fragment": "precision mediump float;\r\n\r\nvarying vec2 v_uv;\r\n\r\nuniform float u_alphaThreshold;\r\n//漫反射\r\nuniform vec4 u_diffuse;\r\nuniform sampler2D s_diffuse;\r\n\r\nvarying vec4 v_particle_color;\r\n\r\nvec4 particleAnimation(vec4 color) {\r\n\r\n    return color * v_particle_color;\r\n}\r\n\r\nvoid main(void)\r\n{\r\n    vec4 finalColor = vec4(1.0,1.0,1.0,1.0);\r\n\r\n    //获取漫反射基本颜色\r\n    vec4 diffuseColor = u_diffuse * texture2D(s_diffuse, v_uv);\r\n\r\n    if(diffuseColor.w < u_alphaThreshold)\r\n    {\r\n        discard;\r\n    }\r\n\r\n    finalColor = diffuseColor;\r\n\r\n    finalColor = particleAnimation(finalColor);\r\n\r\n    gl_FragColor = finalColor;\r\n}",
+                "vertex": "precision mediump float;  \r\n\r\n//坐标属性\r\nattribute vec3 a_position;\r\nattribute vec2 a_uv;\r\nattribute vec3 a_normal;\r\n\r\nuniform mat4 u_modelMatrix;\r\nuniform mat4 u_ITModelMatrix;\r\nuniform mat4 u_viewProjection;\r\n\r\nvarying vec2 v_uv;\r\n\r\nuniform float u_PointSize;\r\n\r\n//\r\nattribute float a_particle_birthTime;\r\nattribute vec3 a_particle_position;\r\nattribute vec3 a_particle_velocity;\r\nattribute float a_particle_lifetime;\r\nattribute vec4 a_particle_color;\r\n\r\nvarying vec4 v_particle_color;\r\n\r\nuniform float u_particleTime;\r\nuniform vec3 u_particle_acceleration;\r\nuniform mat4 u_particle_billboardMatrix;\r\n\r\nvec4 particleAnimation(vec4 position) {\r\n\r\n    float pTime = u_particleTime - a_particle_birthTime;\r\n    if(pTime > 0.0){\r\n\r\n        pTime = mod(pTime,a_particle_lifetime);\r\n\r\n        vec3 pVelocity = vec3(0.0,0.0,0.0);\r\n\r\n        position = u_particle_billboardMatrix * position;\r\n        position.xyz = position.xyz + a_particle_position;\r\n        pVelocity = pVelocity + a_particle_velocity;\r\n        pVelocity = pVelocity + u_particle_acceleration * pTime;\r\n        v_particle_color = a_particle_color;\r\n\r\n        position.xyz = position.xyz + pVelocity * pTime;\r\n    }\r\n    \r\n    return position;\r\n}\r\n\r\nvoid main(void) {\r\n\r\n    vec4 position = vec4(a_position,1.0);\r\n    \r\n    position = particleAnimation(position);\r\n\r\n    vec3 normal = a_normal;\r\n\r\n    //获取全局坐标\r\n    vec4 globalPosition = u_modelMatrix * position;\r\n    //计算投影坐标\r\n    gl_Position = u_viewProjection * globalPosition;\r\n    //输出uv\r\n    v_uv = a_uv;\r\n\r\n    gl_PointSize = u_PointSize;\r\n}"
+            },
             "point": {
                 "fragment": "precision mediump float;\r\n\r\nvarying vec4 v_color;\r\nuniform vec4 u_color;\r\n\r\nvoid main(void) {\r\n   \r\n    gl_FragColor = v_color * u_color;\r\n}\r\n",
                 "vertex": "attribute vec3 a_position;\r\nattribute vec4 a_color;\r\n\r\nuniform float u_PointSize;\r\n\r\nuniform mat4 u_modelMatrix;\r\nuniform mat4 u_viewProjection;\r\n\r\nvarying vec4 v_color;\r\n\r\nvoid main(void) {\r\n\r\n    vec4 globalPosition = u_modelMatrix * vec4(a_position, 1.0);\r\n    gl_Position = u_viewProjection * globalPosition;\r\n    gl_PointSize = u_PointSize;\r\n\r\n    v_color = a_color;\r\n}"
@@ -10798,13 +10816,17 @@ var feng3d;
                 "fragment": "precision mediump float;\r\n\r\nvoid main() {\r\n    const vec4 bitShift = vec4(1.0, 256.0, 256.0 * 256.0, 256.0 * 256.0 * 256.0);\r\n    const vec4 bitMask = vec4(1.0/256.0, 1.0/256.0, 1.0/256.0, 0.0);\r\n    vec4 rgbaDepth = fract(gl_FragCoord.z * bitShift); // Calculate the value stored into each byte\r\n    rgbaDepth -= rgbaDepth.gbaa * bitMask; // Cut off the value which do not fit in 8 bits\r\n    gl_FragColor = rgbaDepth;\r\n}",
                 "vertex": "attribute vec3 a_position;\r\n\r\nuniform mat4 u_modelMatrix;\r\nuniform mat4 u_viewProjection;\r\n\r\nvoid main(void) {\r\n\r\n    vec4 globalPosition = u_modelMatrix * vec4(a_position, 1.0);\r\n    gl_Position = u_viewProjection * globalPosition;\r\n}"
             },
+            "skeleton": {
+                "fragment": "precision mediump float;\r\n\r\nvarying vec2 v_uv;\r\nvarying vec3 v_globalPosition;\r\nvarying vec3 v_normal;\r\n\r\nvarying vec3 v_tangent;\r\nvarying vec3 v_bitangent;\r\n\r\nuniform mat4 u_cameraMatrix;\r\n\r\nuniform float u_alphaThreshold;\r\n//漫反射\r\nuniform vec4 u_diffuse;\r\nuniform sampler2D s_diffuse;\r\n\r\n//法线贴图\r\nuniform sampler2D s_normal;\r\n\r\n//镜面反射\r\nuniform vec3 u_specular;\r\nuniform float u_glossiness;\r\nuniform sampler2D s_specular;\r\n\r\nuniform vec4 u_sceneAmbientColor;\r\n\r\n//环境\r\nuniform vec4 u_ambient;\r\nuniform sampler2D s_ambient;\r\n\r\n#include<lightShading.fragment>\r\n\r\n#include<fog.fragment>\r\n\r\n#include<envmap.fragment>\r\n\r\nvoid main(void)\r\n{\r\n    vec4 finalColor = vec4(1.0,1.0,1.0,1.0);\r\n\r\n    //获取法线\r\n    vec3 normal = texture2D(s_normal,v_uv).xyz * 2.0 - 1.0;\r\n    normal = normalize(normal.x * v_tangent + normal.y * v_bitangent + normal.z * v_normal);\r\n\r\n    // vec3 normal = v_normal;\r\n\r\n    //获取漫反射基本颜色\r\n    vec4 diffuseColor = u_diffuse;\r\n    diffuseColor = diffuseColor * texture2D(s_diffuse, v_uv);\r\n\r\n    if(diffuseColor.w < u_alphaThreshold)\r\n    {\r\n        discard;\r\n    }\r\n\r\n    //环境光\r\n    vec3 ambientColor = u_ambient.w * u_ambient.xyz * u_sceneAmbientColor.xyz * u_sceneAmbientColor.w;\r\n    ambientColor = ambientColor * texture2D(s_ambient, v_uv).xyz;\r\n\r\n    finalColor = diffuseColor;\r\n\r\n    //渲染灯光\r\n    //获取高光值\r\n    float glossiness = u_glossiness;\r\n    //获取镜面反射基本颜色\r\n    vec3 specularColor = u_specular;\r\n    #ifdef HAS_SPECULAR_SAMPLER\r\n        vec4 specularMapColor = texture2D(s_specular, v_uv);\r\n        specularColor.xyz = specularMapColor.xyz;\r\n        glossiness = glossiness * specularMapColor.w;\r\n    #endif\r\n    \r\n    finalColor.xyz = lightShading(normal, diffuseColor.xyz, specularColor, ambientColor, glossiness);\r\n\r\n    finalColor = envmapMethod(finalColor);\r\n\r\n    finalColor = fogMethod(finalColor);\r\n\r\n    gl_FragColor = finalColor;\r\n}",
+                "vertex": "precision mediump float;  \r\n\r\n//坐标属性\r\nattribute vec3 a_position;\r\nattribute vec2 a_uv;\r\nattribute vec3 a_normal;\r\n\r\nuniform mat4 u_modelMatrix;\r\nuniform mat4 u_ITModelMatrix;\r\nuniform mat4 u_viewProjection;\r\nuniform float u_scaleByDepth;\r\n\r\nvarying vec2 v_uv;\r\nvarying vec3 v_globalPosition;\r\nvarying vec3 v_normal;\r\n\r\nattribute vec3 a_tangent;\r\n\r\nvarying vec3 v_tangent;\r\nvarying vec3 v_bitangent;\r\n\r\nuniform float u_PointSize;\r\n\r\n#include<skeleton.vertex>\r\n\r\nvoid main(void) {\r\n\r\n    vec4 position = vec4(a_position,1.0);\r\n\r\n    position = skeletonAnimation(position);\r\n    \r\n    vec3 normal = a_normal;\r\n\r\n    //获取全局坐标\r\n    vec4 globalPosition = u_modelMatrix * position;\r\n    //计算投影坐标\r\n    gl_Position = u_viewProjection * globalPosition;\r\n    //输出全局坐标\r\n    v_globalPosition = globalPosition.xyz;\r\n    //输出uv\r\n    v_uv = a_uv;\r\n\r\n    //计算法线\r\n    v_normal = normalize((u_ITModelMatrix * vec4(normal,0.0)).xyz);\r\n    v_tangent = normalize((u_modelMatrix * vec4(a_tangent,0.0)).xyz);\r\n    v_bitangent = cross(v_normal,v_tangent);\r\n    \r\n    gl_PointSize = u_PointSize;\r\n}"
+            },
             "skybox": {
                 "fragment": "\r\n\r\nprecision highp float;\r\n\r\nuniform samplerCube s_skyboxTexture;\r\nuniform mat4 u_cameraMatrix;\r\n\r\nvarying vec3 v_worldPos;\r\n\r\n\r\n\r\nvoid main(){\r\n    vec3 viewDir = normalize(v_worldPos - u_cameraMatrix[3].xyz);\r\n    gl_FragColor = textureCube(s_skyboxTexture, viewDir);\r\n}",
                 "vertex": "\r\n\r\nattribute vec3 a_position;\r\n\r\nuniform mat4 u_cameraMatrix;\r\nuniform mat4 u_viewProjection;\r\n\r\nuniform float u_skyBoxSize;\r\n\r\nvarying vec3 v_worldPos;\r\n\r\nvoid main(){\r\n    vec3 worldPos = a_position.xyz * u_skyBoxSize + u_cameraMatrix[3].xyz;\r\n    gl_Position = u_viewProjection * vec4(worldPos.xyz,1.0);\r\n    v_worldPos = worldPos;\r\n}"
             },
             "standard": {
-                "fragment": "precision mediump float;\r\n\r\nvarying vec2 v_uv;\r\nvarying vec3 v_globalPosition;\r\nvarying vec3 v_normal;\r\n\r\nvarying vec3 v_tangent;\r\nvarying vec3 v_bitangent;\r\n\r\nuniform mat4 u_cameraMatrix;\r\n\r\nuniform float u_alphaThreshold;\r\n//漫反射\r\nuniform vec4 u_diffuse;\r\nuniform sampler2D s_diffuse;\r\n\r\n//法线贴图\r\nuniform sampler2D s_normal;\r\n\r\n//镜面反射\r\nuniform vec3 u_specular;\r\nuniform float u_glossiness;\r\nuniform sampler2D s_specular;\r\n\r\nuniform vec4 u_sceneAmbientColor;\r\n\r\n//环境\r\nuniform vec4 u_ambient;\r\nuniform sampler2D s_ambient;\r\n\r\n#ifdef HAS_TERRAIN_METHOD\r\n    #include<terrain.fragment>\r\n#endif\r\n\r\n#include<lightShading.fragment>\r\n\r\n#include<fog.fragment>\r\n\r\n#include<envmap.fragment>\r\n\r\n#ifdef HAS_PARTICLE_ANIMATOR\r\n    #include<particle.fragment>\r\n#endif\r\n\r\nvoid main(void)\r\n{\r\n    vec4 finalColor = vec4(1.0,1.0,1.0,1.0);\r\n\r\n    //获取法线\r\n    vec3 normal = texture2D(s_normal,v_uv).xyz * 2.0 - 1.0;\r\n    normal = normalize(normal.x * v_tangent + normal.y * v_bitangent + normal.z * v_normal);\r\n\r\n    // vec3 normal = v_normal;\r\n\r\n    //获取漫反射基本颜色\r\n    vec4 diffuseColor = u_diffuse;\r\n    diffuseColor = diffuseColor * texture2D(s_diffuse, v_uv);\r\n\r\n    if(diffuseColor.w < u_alphaThreshold)\r\n    {\r\n        discard;\r\n    }\r\n\r\n    #ifdef HAS_TERRAIN_METHOD\r\n        diffuseColor = terrainMethod(diffuseColor, v_uv);\r\n    #endif\r\n\r\n    //环境光\r\n    vec3 ambientColor = u_ambient.w * u_ambient.xyz * u_sceneAmbientColor.xyz * u_sceneAmbientColor.w;\r\n    ambientColor = ambientColor * texture2D(s_ambient, v_uv).xyz;\r\n\r\n    finalColor = diffuseColor;\r\n\r\n    //渲染灯光\r\n    //获取高光值\r\n    float glossiness = u_glossiness;\r\n    //获取镜面反射基本颜色\r\n    vec3 specularColor = u_specular;\r\n    #ifdef HAS_SPECULAR_SAMPLER\r\n        vec4 specularMapColor = texture2D(s_specular, v_uv);\r\n        specularColor.xyz = specularMapColor.xyz;\r\n        glossiness = glossiness * specularMapColor.w;\r\n    #endif\r\n    \r\n    finalColor.xyz = lightShading(normal, diffuseColor.xyz, specularColor, ambientColor, glossiness);\r\n\r\n    finalColor = envmapMethod(finalColor);\r\n\r\n    #ifdef HAS_PARTICLE_ANIMATOR\r\n        finalColor = particleAnimation(finalColor);\r\n    #endif\r\n\r\n    finalColor = fogMethod(finalColor);\r\n\r\n    gl_FragColor = finalColor;\r\n}",
-                "vertex": "precision mediump float;  \r\n\r\n//坐标属性\r\nattribute vec3 a_position;\r\nattribute vec2 a_uv;\r\nattribute vec3 a_normal;\r\n\r\nuniform mat4 u_modelMatrix;\r\nuniform mat4 u_ITModelMatrix;\r\nuniform mat4 u_viewProjection;\r\nuniform float u_scaleByDepth;\r\n\r\nvarying vec2 v_uv;\r\nvarying vec3 v_globalPosition;\r\nvarying vec3 v_normal;\r\n\r\nattribute vec3 a_tangent;\r\n\r\nvarying vec3 v_tangent;\r\nvarying vec3 v_bitangent;\r\n\r\n#ifdef HAS_SKELETON_ANIMATION\r\n    #include<skeleton.vertex>\r\n#endif\r\n\r\nuniform float u_PointSize;\r\n\r\n#ifdef HAS_PARTICLE_ANIMATOR\r\n    #include<particle.vertex>\r\n#endif\r\n\r\nvoid main(void) {\r\n\r\n    vec4 position = vec4(a_position,1.0);\r\n\r\n    #ifdef HAS_SKELETON_ANIMATION\r\n        position = skeletonAnimation(position);\r\n    #endif\r\n    \r\n    #ifdef HAS_PARTICLE_ANIMATOR\r\n        position = particleAnimation(position);\r\n    #endif\r\n\r\n    vec3 normal = a_normal;\r\n\r\n    //获取全局坐标\r\n    vec4 globalPosition = u_modelMatrix * position;\r\n    //计算投影坐标\r\n    gl_Position = u_viewProjection * globalPosition;\r\n    //输出全局坐标\r\n    v_globalPosition = globalPosition.xyz;\r\n    //输出uv\r\n    v_uv = a_uv;\r\n\r\n    //计算法线\r\n    v_normal = normalize((u_ITModelMatrix * vec4(normal,0.0)).xyz);\r\n    v_tangent = normalize((u_modelMatrix * vec4(a_tangent,0.0)).xyz);\r\n    v_bitangent = cross(v_normal,v_tangent);\r\n    \r\n    gl_PointSize = u_PointSize;\r\n}"
+                "fragment": "precision mediump float;\r\n\r\nvarying vec2 v_uv;\r\nvarying vec3 v_globalPosition;\r\nvarying vec3 v_normal;\r\n\r\nvarying vec3 v_tangent;\r\nvarying vec3 v_bitangent;\r\n\r\nuniform mat4 u_cameraMatrix;\r\n\r\nuniform float u_alphaThreshold;\r\n//漫反射\r\nuniform vec4 u_diffuse;\r\nuniform sampler2D s_diffuse;\r\n\r\n//法线贴图\r\nuniform sampler2D s_normal;\r\n\r\n//镜面反射\r\nuniform vec3 u_specular;\r\nuniform float u_glossiness;\r\nuniform sampler2D s_specular;\r\n\r\nuniform vec4 u_sceneAmbientColor;\r\n\r\n//环境\r\nuniform vec4 u_ambient;\r\nuniform sampler2D s_ambient;\r\n\r\n#include<lightShading.fragment>\r\n\r\n#include<fog.fragment>\r\n\r\n#include<envmap.fragment>\r\n\r\n#ifdef HAS_PARTICLE_ANIMATOR\r\n    #include<particle.fragment>\r\n#endif\r\n\r\nvoid main(void)\r\n{\r\n    vec4 finalColor = vec4(1.0,1.0,1.0,1.0);\r\n\r\n    //获取法线\r\n    vec3 normal = texture2D(s_normal,v_uv).xyz * 2.0 - 1.0;\r\n    normal = normalize(normal.x * v_tangent + normal.y * v_bitangent + normal.z * v_normal);\r\n\r\n    // vec3 normal = v_normal;\r\n\r\n    //获取漫反射基本颜色\r\n    vec4 diffuseColor = u_diffuse;\r\n    diffuseColor = diffuseColor * texture2D(s_diffuse, v_uv);\r\n\r\n    if(diffuseColor.w < u_alphaThreshold)\r\n    {\r\n        discard;\r\n    }\r\n\r\n    //环境光\r\n    vec3 ambientColor = u_ambient.w * u_ambient.xyz * u_sceneAmbientColor.xyz * u_sceneAmbientColor.w;\r\n    ambientColor = ambientColor * texture2D(s_ambient, v_uv).xyz;\r\n\r\n    finalColor = diffuseColor;\r\n\r\n    //渲染灯光\r\n    //获取高光值\r\n    float glossiness = u_glossiness;\r\n    //获取镜面反射基本颜色\r\n    vec3 specularColor = u_specular;\r\n\r\n    vec4 specularMapColor = texture2D(s_specular, v_uv);\r\n    specularColor.xyz = specularColor * specularMapColor.xyz;\r\n    glossiness = glossiness * specularMapColor.w;\r\n    \r\n    finalColor.xyz = lightShading(normal, diffuseColor.xyz, specularColor, ambientColor, glossiness);\r\n\r\n    finalColor = envmapMethod(finalColor);\r\n\r\n    #ifdef HAS_PARTICLE_ANIMATOR\r\n        finalColor = particleAnimation(finalColor);\r\n    #endif\r\n\r\n    finalColor = fogMethod(finalColor);\r\n\r\n    gl_FragColor = finalColor;\r\n}",
+                "vertex": "precision mediump float;  \r\n\r\n//坐标属性\r\nattribute vec3 a_position;\r\nattribute vec2 a_uv;\r\nattribute vec3 a_normal;\r\n\r\nuniform mat4 u_modelMatrix;\r\nuniform mat4 u_ITModelMatrix;\r\nuniform mat4 u_viewProjection;\r\nuniform float u_scaleByDepth;\r\n\r\nvarying vec2 v_uv;\r\nvarying vec3 v_globalPosition;\r\nvarying vec3 v_normal;\r\n\r\nattribute vec3 a_tangent;\r\n\r\nvarying vec3 v_tangent;\r\nvarying vec3 v_bitangent;\r\n\r\nuniform float u_PointSize;\r\n\r\n#ifdef HAS_PARTICLE_ANIMATOR\r\n    #include<particle.vertex>\r\n#endif\r\n\r\nvoid main(void) {\r\n\r\n    vec4 position = vec4(a_position,1.0);\r\n    \r\n    #ifdef HAS_PARTICLE_ANIMATOR\r\n        position = particleAnimation(position);\r\n    #endif\r\n\r\n    vec3 normal = a_normal;\r\n\r\n    //获取全局坐标\r\n    vec4 globalPosition = u_modelMatrix * position;\r\n    //计算投影坐标\r\n    gl_Position = u_viewProjection * globalPosition;\r\n    //输出全局坐标\r\n    v_globalPosition = globalPosition.xyz;\r\n    //输出uv\r\n    v_uv = a_uv;\r\n\r\n    //计算法线\r\n    v_normal = normalize((u_ITModelMatrix * vec4(normal,0.0)).xyz);\r\n    v_tangent = normalize((u_modelMatrix * vec4(a_tangent,0.0)).xyz);\r\n    v_bitangent = cross(v_normal,v_tangent);\r\n    \r\n    gl_PointSize = u_PointSize;\r\n}"
             },
             "terrain": {
                 "fragment": "precision mediump float;\r\n\r\nvarying vec2 v_uv;\r\nvarying vec3 v_globalPosition;\r\nvarying vec3 v_normal;\r\n\r\nvarying vec3 v_tangent;\r\nvarying vec3 v_bitangent;\r\n\r\nuniform mat4 u_cameraMatrix;\r\n\r\nuniform float u_alphaThreshold;\r\n//漫反射\r\nuniform vec4 u_diffuse;\r\nuniform sampler2D s_diffuse;\r\n\r\n//法线贴图\r\nuniform sampler2D s_normal;\r\n\r\n//镜面反射\r\nuniform vec3 u_specular;\r\nuniform float u_glossiness;\r\nuniform sampler2D s_specular;\r\n\r\nuniform vec4 u_sceneAmbientColor;\r\n\r\n//环境\r\nuniform vec4 u_ambient;\r\nuniform sampler2D s_ambient;\r\n\r\n#include<terrain.fragment>\r\n\r\n#include<lightShading.fragment>\r\n\r\n#include<fog.fragment>\r\n\r\n#include<envmap.fragment>\r\n\r\nvoid main(void)\r\n{\r\n    vec4 finalColor = vec4(1.0,1.0,1.0,1.0);\r\n\r\n    //获取法线\r\n    vec3 normal = texture2D(s_normal,v_uv).xyz * 2.0 - 1.0;\r\n    normal = normalize(normal.x * v_tangent + normal.y * v_bitangent + normal.z * v_normal);\r\n\r\n    // vec3 normal = v_normal;\r\n\r\n    //获取漫反射基本颜色\r\n    vec4 diffuseColor = u_diffuse;\r\n    diffuseColor = diffuseColor * texture2D(s_diffuse, v_uv);\r\n\r\n    if(diffuseColor.w < u_alphaThreshold)\r\n    {\r\n        discard;\r\n    }\r\n\r\n    diffuseColor = terrainMethod(diffuseColor, v_uv);\r\n\r\n    //环境光\r\n    vec3 ambientColor = u_ambient.w * u_ambient.xyz * u_sceneAmbientColor.xyz * u_sceneAmbientColor.w;\r\n    ambientColor = ambientColor * texture2D(s_ambient, v_uv).xyz;\r\n\r\n    finalColor = diffuseColor;\r\n\r\n    //渲染灯光\r\n    //获取高光值\r\n    float glossiness = u_glossiness;\r\n    //获取镜面反射基本颜色\r\n    vec3 specularColor = u_specular;\r\n    #ifdef HAS_SPECULAR_SAMPLER\r\n        vec4 specularMapColor = texture2D(s_specular, v_uv);\r\n        specularColor.xyz = specularMapColor.xyz;\r\n        glossiness = glossiness * specularMapColor.w;\r\n    #endif\r\n    \r\n    finalColor.xyz = lightShading(normal, diffuseColor.xyz, specularColor, ambientColor, glossiness);\r\n\r\n    finalColor = envmapMethod(finalColor);\r\n\r\n    finalColor = fogMethod(finalColor);\r\n\r\n    gl_FragColor = finalColor;\r\n}",
@@ -10816,7 +10838,11 @@ var feng3d;
             },
             "wireframe": {
                 "fragment": "precision mediump float;\r\n\r\nuniform vec4 u_wireframeColor;\r\n\r\nvoid main(void) {\r\n    gl_FragColor = u_wireframeColor;\r\n}",
-                "vertex": "precision mediump float;  \r\n\r\n//此处将填充宏定义\r\n#define macros\r\n\r\nattribute vec3 a_position;\r\nattribute vec4 a_color;\r\n\r\nuniform mat4 u_modelMatrix;\r\nuniform mat4 u_viewProjection;\r\n\r\n#ifdef HAS_SKELETON_ANIMATION\r\n    #include<skeleton.vertex>\r\n#endif\r\n\r\n#ifdef HAS_PARTICLE_ANIMATOR\r\n    #include<particle.vertex>\r\n#endif\r\n\r\nvoid main(void) {\r\n\r\n    vec4 position = vec4(a_position,1.0);\r\n\r\n    #ifdef HAS_SKELETON_ANIMATION\r\n        position = skeletonAnimation(position);\r\n    #endif\r\n\r\n    #ifdef HAS_PARTICLE_ANIMATOR\r\n        position = particleAnimation(position);\r\n    #endif\r\n\r\n    gl_Position = u_viewProjection * u_modelMatrix * position;\r\n}"
+                "vertex": "precision mediump float;  \r\n\r\nattribute vec3 a_position;\r\nattribute vec4 a_color;\r\n\r\nuniform mat4 u_modelMatrix;\r\nuniform mat4 u_viewProjection;\r\n\r\n#ifdef HAS_SKELETON_ANIMATION\r\n    #include<skeleton.vertex>\r\n#endif\r\n\r\n#ifdef HAS_PARTICLE_ANIMATOR\r\n    #include<particle.vertex>\r\n#endif\r\n\r\nvoid main(void) {\r\n\r\n    vec4 position = vec4(a_position,1.0);\r\n\r\n    #ifdef HAS_SKELETON_ANIMATION\r\n        position = skeletonAnimation(position);\r\n    #endif\r\n\r\n    #ifdef HAS_PARTICLE_ANIMATOR\r\n        position = particleAnimation(position);\r\n    #endif\r\n\r\n    gl_Position = u_viewProjection * u_modelMatrix * position;\r\n}"
+            },
+            "wireframe_skeleton": {
+                "fragment": "precision mediump float;\r\n\r\nuniform vec4 u_wireframeColor;\r\n\r\nvoid main(void) {\r\n    gl_FragColor = u_wireframeColor;\r\n}",
+                "vertex": "precision mediump float;  \r\n\r\nattribute vec3 a_position;\r\nattribute vec4 a_color;\r\n\r\nuniform mat4 u_modelMatrix;\r\nuniform mat4 u_viewProjection;\r\n\r\n#include<skeleton.vertex>\r\n\r\nvoid main(void) {\r\n\r\n    vec4 position = vec4(a_position,1.0);\r\n\r\n    position = skeletonAnimation(position);\r\n\r\n    #ifdef HAS_PARTICLE_ANIMATOR\r\n        position = particleAnimation(position);\r\n    #endif\r\n\r\n    gl_Position = u_viewProjection * u_modelMatrix * position;\r\n}"
             }
         },
         "modules": {
@@ -10824,11 +10850,9 @@ var feng3d;
             "envmap.fragment": "uniform samplerCube s_envMap;\r\nuniform float u_reflectivity;\r\n\r\nvec4 envmapMethod(vec4 finalColor)\r\n{\r\n    vec3 cameraToVertex = normalize( v_globalPosition - u_cameraMatrix[3].xyz );\r\n    vec3 reflectVec = reflect( cameraToVertex, v_normal );\r\n    vec4 envColor = textureCube( s_envMap, reflectVec );\r\n    finalColor.xyz *= envColor.xyz * u_reflectivity;\r\n    return finalColor;\r\n}",
             "fog.fragment": "#define FOGMODE_NONE    0.\r\n#define FOGMODE_EXP     1.\r\n#define FOGMODE_EXP2    2.\r\n#define FOGMODE_LINEAR  3.\r\n#define E 2.71828\r\n\r\nuniform float u_fogMode;\r\nuniform float u_fogMinDistance;\r\nuniform float u_fogMaxDistance;\r\nuniform float u_fogDensity;\r\nuniform vec3 u_fogColor;\r\n\r\nfloat CalcFogFactor(float fogDistance)\r\n{\r\n\tfloat fogCoeff = 1.0;\r\n\tif (FOGMODE_LINEAR == u_fogMode)\r\n\t{\r\n\t\tfogCoeff = (u_fogMaxDistance - fogDistance) / (u_fogMaxDistance - u_fogMinDistance);\r\n\t}\r\n\telse if (FOGMODE_EXP == u_fogMode)\r\n\t{\r\n\t\tfogCoeff = 1.0 / pow(E, fogDistance * u_fogDensity);\r\n\t}\r\n\telse if (FOGMODE_EXP2 == u_fogMode)\r\n\t{\r\n\t\tfogCoeff = 1.0 / pow(E, fogDistance * fogDistance * u_fogDensity * u_fogDensity);\r\n\t}\r\n\r\n\treturn clamp(fogCoeff, 0.0, 1.0);\r\n}\r\n\r\nvec4 fogMethod(vec4 color)\r\n{\r\n    vec3 fogDistance = u_cameraMatrix[3].xyz - v_globalPosition.xyz;\r\n\tfloat fog = CalcFogFactor(length(fogDistance));\r\n\tcolor.rgb = fog * color.rgb + (1.0 - fog) * u_fogColor;\r\n    return color;\r\n}",
             "lightShading.fragment": "//点光源位置数组\r\nuniform vec3 u_pointLightPositions[4];\r\n//点光源颜色数组\r\nuniform vec3 u_pointLightColors[4];\r\n//点光源光照强度数组\r\nuniform float u_pointLightIntensitys[4];\r\n//点光源光照范围数组\r\nuniform float u_pointLightRanges[4];\r\n\r\n//方向光源方向数组\r\nuniform vec3 u_directionalLightDirections[2];\r\n//方向光源颜色数组\r\nuniform vec3 u_directionalLightColors[2];\r\n//方向光源光照强度数组\r\nuniform float u_directionalLightIntensitys[2];\r\n\r\n//卡通\r\n#ifdef IS_CARTOON\r\n    #include<cartoon.fragment>\r\n#endif\r\n\r\n//计算光照漫反射系数\r\nfloat calculateLightDiffuse(vec3 normal,vec3 lightDir){\r\n    #ifdef IS_CARTOON\r\n        return cartoonLightDiffuse(normal,lightDir);\r\n    #else\r\n        return clamp(dot(normal,lightDir),0.0,1.0);\r\n    #endif\r\n}\r\n\r\n//计算光照镜面反射系数\r\nfloat calculateLightSpecular(vec3 normal,vec3 lightDir,vec3 viewDir,float glossiness){\r\n\r\n    #ifdef IS_CARTOON\r\n        return cartoonLightSpecular(normal,lightDir,viewDir,glossiness);\r\n    #else\r\n        vec3 halfVec = normalize(lightDir + viewDir);\r\n        float specComp = max(dot(normal,halfVec),0.0);\r\n        specComp = pow(specComp, glossiness);\r\n\r\n        return specComp;\r\n    #endif\r\n}\r\n\r\n//根据距离计算衰减\r\nfloat computeDistanceLightFalloff(float lightDistance, float range)\r\n{\r\n    #ifdef USEPHYSICALLIGHTFALLOFF\r\n        float lightDistanceFalloff = 1.0 / ((lightDistance * lightDistance + 0.0001));\r\n    #else\r\n        float lightDistanceFalloff = max(0., 1.0 - lightDistance / range);\r\n    #endif\r\n    \r\n    return lightDistanceFalloff;\r\n}\r\n\r\n//渲染点光源\r\nvec3 lightShading(vec3 normal,vec3 diffuseColor,vec3 specularColor,vec3 ambientColor,float glossiness){\r\n\r\n    //视线方向\r\n    vec3 viewDir = normalize(u_cameraMatrix[3].xyz - v_globalPosition);\r\n\r\n    vec3 totalDiffuseLightColor = vec3(0.0,0.0,0.0);\r\n    vec3 totalSpecularLightColor = vec3(0.0,0.0,0.0);\r\n\r\n    // 处理点光源\r\n    for(int i = 0;i<4;i++){\r\n        //\r\n        vec3 lightOffset = u_pointLightPositions[i] - v_globalPosition;\r\n        float lightDistance = length(lightOffset);\r\n        //光照方向\r\n        vec3 lightDir = normalize(lightOffset);\r\n        //灯光颜色\r\n        vec3 lightColor = u_pointLightColors[i];\r\n        //灯光强度\r\n        float lightIntensity = u_pointLightIntensitys[i];\r\n        //光照范围\r\n        float range = u_pointLightRanges[i];\r\n        float attenuation = computeDistanceLightFalloff(lightDistance,range);\r\n        lightIntensity = lightIntensity * attenuation;\r\n        //\r\n        totalDiffuseLightColor = totalDiffuseLightColor +  calculateLightDiffuse(normal,lightDir) * lightColor * lightIntensity;\r\n        totalSpecularLightColor = totalSpecularLightColor +  calculateLightSpecular(normal,lightDir,viewDir,glossiness) * lightColor * lightIntensity;\r\n    }\r\n\r\n    // 处理方向光源\r\n    for(int i = 0;i<2;i++){\r\n        //光照方向\r\n        vec3 lightDir = normalize(-u_directionalLightDirections[i]);\r\n        //灯光颜色\r\n        vec3 lightColor = u_directionalLightColors[i];\r\n        //灯光强度\r\n        float lightIntensity = u_directionalLightIntensitys[i];\r\n        //\r\n        totalDiffuseLightColor = totalDiffuseLightColor +  calculateLightDiffuse(normal,lightDir) * lightColor * lightIntensity;\r\n        totalSpecularLightColor = totalSpecularLightColor +  calculateLightSpecular(normal,lightDir,viewDir,glossiness) * lightColor * lightIntensity;\r\n    }\r\n\r\n    vec3 resultColor = vec3(0.0,0.0,0.0);\r\n    resultColor = resultColor + totalDiffuseLightColor * diffuseColor;\r\n    resultColor = resultColor + totalSpecularLightColor * specularColor;\r\n    resultColor = resultColor + ambientColor * diffuseColor;\r\n    return resultColor;\r\n}",
-            "particle.fragment": "#ifdef D_a_particle_color\r\n    varying vec4 v_particle_color;\r\n#endif\r\n\r\nvec4 particleAnimation(vec4 color) {\r\n\r\n    #ifdef D_a_particle_color\r\n        color = color * v_particle_color;\r\n    #endif\r\n    return color;\r\n}",
-            "particle.vertex": "//根据是否提供(a_particle_position)数据自动定义 #define D_(a_particle_position)\r\n\r\n#ifdef D_a_particle_birthTime\r\n    attribute float a_particle_birthTime;\r\n#endif\r\n\r\n#ifdef D_a_particle_position\r\n    attribute vec3 a_particle_position;\r\n#endif\r\n\r\n#ifdef D_a_particle_velocity\r\n    attribute vec3 a_particle_velocity;\r\n#endif\r\n\r\n#ifdef D_a_particle_lifetime\r\n    attribute float a_particle_lifetime;\r\n#endif\r\n\r\n#ifdef D_a_particle_color\r\n    attribute vec4 a_particle_color;\r\n    varying vec4 v_particle_color;\r\n#endif\r\n\r\nuniform float u_particleTime;\r\n\r\n#ifdef D_u_particle_acceleration\r\n    uniform vec3 u_particle_acceleration;\r\n#endif\r\n\r\n#ifdef D_u_particle_billboardMatrix\r\n    uniform mat4 u_particle_billboardMatrix;\r\n#endif\r\n\r\nvec4 particleAnimation(vec4 position) {\r\n\r\n    #ifdef D_a_particle_birthTime\r\n    float pTime = u_particleTime - a_particle_birthTime;\r\n    if(pTime > 0.0){\r\n\r\n        #ifdef D_a_particle_lifetime\r\n            pTime = mod(pTime,a_particle_lifetime);\r\n        #endif\r\n\r\n        vec3 pVelocity = vec3(0.0,0.0,0.0);\r\n\r\n        #ifdef D_u_particle_billboardMatrix\r\n            position = u_particle_billboardMatrix * position;\r\n        #endif\r\n\r\n        #ifdef D_a_particle_position\r\n            position.xyz = position.xyz + a_particle_position;\r\n        #endif\r\n\r\n        #ifdef D_a_particle_velocity\r\n            pVelocity = pVelocity + a_particle_velocity;\r\n        #endif\r\n\r\n        #ifdef D_u_particle_acceleration\r\n            pVelocity = pVelocity + u_particle_acceleration * pTime;\r\n        #endif\r\n        \r\n        #ifdef D_a_particle_color\r\n            v_particle_color = a_particle_color;\r\n        #endif\r\n\r\n        position.xyz = position.xyz + pVelocity * pTime;\r\n    }\r\n    #endif\r\n    \r\n    return position;\r\n}",
             "pointLightShading1.declare": "//参考资料\r\n//http://blog.csdn.net/leonwei/article/details/44539217\r\n//https://github.com/mcleary/pbr/blob/master/shaders/phong_pbr_frag.glsl\r\n\r\n#if NUM_POINTLIGHT > 0\r\n    //点光源位置列表\r\n    uniform vec3 u_pointLightPositions[NUM_POINTLIGHT];\r\n    //点光源漫反射颜色\r\n    uniform vec3 u_pointLightColors[NUM_POINTLIGHT];\r\n    //点光源镜面反射颜色\r\n    uniform float u_pointLightIntensitys[NUM_POINTLIGHT];\r\n    //反射率\r\n    uniform float u_reflectance;\r\n    //粗糙度\r\n    uniform float u_roughness;\r\n    //金属度\r\n    uniform float u_metalic;\r\n\r\n    vec3 fresnelSchlick(float VdotH,vec3 reflectance){\r\n\r\n        return reflectance + (1.0 - reflectance) * pow(clamp(1.0 - VdotH, 0.0, 1.0), 5.0);\r\n        // return reflectance;\r\n    }\r\n\r\n    float normalDistributionGGX(float NdotH,float alphaG){\r\n\r\n        float alphaG2 = alphaG * alphaG;\r\n        float d = NdotH * NdotH * (alphaG2 - 1.0) + 1.0; \r\n        return alphaG2 / (3.1415926 * d * d);\r\n    }\r\n\r\n    float smithVisibility(float dot,float alphaG){\r\n\r\n        float tanSquared = (1.0 - dot * dot) / (dot * dot);\r\n        return 2.0 / (1.0 + sqrt(1.0 + alphaG * alphaG * tanSquared));\r\n    }\r\n\r\n    vec3 calculateLight(vec3 normal,vec3 viewDir,vec3 lightDir,vec3 lightColor,float lightIntensity,vec3 baseColor,vec3 reflectance,float roughness){\r\n\r\n        //BRDF = D(h) * F(1, h) * V(l, v, h) / (4 * dot(n, l) * dot(n, v));\r\n\r\n        vec3 halfVec = normalize(lightDir + viewDir);\r\n        float NdotL = clamp(dot(normal,lightDir),0.0,1.0);\r\n        float NdotH = clamp(dot(normal,halfVec),0.0,1.0);\r\n        float NdotV = max(abs(dot(normal,viewDir)),0.000001);\r\n        float VdotH = clamp(dot(viewDir, halfVec),0.0,1.0);\r\n        \r\n        float alphaG = max(roughness * roughness,0.0005);\r\n\r\n        //F(v,h)\r\n        vec3 F = fresnelSchlick(VdotH, reflectance);\r\n\r\n        //D(h)\r\n        float D = normalDistributionGGX(NdotH,alphaG);\r\n\r\n        //V(l,h)\r\n        float V = smithVisibility(NdotL,alphaG) * smithVisibility(NdotV,alphaG) / (4.0 * NdotL * NdotV);\r\n\r\n        vec3 specular = max(0.0, D * V) * 3.1415926 * F;\r\n        \r\n        return (baseColor + specular) * NdotL * lightColor * lightIntensity;\r\n    }\r\n\r\n    //渲染点光源\r\n    vec3 pointLightShading(vec3 normal,vec3 baseColor){\r\n\r\n        float reflectance = u_reflectance;\r\n        float roughness = u_roughness;\r\n        float metalic = u_metalic;\r\n\r\n        reflectance = mix(0.0,0.5,reflectance);\r\n        vec3 realBaseColor = (1.0 - metalic) * baseColor;\r\n        vec3 realReflectance = mix(vec3(reflectance),baseColor,metalic);\r\n\r\n        vec3 totalLightColor = vec3(0.0,0.0,0.0);\r\n        for(int i = 0;i<NUM_POINTLIGHT;i++){\r\n            //光照方向\r\n            vec3 lightDir = normalize(u_pointLightPositions[i] - v_globalPosition);\r\n            //视线方向\r\n            vec3 viewDir = normalize(u_cameraMatrix[3].xyz - v_globalPosition);\r\n            //灯光颜色\r\n            vec3 lightColor = u_pointLightColors[i];\r\n            //灯光强度\r\n            float lightIntensity = u_pointLightIntensitys[i];\r\n\r\n            totalLightColor = totalLightColor + calculateLight(normal,viewDir,lightDir,lightColor,lightIntensity,realBaseColor,realReflectance,roughness);\r\n        }\r\n        \r\n        return totalLightColor;\r\n    }\r\n#endif",
             "pointLightShading1.main": "#if NUM_POINTLIGHT > 0\r\n    // finalColor = finalColor * 0.5 +  pointLightShading(v_normal,u_baseColor) * 0.5;\r\n    finalColor.xyz = pointLightShading(v_normal,finalColor.xyz);\r\n#endif",
-            "skeleton.vertex": "attribute vec4 a_jointindex0;\r\nattribute vec4 a_jointweight0;\r\n\r\n#ifdef HAS_a_jointindex1\r\n    attribute vec4 a_jointindex1;\r\n    attribute vec4 a_jointweight1;\r\n#endif\r\n\r\nuniform mat4 u_skeletonGlobalMatriices[NUM_SKELETONJOINT];\r\n\r\nvec4 skeletonAnimation(vec4 position) {\r\n\r\n    vec4 totalPosition = vec4(0.0,0.0,0.0,1.0);\r\n    for(int i = 0; i < 4; i++){\r\n        totalPosition += u_skeletonGlobalMatriices[int(a_jointindex0[i])] * position * a_jointweight0[i];\r\n    }\r\n    #ifdef HAS_a_jointindex1\r\n        for(int i = 0; i < 4; i++){\r\n            totalPosition += u_skeletonGlobalMatriices[int(a_jointindex1[i])] * position * a_jointweight1[i];\r\n        }\r\n    #endif\r\n    position.xyz = totalPosition.xyz;\r\n    return position;\r\n}",
+            "skeleton.vertex": "\r\nattribute vec4 a_jointindex0;\r\nattribute vec4 a_jointweight0;\r\n\r\n#ifdef HAS_a_jointindex1\r\n    attribute vec4 a_jointindex1;\r\n    attribute vec4 a_jointweight1;\r\n#endif\r\n\r\nuniform mat4 u_skeletonGlobalMatriices[150];\r\n\r\nvec4 skeletonAnimation(vec4 position) {\r\n\r\n    vec4 totalPosition = vec4(0.0,0.0,0.0,1.0);\r\n    for(int i = 0; i < 4; i++){\r\n        totalPosition += u_skeletonGlobalMatriices[int(a_jointindex0[i])] * position * a_jointweight0[i];\r\n    }\r\n    #ifdef HAS_a_jointindex1\r\n        for(int i = 0; i < 4; i++){\r\n            totalPosition += u_skeletonGlobalMatriices[int(a_jointindex1[i])] * position * a_jointweight1[i];\r\n        }\r\n    #endif\r\n    position.xyz = totalPosition.xyz;\r\n    return position;\r\n}",
             "terrain.fragment": "#ifdef USE_TERRAIN_MERGE\r\n    #include<terrainMerge.fragment>\r\n#else\r\n    #include<terrainDefault.fragment>\r\n#endif",
             "terrainDefault.fragment": "uniform sampler2D s_splatTexture1;\r\nuniform sampler2D s_splatTexture2;\r\nuniform sampler2D s_splatTexture3;\r\n\r\nuniform sampler2D s_blendTexture;\r\nuniform vec4 u_splatRepeats;\r\n\r\nvec4 terrainMethod(vec4 diffuseColor,vec2 v_uv) {\r\n\r\n    vec4 blend = texture2D(s_blendTexture,v_uv);\r\n\r\n    vec2 t_uv = v_uv.xy * u_splatRepeats.y;\r\n    vec4 tColor = texture2D(s_splatTexture1,t_uv);\r\n    diffuseColor = (tColor - diffuseColor) * blend.x + diffuseColor;\r\n\r\n    t_uv = v_uv.xy * u_splatRepeats.z;\r\n    tColor = texture2D(s_splatTexture2,t_uv);\r\n    diffuseColor = (tColor - diffuseColor) * blend.y + diffuseColor;\r\n\r\n    t_uv = v_uv.xy * u_splatRepeats.w;\r\n    tColor = texture2D(s_splatTexture3,t_uv);\r\n    diffuseColor = (tColor - diffuseColor) * blend.z + diffuseColor;\r\n\r\n    return diffuseColor;\r\n}",
             "terrainMerge.fragment.1": "//代码实现lod，使用默认线性插值\r\n#extension GL_EXT_shader_texture_lod : enable\r\n#extension GL_OES_standard_derivatives : enable\r\n\r\n#define LOD_LINEAR\r\n\r\nuniform sampler2D s_splatMergeTexture;\r\nuniform sampler2D s_blendTexture;\r\nuniform vec4 u_splatRepeats;\r\n\r\nvec2 imageSize =    vec2(2048.0,1024.0);\r\nvec4 offset[3];\r\nvec2 tileSize = vec2(512.0,512.0);\r\n// float maxLod = 7.0;\r\nfloat maxLod = 5.0;\r\n\r\nvec4 terrainTexture2DLod(sampler2D s_splatMergeTexture,vec2 uv,float lod,vec4 offset){\r\n\r\n    //计算不同lod像素缩放以及起始坐标\r\n    vec4 lodvec = vec4(0.5,1.0,0.0,0.0);\r\n    lodvec.x = lodvec.x * pow(0.5,lod);\r\n    lodvec.y = lodvec.x * 2.0;\r\n    lodvec.z = 1.0 - lodvec.y;\r\n\r\n    //lod块尺寸\r\n    vec2 lodSize = imageSize * lodvec.xy;\r\n    vec2 lodPixelOffset = 1.0 / lodSize;\r\n\r\n    //扩展边缘一像素\r\n    offset.xy = offset.xy - lodPixelOffset * 2.0;\r\n    offset.zw = offset.zw + lodPixelOffset;\r\n    //lod块中uv\r\n    vec2 t_uv = uv * offset.xy + offset.zw;\r\n    t_uv = t_uv * lodvec.xy;\r\n    //取整像素\r\n    t_uv = (t_uv * imageSize + vec2(-0.0,0.0)) / imageSize;\r\n    // t_uv = (t_uv * imageSize + 0.5) / imageSize;\r\n    // t_uv = floor(t_uv * imageSize - 1.0) / imageSize;\r\n    // t_uv = ceil(t_uv * imageSize + 1.0) / imageSize;\r\n    //添加lod起始坐标\r\n    t_uv = t_uv * (1.0 - 1.0 / imageSize);\r\n    t_uv = t_uv + lodvec.zw;\r\n    vec4 tColor = texture2D(s_splatMergeTexture,t_uv);\r\n\r\n    return tColor;\r\n\r\n    // return vec4(mixFactor.x,mixFactor.y,0.0,1.0);\r\n    // return vec4(mixFactor.x + 0.5,mixFactor.y + 0.5,0.0,1.0);\r\n}\r\n\r\n//参考 http://blog.csdn.net/cgwbr/article/details/6620318\r\n//计算MipMap层函数：\r\nfloat mipmapLevel(vec2 uv, vec2 textureSize)\r\n{\r\n    vec2 dx = dFdx(uv * textureSize.x);\r\n    vec2 dy = dFdy(uv * textureSize.y);\r\n    float d = max(dot(dx, dx), dot(dy, dy));  \r\n    return 0.5 * log2(d);\r\n}\r\n\r\nvec4 terrainTexture2D(sampler2D s_splatMergeTexture,vec2 t_uv,float lod,vec4 offset){\r\n \r\n    #ifdef LOD_LINEAR\r\n        vec4 tColor = mix(terrainTexture2DLod(s_splatMergeTexture,t_uv,floor(lod),offset),terrainTexture2DLod(s_splatMergeTexture,t_uv,ceil(lod),offset),fract(lod));\r\n    #else\r\n        vec4 tColor = terrainTexture2DLod(s_splatMergeTexture,t_uv,floor(lod),offset);\r\n    #endif\r\n\r\n    return tColor;\r\n}\r\n\r\nvec4 terrainMethod(vec4 diffuseColor,vec2 v_uv) {\r\n    \r\n    offset[0] = vec4(0.5,0.5,0.0,0.0);\r\n    offset[1] = vec4(0.5,0.5,0.5,0.0);\r\n    offset[2] = vec4(0.5,0.5,0.0,0.5);\r\n    \r\n    vec4 blend = texture2D(s_blendTexture,v_uv);\r\n    for(int i = 0; i < 3; i++)\r\n    {\r\n        vec2 t_uv = v_uv.xy * u_splatRepeats[i];\r\n        float lod = mipmapLevel(t_uv,tileSize);\r\n        lod = clamp(lod,0.0,maxLod);\r\n        // lod = 5.0;\r\n        t_uv = fract(t_uv);\r\n        vec4 tColor = terrainTexture2D(s_splatMergeTexture,t_uv,lod,offset[i]);\r\n        diffuseColor = (tColor - diffuseColor) * blend[i] + diffuseColor;\r\n    }\r\n\r\n    // diffuseColor.xyz = vec3(1.0,0.0,0.0);\r\n    // diffuseColor.xyz = vec3(floor(lod)/7.0,0.0,0.0);\r\n    return diffuseColor;\r\n}",
@@ -11106,7 +11130,7 @@ var feng3d;
         /**
          * 每帧执行
          */
-        Behaviour.prototype.update = function () {
+        Behaviour.prototype.update = function (interval) {
         };
         __decorate([
             feng3d.oav(),
@@ -11616,6 +11640,7 @@ var feng3d;
     };
     var renderParams;
     var shader;
+    var wireframe_skeleton_shader;
     function init() {
         if (!renderParams) {
             renderParams = new feng3d.RenderParams();
@@ -11625,6 +11650,7 @@ var feng3d;
             renderParams.depthtest = true;
             renderParams.depthFunc = feng3d.DepthFunc.LEQUAL;
             shader = feng3d.shaderlib.getShader("wireframe");
+            wireframe_skeleton_shader = feng3d.shaderlib.getShader("wireframe_skeleton");
         }
     }
     /**
@@ -11637,17 +11663,17 @@ var feng3d;
         for (var i = 0; i < unblenditems.length; i++) {
             var item = unblenditems[i].item;
             if (item.getComponent(WireframeComponent)) {
-                var renderAtomic = item.gameObject.renderAtomic;
-                item.gameObject.preRender(renderAtomic);
-                var meshRenderer = item.getComponent(feng3d.MeshRenderer);
-                drawGameObject(gl, renderAtomic); //
+                drawGameObject(gl, item.gameObject); //
             }
         }
     }
     /**
      * 绘制3D对象
      */
-    function drawGameObject(gl, renderAtomic) {
+    function drawGameObject(gl, gameObject) {
+        var renderAtomic = gameObject.renderAtomic;
+        gameObject.preRender(renderAtomic);
+        var meshRenderer = gameObject.getComponent(feng3d.MeshRenderer);
         var renderMode = feng3d.lazy.getvalue(renderAtomic.renderParams.renderMode);
         if (renderMode == feng3d.RenderMode.POINTS
             || renderMode == feng3d.RenderMode.LINES
@@ -11656,7 +11682,12 @@ var feng3d;
             return;
         init();
         var oldshader = renderAtomic.shader;
-        renderAtomic.shader = shader;
+        if (meshRenderer instanceof feng3d.SkinnedMeshRenderer) {
+            renderAtomic.shader = wireframe_skeleton_shader;
+        }
+        else {
+            renderAtomic.shader = shader;
+        }
         var oldrenderParams = renderAtomic.renderParams;
         renderAtomic.renderParams = renderParams;
         //
@@ -13672,20 +13703,6 @@ var feng3d;
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(MeshRenderer.prototype, "material", {
-            /**
-             * 材质
-             * Returns the first instantiated Material assigned to the renderer.
-             */
-            get: function () { return this._material; },
-            set: function (value) {
-                if (this._material == value)
-                    return;
-                this._material = value;
-            },
-            enumerable: true,
-            configurable: true
-        });
         MeshRenderer.prototype.init = function (gameObject) {
             _super.prototype.init.call(this, gameObject);
             if (!this.geometry)
@@ -13701,7 +13718,7 @@ var feng3d;
             renderAtomic.uniforms.u_ITMVMatrix = function () { return feng3d.lazy.getvalue(renderAtomic.uniforms.u_mvMatrix).clone().invert().transpose(); };
             //
             this._geometry.preRender(renderAtomic);
-            this._material.preRender(renderAtomic);
+            this.material.preRender(renderAtomic);
         };
         /**
          * 销毁
@@ -13722,314 +13739,10 @@ var feng3d;
         __decorate([
             feng3d.oav({ componentParam: { dragparam: { accepttype: "material", datatype: "material" } } }),
             feng3d.serialize
-        ], MeshRenderer.prototype, "material", null);
+        ], MeshRenderer.prototype, "material", void 0);
         return MeshRenderer;
     }(feng3d.Behaviour));
     feng3d.MeshRenderer = MeshRenderer;
-})(feng3d || (feng3d = {}));
-var feng3d;
-(function (feng3d) {
-    var SkeletonComponent = /** @class */ (function (_super) {
-        __extends(SkeletonComponent, _super);
-        function SkeletonComponent() {
-            var _this = _super !== null && _super.apply(this, arguments) || this;
-            /** 骨骼关节数据列表 */
-            _this.joints = [];
-            _this.isInitJoints = false;
-            return _this;
-        }
-        Object.defineProperty(SkeletonComponent.prototype, "globalMatrices", {
-            /**
-             * 当前骨骼姿势的全局矩阵
-             * @see #globalPose
-             */
-            get: function () {
-                if (!this.isInitJoints) {
-                    this.initSkeleton();
-                    this.isInitJoints = true;
-                }
-                if (this._globalPropertiesInvalid) {
-                    this.updateGlobalProperties();
-                    this._globalPropertiesInvalid = false;
-                }
-                return this._globalMatrices;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        SkeletonComponent.prototype.initSkeleton = function () {
-            this.jointGameobjects = [];
-            this.jointGameObjectMap = {};
-            //
-            this.createSkeletonGameObject();
-            //
-            this._globalPropertiesInvalid = true;
-            this._jointsInvalid = [];
-            this._globalMatrix3DsInvalid = [];
-            this.globalMatrix3Ds = [];
-            this._globalMatrices = [];
-            //
-            var jointNum = this.joints.length;
-            for (var i = 0; i < jointNum; i++) {
-                this._jointsInvalid[i] = true;
-                this._globalMatrix3DsInvalid[i] = true;
-                this.globalMatrix3Ds[i] = new feng3d.Matrix4x4();
-                this._globalMatrices[i] = new feng3d.Matrix4x4();
-            }
-        };
-        /**
-         * 更新骨骼全局变换矩阵
-         */
-        SkeletonComponent.prototype.updateGlobalProperties = function () {
-            //姿势变换矩阵
-            var joints = this.joints;
-            var jointGameobjects = this.jointGameobjects;
-            var globalMatrix3Ds = this.globalMatrix3Ds;
-            var _globalMatrix3DsInvalid = this._globalMatrix3DsInvalid;
-            //遍历每个关节
-            for (var i = 0; i < joints.length; ++i) {
-                if (!this._jointsInvalid[i])
-                    continue;
-                this._globalMatrices[i]
-                    .copyFrom(globalMatrix3d(i))
-                    .prepend(joints[i].invertMatrix3D);
-                this._jointsInvalid[i] = false;
-            }
-            function globalMatrix3d(index) {
-                if (!_globalMatrix3DsInvalid[index])
-                    return globalMatrix3Ds[index];
-                var jointPose = joints[index];
-                var jointGameobject = jointGameobjects[index];
-                globalMatrix3Ds[index] = jointGameobject.transform.matrix3d.clone();
-                if (jointPose.parentIndex >= 0) {
-                    var parentGlobalMatrix3d = globalMatrix3d(jointPose.parentIndex);
-                    globalMatrix3Ds[index].append(parentGlobalMatrix3d);
-                }
-                _globalMatrix3DsInvalid[index] = false;
-                return globalMatrix3Ds[index];
-            }
-        };
-        SkeletonComponent.prototype.invalidjoint = function (jointIndex) {
-            var _this = this;
-            this._globalPropertiesInvalid = true;
-            this._jointsInvalid[jointIndex] = true;
-            this._globalMatrix3DsInvalid[jointIndex] = true;
-            this.joints[jointIndex].children.forEach(function (element) {
-                _this.invalidjoint(element);
-            });
-        };
-        SkeletonComponent.prototype.createSkeletonGameObject = function () {
-            var skeleton = this;
-            var joints = skeleton.joints;
-            var jointGameobjects = this.jointGameobjects;
-            var jointGameObjectMap = this.jointGameObjectMap;
-            for (var i = 0; i < joints.length; i++) {
-                createJoint(i);
-            }
-            function createJoint(i) {
-                if (jointGameobjects[i])
-                    return jointGameobjects[i].gameObject;
-                var skeletonJoint = joints[i];
-                var parentGameobject;
-                if (skeletonJoint.parentIndex != -1) {
-                    parentGameobject = createJoint(skeletonJoint.parentIndex);
-                    joints[skeletonJoint.parentIndex].children.push(i);
-                }
-                else {
-                    parentGameobject = skeleton.gameObject;
-                }
-                var jointGameobject = parentGameobject.find(skeletonJoint.name);
-                if (!jointGameobject) {
-                    jointGameobject = feng3d.GameObject.create(skeletonJoint.name);
-                    jointGameobject.serializable = false;
-                    parentGameobject.addChild(jointGameobject);
-                }
-                var transform = jointGameobject.transform;
-                var matrix3D = skeletonJoint.matrix3D;
-                if (skeletonJoint.parentIndex != -1) {
-                    matrix3D = matrix3D.clone().append(joints[skeletonJoint.parentIndex].invertMatrix3D);
-                }
-                transform.matrix3d = matrix3D;
-                transform.on("transformChanged", function () {
-                    skeleton.invalidjoint(i);
-                });
-                jointGameobjects[i] = transform;
-                jointGameObjectMap[skeletonJoint.name] = transform;
-                return jointGameobject;
-            }
-        };
-        __decorate([
-            feng3d.serialize,
-            feng3d.oav()
-        ], SkeletonComponent.prototype, "joints", void 0);
-        return SkeletonComponent;
-    }(feng3d.Component));
-    feng3d.SkeletonComponent = SkeletonComponent;
-})(feng3d || (feng3d = {}));
-var feng3d;
-(function (feng3d) {
-    var SkinnedMeshRenderer = /** @class */ (function (_super) {
-        __extends(SkinnedMeshRenderer, _super);
-        function SkinnedMeshRenderer() {
-            var _this = _super !== null && _super.apply(this, arguments) || this;
-            _this.skeletonGlobalMatriices = [];
-            return _this;
-        }
-        Object.defineProperty(SkinnedMeshRenderer.prototype, "single", {
-            get: function () { return true; },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(SkinnedMeshRenderer.prototype, "skinSkeleton", {
-            get: function () {
-                return this._skinSkeleton;
-            },
-            set: function (value) {
-                if (this._skinSkeleton == value)
-                    return;
-                this._skinSkeleton = value;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        /**
-         * 创建一个骨骼动画类
-         */
-        SkinnedMeshRenderer.prototype.init = function (gameObject) {
-            _super.prototype.init.call(this, gameObject);
-        };
-        Object.defineProperty(SkinnedMeshRenderer.prototype, "u_modelMatrix", {
-            get: function () {
-                if (this.cacheSkeletonComponent)
-                    return this.cacheSkeletonComponent.transform.localToWorldMatrix;
-                return this.transform.localToWorldMatrix;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(SkinnedMeshRenderer.prototype, "u_ITModelMatrix", {
-            get: function () {
-                if (this.cacheSkeletonComponent)
-                    return this.cacheSkeletonComponent.transform.ITlocalToWorldMatrix;
-                return this.transform.ITlocalToWorldMatrix;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(SkinnedMeshRenderer.prototype, "u_skeletonGlobalMatriices", {
-            get: function () {
-                if (!this.cacheSkeletonComponent) {
-                    var gameObject = this.gameObject;
-                    var skeletonComponent = null;
-                    while (gameObject && !skeletonComponent) {
-                        skeletonComponent = gameObject.getComponent(feng3d.SkeletonComponent);
-                        gameObject = gameObject.parent;
-                    }
-                    this.cacheSkeletonComponent = skeletonComponent;
-                }
-                if (this._skinSkeleton && this.cacheSkeletonComponent) {
-                    var joints = this._skinSkeleton.joints;
-                    var globalMatrices = this.cacheSkeletonComponent.globalMatrices;
-                    for (var i = joints.length - 1; i >= 0; i--) {
-                        this.skeletonGlobalMatriices[i] = globalMatrices[joints[i][0]];
-                        if (this.initMatrix3d) {
-                            this.skeletonGlobalMatriices[i] = this.skeletonGlobalMatriices[i].clone()
-                                .prepend(this.initMatrix3d);
-                        }
-                    }
-                    return this.skeletonGlobalMatriices;
-                }
-                return defaultglobalMatrices();
-            },
-            enumerable: true,
-            configurable: true
-        });
-        SkinnedMeshRenderer.prototype.preRender = function (renderAtomic) {
-            var _this = this;
-            _super.prototype.preRender.call(this, renderAtomic);
-            renderAtomic.uniforms.u_modelMatrix = function () { return _this.u_modelMatrix; };
-            renderAtomic.uniforms.u_ITModelMatrix = function () { return _this.u_ITModelMatrix; };
-            //
-            renderAtomic.uniforms.u_skeletonGlobalMatriices = function () { return _this.u_skeletonGlobalMatriices; };
-        };
-        /**
-         * 销毁
-         */
-        SkinnedMeshRenderer.prototype.dispose = function () {
-            _super.prototype.dispose.call(this);
-        };
-        __decorate([
-            feng3d.serialize,
-            feng3d.oav()
-        ], SkinnedMeshRenderer.prototype, "skinSkeleton", null);
-        __decorate([
-            feng3d.serialize
-        ], SkinnedMeshRenderer.prototype, "initMatrix3d", void 0);
-        return SkinnedMeshRenderer;
-    }(feng3d.MeshRenderer));
-    feng3d.SkinnedMeshRenderer = SkinnedMeshRenderer;
-    /**
-     * 默认单位矩阵
-     */
-    function defaultglobalMatrices() {
-        if (!_defaultglobalMatrices) {
-            _defaultglobalMatrices = [];
-            _defaultglobalMatrices.length = 150;
-            var matrix3d = new feng3d.Matrix4x4();
-            for (var i = 0; i < 150; i++) {
-                _defaultglobalMatrices[i] = matrix3d;
-            }
-        }
-        return _defaultglobalMatrices;
-    }
-    var _defaultglobalMatrices;
-    var SkinSkeleton = /** @class */ (function () {
-        function SkinSkeleton() {
-            /**
-             * [在整个骨架中的编号，骨骼名称]
-             */
-            this.joints = [];
-            /**
-             * 当前模型包含骨骼数量
-             */
-            this.numJoint = 0;
-        }
-        __decorate([
-            feng3d.serialize
-        ], SkinSkeleton.prototype, "joints", void 0);
-        __decorate([
-            feng3d.serialize
-        ], SkinSkeleton.prototype, "numJoint", void 0);
-        return SkinSkeleton;
-    }());
-    feng3d.SkinSkeleton = SkinSkeleton;
-    var SkinSkeletonTemp = /** @class */ (function (_super) {
-        __extends(SkinSkeletonTemp, _super);
-        function SkinSkeletonTemp() {
-            var _this = _super !== null && _super.apply(this, arguments) || this;
-            /**
-             * temp 解析时临时数据
-             */
-            _this.cache_map = {};
-            return _this;
-        }
-        SkinSkeletonTemp.prototype.resetJointIndices = function (jointIndices, skeleton) {
-            var len = jointIndices.length;
-            for (var i = 0; i < len; i++) {
-                if (this.cache_map[jointIndices[i]] === undefined)
-                    this.cache_map[jointIndices[i]] = this.numJoint++;
-                jointIndices[i] = this.cache_map[jointIndices[i]];
-            }
-            this.joints.length = 0;
-            for (var key in this.cache_map) {
-                if (this.cache_map.hasOwnProperty(key)) {
-                    this.joints[this.cache_map[key]] = [parseInt(key), skeleton.joints[key].name];
-                }
-            }
-        };
-        return SkinSkeletonTemp;
-    }(SkinSkeleton));
-    feng3d.SkinSkeletonTemp = SkinSkeletonTemp;
 })(feng3d || (feng3d = {}));
 var feng3d;
 (function (feng3d) {
@@ -14229,15 +13942,15 @@ var feng3d;
                 });
             }
         };
-        Scene3D.prototype.onEnterFrame = function () {
+        Scene3D.prototype.onEnterFrame = function (interval) {
             var _this = this;
             this.collectComponents.animations.list.forEach(function (element) {
                 if (element.isplaying)
-                    element.update();
+                    element.update(interval);
             });
             this.collectComponents.behaviours.list.forEach(function (element) {
                 if (element.isVisibleAndEnabled && (_this.updateScriptFlag & element.flag))
-                    element.update();
+                    element.update(interval);
             });
         };
         Scene3D.prototype.update = function () {
@@ -14913,6 +14626,9 @@ var feng3d;
                 }
             }
         };
+        __decorate([
+            feng3d.oav()
+        ], Geometry.prototype, "invalidateGeometry", null);
         return Geometry;
     }(feng3d.Feng3dObject));
     feng3d.Geometry = Geometry;
@@ -15218,37 +14934,35 @@ var feng3d;
     var PointGeometry = /** @class */ (function (_super) {
         __extends(PointGeometry, _super);
         function PointGeometry() {
-            var _this = _super.call(this) || this;
-            _this._points = [];
-            _this.addPoint(new PointInfo(new feng3d.Vector3(0, 0, 0)));
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            /**
+             * 点数据列表
+             * 修改数组内数据时需要手动调用 invalidateGeometry();
+             */
+            _this.points = [{}];
             return _this;
         }
-        /**
-         * 添加点
-         * @param point		点数据
-         */
-        PointGeometry.prototype.addPoint = function (point, needUpdateGeometry) {
-            if (needUpdateGeometry === void 0) { needUpdateGeometry = true; }
-            this._points.push(point);
-            this.invalidateGeometry();
-        };
         /**
          * 构建几何体
          */
         PointGeometry.prototype.buildGeometry = function () {
-            var numPoints = this._points.length;
+            var numPoints = this.points.length;
             var indices = [];
             var positionData = [];
             var normalData = [];
             var uvData = [];
             var colors = [];
             for (var i = 0; i < numPoints; i++) {
-                var element = this._points[i];
+                var element = this.points[i];
+                var position = element.position || feng3d.Vector3.ZERO;
+                var color = element.color || feng3d.Color4.WHITE;
+                var normal = element.normal || feng3d.Vector3.ZERO;
+                var uv = element.uv || feng3d.Vector2.ZERO;
                 indices[i] = i;
-                positionData.push(element.position.x, element.position.y, element.position.z);
-                normalData.push(element.normal.x, element.normal.y, element.normal.z);
-                uvData.push(element.uv.x, element.uv.y);
-                colors.push(element.color.r, element.color.g, element.color.b, element.color.a);
+                positionData.push(position.x, position.y, position.z);
+                normalData.push(normal.x, normal.y, normal.z);
+                uvData.push(uv.x, uv.y);
+                colors.push(color.r, color.g, color.b, color.a);
             }
             this.positions = positionData;
             this.uvs = uvData;
@@ -15256,58 +14970,14 @@ var feng3d;
             this.indices = indices;
             this.setVAData("a_color", colors, 4);
         };
-        /**
-         * 获取线段数据
-         * @param index 		线段索引
-         * @return				线段数据
-         */
-        PointGeometry.prototype.getPoint = function (index) {
-            if (index < this._points.length)
-                return this._points[index];
-            return null;
-        };
-        /**
-         * 移除所有线段
-         */
-        PointGeometry.prototype.removeAllPoints = function () {
-            this.points.length = 0;
-            this.invalidateGeometry();
-        };
-        Object.defineProperty(PointGeometry.prototype, "points", {
-            /**
-             * 线段列表
-             */
-            get: function () {
-                return this._points;
-            },
-            enumerable: true,
-            configurable: true
-        });
+        __decorate([
+            feng3d.serialize,
+            feng3d.oav(),
+            feng3d.watch("invalidateGeometry")
+        ], PointGeometry.prototype, "points", void 0);
         return PointGeometry;
     }(feng3d.Geometry));
     feng3d.PointGeometry = PointGeometry;
-    /**
-     * 点信息
-     * @author feng 2016-10-16
-     */
-    var PointInfo = /** @class */ (function () {
-        /**
-         * 创建点
-         * @param position 坐标
-         */
-        function PointInfo(position, color, uv, normal) {
-            if (position === void 0) { position = new feng3d.Vector3(); }
-            if (color === void 0) { color = new feng3d.Color4(); }
-            if (uv === void 0) { uv = new feng3d.Vector2(); }
-            if (normal === void 0) { normal = new feng3d.Vector3(0, 1, 0); }
-            this.position = position;
-            this.color = color;
-            this.normal = normal;
-            this.uv = uv;
-        }
-        return PointInfo;
-    }());
-    feng3d.PointInfo = PointInfo;
 })(feng3d || (feng3d = {}));
 var feng3d;
 (function (feng3d) {
@@ -15319,100 +14989,46 @@ var feng3d;
         __extends(SegmentGeometry, _super);
         function SegmentGeometry() {
             var _this = _super.call(this) || this;
-            _this.segments_ = [];
+            /**
+             * 线段列表
+             * 修改数组内数据时需要手动调用 invalidateGeometry();
+             */
+            _this.segments = [];
             return _this;
         }
-        /**
-         * 添加线段
-         * @param segment		            线段数据
-         */
-        SegmentGeometry.prototype.addSegment = function (segment) {
-            this.segments_.push(segment);
-            this.invalidateGeometry();
-        };
-        /**
-         * 设置线段
-         * @param segment		            线段数据
-         * @param index		                线段索引
-         */
-        SegmentGeometry.prototype.setSegmentAt = function (segment, index) {
-            this.segments_[index] = segment;
-            this.invalidateGeometry();
-        };
         /**
          * 更新几何体
          */
         SegmentGeometry.prototype.buildGeometry = function () {
             var segmentPositionStep = 6;
             var segmentColorStep = 8;
-            var numSegments = this.segments_.length;
+            var numSegments = this.segments.length;
             var indices = [];
             var positionData = [];
             var colorData = [];
             for (var i = 0; i < numSegments; i++) {
-                var element = this.segments_[i];
+                var element = this.segments[i];
+                var start = element.start || feng3d.Vector3.ZERO;
+                var end = element.end || feng3d.Vector3.ZERO;
+                ;
+                var startColor = element.startColor || feng3d.Color4.WHITE;
+                var endColor = element.endColor || feng3d.Color4.WHITE;
                 indices.push(i * 2, i * 2 + 1);
-                positionData.push(element.start.x, element.start.y, element.start.z, element.end.x, element.end.y, element.end.z);
-                colorData.push(element.startColor.r, element.startColor.g, element.startColor.b, element.startColor.a, element.endColor.r, element.endColor.g, element.endColor.b, element.endColor.a);
+                positionData.push(start.x, start.y, start.z, end.x, end.y, end.z);
+                colorData.push(startColor.r, startColor.g, startColor.b, startColor.a, endColor.r, endColor.g, endColor.b, endColor.a);
             }
             this.setVAData("a_position", positionData, 3);
             this.setVAData("a_color", colorData, 4);
             this.indices = indices;
         };
-        /**
-         * 获取线段数据
-         * @param index 		线段索引
-         * @return				线段数据
-         */
-        SegmentGeometry.prototype.getSegment = function (index) {
-            if (index < this.segments_.length)
-                return this.segments_[index];
-            return null;
-        };
-        /**
-         * 移除所有线段
-         */
-        SegmentGeometry.prototype.removeAllSegments = function () {
-            this.segments.length = 0;
-            this.invalidateGeometry();
-        };
-        Object.defineProperty(SegmentGeometry.prototype, "segments", {
-            /**
-             * 线段列表
-             */
-            get: function () {
-                return this.segments_;
-            },
-            enumerable: true,
-            configurable: true
-        });
+        __decorate([
+            feng3d.serialize,
+            feng3d.oav(),
+            feng3d.watch("invalidateGeometry")
+        ], SegmentGeometry.prototype, "segments", void 0);
         return SegmentGeometry;
     }(feng3d.Geometry));
     feng3d.SegmentGeometry = SegmentGeometry;
-    /**
-     * 线段
-     * @author feng 2016-10-16
-     */
-    var Segment = /** @class */ (function () {
-        /**
-         * 创建线段
-         * @param start 起点坐标
-         * @param end 终点坐标
-         * @param colorStart 起点颜色
-         * @param colorEnd 终点颜色
-         * @param thickness 线段厚度
-         */
-        function Segment(start, end, colorStart, colorEnd) {
-            if (colorStart === void 0) { colorStart = new feng3d.Color4(); }
-            if (colorEnd === void 0) { colorEnd = new feng3d.Color4(); }
-            this.start = start;
-            this.end = end;
-            this.startColor = colorStart;
-            this.endColor = colorEnd;
-        }
-        return Segment;
-    }());
-    feng3d.Segment = Segment;
 })(feng3d || (feng3d = {}));
 var feng3d;
 (function (feng3d) {
@@ -17485,6 +17101,7 @@ var feng3d;
             _this.url = "";
             _this._textureType = feng3d.TextureType.TEXTURE_2D;
             _this.noPixels = _this.noPixels || feng3d.imageDatas.white;
+            feng3d.globalEvent.on("imageAssetsChanged", _this.onImageAssetsChanged, _this);
             return _this;
         }
         Object.defineProperty(Texture2D.prototype, "size", {
@@ -17512,12 +17129,16 @@ var feng3d;
         Texture2D.prototype.urlChanged = function () {
             var _this = this;
             var url = this.url;
-            feng3d.assets.loadImage(url, function (img) {
+            feng3d.assets.readFileAsImage(url, function (err, img) {
                 if (url == _this.url) {
                     _this._pixels = img;
                     _this.invalidate();
                 }
             });
+        };
+        Texture2D.prototype.onImageAssetsChanged = function (e) {
+            if (this.url == e.data.url)
+                this.urlChanged();
         };
         __decorate([
             feng3d.serialize,
@@ -17576,7 +17197,7 @@ var feng3d;
             function loadImage(url, index) {
                 if (!url)
                     return;
-                feng3d.assets.loadImage(url, function (img) {
+                feng3d.assets.readFileAsImage(url, function (err, img) {
                     __this._pixels[index] = img;
                     __this.invalidate();
                 });
@@ -19150,6 +18771,61 @@ var feng3d;
      * 例如：position 对应 a_particle_position 与 #define D_a_particle_position
      * @author feng 2017-01-12
      */
+    var Particle = /** @class */ (function () {
+        function Particle() {
+            /**
+             * 索引
+             */
+            this.index = 0;
+            /**
+             * 粒子总数量
+             */
+            this.total = 1000;
+            /**
+             * 出生时间
+             */
+            this.birthTime = 0;
+            /**
+             * 寿命
+             */
+            this.lifetime = 5;
+            /**
+             * 位移
+             */
+            this.position = new feng3d.Vector3();
+            /**
+             * 旋转
+             */
+            this.rotation = new feng3d.Vector3();
+            /**
+             * 缩放
+             */
+            this.scalenew = new feng3d.Vector3(1, 1, 1);
+            /**
+             * 速度
+             */
+            this.velocity = new feng3d.Vector3();
+            /**
+             * 加速度
+             */
+            this.acceleration = new feng3d.Vector3();
+            /**
+             * 颜色
+             */
+            this.color = new feng3d.Color4();
+        }
+        return Particle;
+    }());
+    feng3d.Particle = Particle;
+})(feng3d || (feng3d = {}));
+var feng3d;
+(function (feng3d) {
+    /**
+     * 粒子
+     * 粒子系统会自动在shader中匹配一个"a_particle_${attribute}"顶点属性,并且属性值不为空时会自动添加 "#define D_a_particle_${attribute}"
+     * 例如：position 对应 a_particle_position 与 #define D_a_particle_position
+     * @author feng 2017-01-12
+     */
     var ParticleGlobal = /** @class */ (function () {
         function ParticleGlobal() {
             /**
@@ -19203,9 +18879,9 @@ var feng3d;
          */
         ParticleComponent.prototype.generateParticle = function (particle) {
         };
-        ParticleComponent.prototype.setRenderState = function (particleAnimator) {
+        ParticleComponent.prototype.setRenderState = function (particleSystem) {
             if (this.isDirty) {
-                particleAnimator.invalidate();
+                particleSystem.invalidate();
                 this.isDirty = false;
             }
         };
@@ -19235,7 +18911,7 @@ var feng3d;
             /**
              * 发射率，每秒发射粒子数量
              */
-            _this.rate = 10;
+            _this.rate = 100;
             /**
              * 爆发，在time时刻额外喷射particles粒子
              */
@@ -19378,18 +19054,18 @@ var feng3d;
         function ParticleBillboard() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
-        ParticleBillboard.prototype.setRenderState = function (particleAnimator) {
+        ParticleBillboard.prototype.setRenderState = function (particleSystem) {
             if (this.camera && this.enable) {
                 if (this.billboardAxis)
                     this.billboardAxis.normalize();
                 var _matrix = new feng3d.Matrix4x4;
-                var gameObject = particleAnimator.gameObject;
+                var gameObject = particleSystem.gameObject;
                 _matrix.copyFrom(gameObject.transform.localToWorldMatrix);
                 _matrix.lookAt(this.camera.transform.localToWorldMatrix.position, this.billboardAxis || feng3d.Vector3.Y_AXIS);
-                particleAnimator.particleGlobal.billboardMatrix = _matrix;
+                particleSystem.particleGlobal.billboardMatrix = _matrix;
             }
             else {
-                particleAnimator.particleGlobal.billboardMatrix = new feng3d.Matrix4x4();
+                particleSystem.particleGlobal.billboardMatrix = new feng3d.Matrix4x4();
             }
         };
         return ParticleBillboard;
@@ -19399,22 +19075,23 @@ var feng3d;
 var feng3d;
 (function (feng3d) {
     /**
-     * 粒子动画
+     * 粒子系统
      * @author feng 2017-01-09
      */
-    var ParticleAnimator = /** @class */ (function (_super) {
-        __extends(ParticleAnimator, _super);
-        function ParticleAnimator() {
+    var ParticleSystem = /** @class */ (function (_super) {
+        __extends(ParticleSystem, _super);
+        function ParticleSystem() {
             var _this = _super !== null && _super.apply(this, arguments) || this;
-            _this._isPlaying = true;
+            _this.geometry = new feng3d.PointGeometry();
+            _this.material = feng3d.materialFactory.create("particle", { renderParams: { renderMode: feng3d.RenderMode.POINTS } });
+            /**
+             * 是否正在播放
+             */
+            _this.isPlaying = true;
             /**
              * 粒子时间
              */
             _this.time = 0;
-            /**
-             * 起始时间
-             */
-            _this.preTime = 0;
             /**
              * 播放速度
              */
@@ -19449,47 +19126,22 @@ var feng3d;
             _this._isDirty = true;
             return _this;
         }
-        Object.defineProperty(ParticleAnimator.prototype, "isPlaying", {
-            /**
-             * 是否正在播放
-             */
-            get: function () {
-                return this._isPlaying;
-            },
-            set: function (value) {
-                if (this._isPlaying == value)
-                    return;
-                if (this._isPlaying) {
-                    feng3d.ticker.offframe(this.update, this);
-                }
-                this._isPlaying = value;
-                if (this._isPlaying) {
-                    this.preTime = Date.now();
-                    feng3d.ticker.onframe(this.update, this);
-                }
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(ParticleAnimator.prototype, "single", {
+        Object.defineProperty(ParticleSystem.prototype, "single", {
             get: function () { return true; },
             enumerable: true,
             configurable: true
         });
-        ParticleAnimator.prototype.init = function (gameObject) {
+        ParticleSystem.prototype.init = function (gameObject) {
             _super.prototype.init.call(this, gameObject);
-            if (this._isPlaying) {
-                this.preTime = Date.now();
-                feng3d.ticker.onframe(this.update, this);
-            }
             this.updateRenderState();
         };
-        ParticleAnimator.prototype.update = function () {
-            this.time = (this.time + ((Date.now() - this.preTime) * this.playspeed / 1000) + this.cycle) % this.cycle;
-            this.preTime = Date.now();
+        ParticleSystem.prototype.update = function (interval) {
+            if (!this.isPlaying)
+                return;
+            this.time = (this.time + (interval * this.playspeed / 1000) + this.cycle) % this.cycle;
             this.updateRenderState();
         };
-        ParticleAnimator.prototype.updateRenderState = function () {
+        ParticleSystem.prototype.updateRenderState = function () {
             for (var key in this.animations) {
                 if (this.animations.hasOwnProperty(key)) {
                     var element = this.animations[key];
@@ -19501,13 +19153,13 @@ var feng3d;
                 this._isDirty = false;
             }
         };
-        ParticleAnimator.prototype.invalidate = function () {
+        ParticleSystem.prototype.invalidate = function () {
             this._isDirty = true;
         };
         /**
          * 生成粒子
          */
-        ParticleAnimator.prototype.generateParticles = function () {
+        ParticleSystem.prototype.generateParticles = function () {
             var generateFunctions = this.generateFunctions.concat();
             this._attributes = {};
             for (var key in this.animations) {
@@ -19521,7 +19173,7 @@ var feng3d;
             generateFunctions.sort(function (a, b) { return b.priority - a.priority; });
             //
             for (var i = 0; i < this.numParticles; i++) {
-                var particle = {};
+                var particle = new feng3d.Particle();
                 particle.index = i;
                 particle.total = this.numParticles;
                 generateFunctions.forEach(function (element) {
@@ -19534,7 +19186,7 @@ var feng3d;
          * 收集粒子数据
          * @param particle      粒子
          */
-        ParticleAnimator.prototype.collectionParticle = function (particle) {
+        ParticleSystem.prototype.collectionParticle = function (particle) {
             for (var attribute in particle) {
                 this.collectionParticleAttribute(attribute, particle);
             }
@@ -19545,7 +19197,7 @@ var feng3d;
          * @param index             粒子编号
          * @param data              属性数据
          */
-        ParticleAnimator.prototype.collectionParticleAttribute = function (attribute, particle) {
+        ParticleSystem.prototype.collectionParticleAttribute = function (attribute, particle) {
             var attributeID = "a_particle_" + attribute;
             var data = particle[attribute];
             var index = particle.index;
@@ -19573,8 +19225,9 @@ var feng3d;
                 throw new Error("\u65E0\u6CD5\u5904\u7406" + feng3d.classUtils.getQualifiedClassName(data) + "\u7C92\u5B50\u5C5E\u6027");
             }
         };
-        ParticleAnimator.prototype.preRender = function (renderAtomic) {
+        ParticleSystem.prototype.preRender = function (renderAtomic) {
             var _this = this;
+            _super.prototype.preRender.call(this, renderAtomic);
             renderAtomic.instanceCount = function () { return _this.numParticles; };
             //
             renderAtomic.uniforms.u_particleTime = function () { return _this.time; };
@@ -19590,47 +19243,66 @@ var feng3d;
             //更新宏定义
             for (var attribute in this._attributes) {
                 var vector3DData = this._attributes[attribute];
-                var attributeRenderData = renderAtomic.attributes[name] = renderAtomic.attributes[name] || new feng3d.Attribute(name, vector3DData);
+                var attributeRenderData = renderAtomic.attributes[attribute] = renderAtomic.attributes[attribute] || new feng3d.Attribute(attribute, vector3DData);
                 attributeRenderData.data = vector3DData;
                 attributeRenderData.size = vector3DData.length / this.numParticles;
                 attributeRenderData.divisor = 1;
             }
         };
         __decorate([
-            feng3d.oav(),
+            feng3d.oav({ componentParam: { dragparam: { accepttype: "geometry", datatype: "geometry" } } }),
             feng3d.serialize
-        ], ParticleAnimator.prototype, "isPlaying", null);
+        ], ParticleSystem.prototype, "geometry", void 0);
+        __decorate([
+            feng3d.oav({ componentParam: { dragparam: { accepttype: "material", datatype: "material" } } }),
+            feng3d.serialize
+        ], ParticleSystem.prototype, "material", void 0);
         __decorate([
             feng3d.oav(),
             feng3d.serialize
-        ], ParticleAnimator.prototype, "time", void 0);
+        ], ParticleSystem.prototype, "isPlaying", void 0);
+        __decorate([
+            feng3d.oav()
+        ], ParticleSystem.prototype, "time", void 0);
         __decorate([
             feng3d.oav(),
             feng3d.serialize
-        ], ParticleAnimator.prototype, "playspeed", void 0);
+        ], ParticleSystem.prototype, "playspeed", void 0);
         __decorate([
             feng3d.oav(),
             feng3d.serialize
-        ], ParticleAnimator.prototype, "cycle", void 0);
+        ], ParticleSystem.prototype, "cycle", void 0);
         __decorate([
             feng3d.serialize
-        ], ParticleAnimator.prototype, "generateFunctions", void 0);
+        ], ParticleSystem.prototype, "generateFunctions", void 0);
         __decorate([
             feng3d.serialize,
             feng3d.oav()
-        ], ParticleAnimator.prototype, "animations", void 0);
+        ], ParticleSystem.prototype, "animations", void 0);
         __decorate([
             feng3d.serialize,
             feng3d.oav()
-        ], ParticleAnimator.prototype, "particleGlobal", void 0);
+        ], ParticleSystem.prototype, "particleGlobal", void 0);
         __decorate([
             feng3d.watch("invalidate"),
             feng3d.oav(),
             feng3d.serialize
-        ], ParticleAnimator.prototype, "numParticles", void 0);
-        return ParticleAnimator;
-    }(feng3d.Component));
-    feng3d.ParticleAnimator = ParticleAnimator;
+        ], ParticleSystem.prototype, "numParticles", void 0);
+        return ParticleSystem;
+    }(feng3d.MeshRenderer));
+    feng3d.ParticleSystem = ParticleSystem;
+})(feng3d || (feng3d = {}));
+var feng3d;
+(function (feng3d) {
+    var ParticleUniforms = /** @class */ (function (_super) {
+        __extends(ParticleUniforms, _super);
+        function ParticleUniforms() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        return ParticleUniforms;
+    }(feng3d.StandardUniforms));
+    feng3d.ParticleUniforms = ParticleUniforms;
+    feng3d.shaderConfig.shaders["particle"].cls = ParticleUniforms;
 })(feng3d || (feng3d = {}));
 var feng3d;
 (function (feng3d) {
@@ -19675,18 +19347,312 @@ var feng3d;
 })(feng3d || (feng3d = {}));
 var feng3d;
 (function (feng3d) {
+    var SkeletonComponent = /** @class */ (function (_super) {
+        __extends(SkeletonComponent, _super);
+        function SkeletonComponent() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            /** 骨骼关节数据列表 */
+            _this.joints = [];
+            _this.isInitJoints = false;
+            return _this;
+        }
+        Object.defineProperty(SkeletonComponent.prototype, "globalMatrices", {
+            /**
+             * 当前骨骼姿势的全局矩阵
+             * @see #globalPose
+             */
+            get: function () {
+                if (!this.isInitJoints) {
+                    this.initSkeleton();
+                    this.isInitJoints = true;
+                }
+                if (this._globalPropertiesInvalid) {
+                    this.updateGlobalProperties();
+                    this._globalPropertiesInvalid = false;
+                }
+                return this._globalMatrices;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        SkeletonComponent.prototype.initSkeleton = function () {
+            this.jointGameobjects = [];
+            this.jointGameObjectMap = {};
+            //
+            this.createSkeletonGameObject();
+            //
+            this._globalPropertiesInvalid = true;
+            this._jointsInvalid = [];
+            this._globalMatrix3DsInvalid = [];
+            this.globalMatrix3Ds = [];
+            this._globalMatrices = [];
+            //
+            var jointNum = this.joints.length;
+            for (var i = 0; i < jointNum; i++) {
+                this._jointsInvalid[i] = true;
+                this._globalMatrix3DsInvalid[i] = true;
+                this.globalMatrix3Ds[i] = new feng3d.Matrix4x4();
+                this._globalMatrices[i] = new feng3d.Matrix4x4();
+            }
+        };
+        /**
+         * 更新骨骼全局变换矩阵
+         */
+        SkeletonComponent.prototype.updateGlobalProperties = function () {
+            //姿势变换矩阵
+            var joints = this.joints;
+            var jointGameobjects = this.jointGameobjects;
+            var globalMatrix3Ds = this.globalMatrix3Ds;
+            var _globalMatrix3DsInvalid = this._globalMatrix3DsInvalid;
+            //遍历每个关节
+            for (var i = 0; i < joints.length; ++i) {
+                if (!this._jointsInvalid[i])
+                    continue;
+                this._globalMatrices[i]
+                    .copyFrom(globalMatrix3d(i))
+                    .prepend(joints[i].invertMatrix3D);
+                this._jointsInvalid[i] = false;
+            }
+            function globalMatrix3d(index) {
+                if (!_globalMatrix3DsInvalid[index])
+                    return globalMatrix3Ds[index];
+                var jointPose = joints[index];
+                var jointGameobject = jointGameobjects[index];
+                globalMatrix3Ds[index] = jointGameobject.transform.matrix3d.clone();
+                if (jointPose.parentIndex >= 0) {
+                    var parentGlobalMatrix3d = globalMatrix3d(jointPose.parentIndex);
+                    globalMatrix3Ds[index].append(parentGlobalMatrix3d);
+                }
+                _globalMatrix3DsInvalid[index] = false;
+                return globalMatrix3Ds[index];
+            }
+        };
+        SkeletonComponent.prototype.invalidjoint = function (jointIndex) {
+            var _this = this;
+            this._globalPropertiesInvalid = true;
+            this._jointsInvalid[jointIndex] = true;
+            this._globalMatrix3DsInvalid[jointIndex] = true;
+            this.joints[jointIndex].children.forEach(function (element) {
+                _this.invalidjoint(element);
+            });
+        };
+        SkeletonComponent.prototype.createSkeletonGameObject = function () {
+            var skeleton = this;
+            var joints = skeleton.joints;
+            var jointGameobjects = this.jointGameobjects;
+            var jointGameObjectMap = this.jointGameObjectMap;
+            for (var i = 0; i < joints.length; i++) {
+                createJoint(i);
+            }
+            function createJoint(i) {
+                if (jointGameobjects[i])
+                    return jointGameobjects[i].gameObject;
+                var skeletonJoint = joints[i];
+                var parentGameobject;
+                if (skeletonJoint.parentIndex != -1) {
+                    parentGameobject = createJoint(skeletonJoint.parentIndex);
+                    joints[skeletonJoint.parentIndex].children.push(i);
+                }
+                else {
+                    parentGameobject = skeleton.gameObject;
+                }
+                var jointGameobject = parentGameobject.find(skeletonJoint.name);
+                if (!jointGameobject) {
+                    jointGameobject = feng3d.GameObject.create(skeletonJoint.name);
+                    jointGameobject.serializable = false;
+                    parentGameobject.addChild(jointGameobject);
+                }
+                var transform = jointGameobject.transform;
+                var matrix3D = skeletonJoint.matrix3D;
+                if (skeletonJoint.parentIndex != -1) {
+                    matrix3D = matrix3D.clone().append(joints[skeletonJoint.parentIndex].invertMatrix3D);
+                }
+                transform.matrix3d = matrix3D;
+                transform.on("transformChanged", function () {
+                    skeleton.invalidjoint(i);
+                });
+                jointGameobjects[i] = transform;
+                jointGameObjectMap[skeletonJoint.name] = transform;
+                return jointGameobject;
+            }
+        };
+        __decorate([
+            feng3d.serialize,
+            feng3d.oav()
+        ], SkeletonComponent.prototype, "joints", void 0);
+        return SkeletonComponent;
+    }(feng3d.Component));
+    feng3d.SkeletonComponent = SkeletonComponent;
+})(feng3d || (feng3d = {}));
+var feng3d;
+(function (feng3d) {
+    var supportNUM_SKELETONJOINT = 150;
+    var SkinnedMeshRenderer = /** @class */ (function (_super) {
+        __extends(SkinnedMeshRenderer, _super);
+        function SkinnedMeshRenderer() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.material = feng3d.materialFactory.create("skeleton");
+            _this.skeletonGlobalMatriices = (function () { var v = [new feng3d.Matrix4x4()]; var i = supportNUM_SKELETONJOINT; while (i-- > 1)
+                v.push(v[0]); return v; })();
+            return _this;
+        }
+        Object.defineProperty(SkinnedMeshRenderer.prototype, "single", {
+            get: function () { return true; },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * 创建一个骨骼动画类
+         */
+        SkinnedMeshRenderer.prototype.init = function (gameObject) {
+            _super.prototype.init.call(this, gameObject);
+        };
+        Object.defineProperty(SkinnedMeshRenderer.prototype, "u_modelMatrix", {
+            get: function () {
+                if (this.cacheSkeletonComponent)
+                    return this.cacheSkeletonComponent.transform.localToWorldMatrix;
+                return this.transform.localToWorldMatrix;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(SkinnedMeshRenderer.prototype, "u_ITModelMatrix", {
+            get: function () {
+                if (this.cacheSkeletonComponent)
+                    return this.cacheSkeletonComponent.transform.ITlocalToWorldMatrix;
+                return this.transform.ITlocalToWorldMatrix;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(SkinnedMeshRenderer.prototype, "u_skeletonGlobalMatriices", {
+            get: function () {
+                if (!this.cacheSkeletonComponent) {
+                    var gameObject = this.gameObject;
+                    var skeletonComponent = null;
+                    while (gameObject && !skeletonComponent) {
+                        skeletonComponent = gameObject.getComponent(feng3d.SkeletonComponent);
+                        gameObject = gameObject.parent;
+                    }
+                    this.cacheSkeletonComponent = skeletonComponent;
+                }
+                if (this.skinSkeleton && this.cacheSkeletonComponent) {
+                    var joints = this.skinSkeleton.joints;
+                    var globalMatrices = this.cacheSkeletonComponent.globalMatrices;
+                    for (var i = joints.length - 1; i >= 0; i--) {
+                        this.skeletonGlobalMatriices[i] = globalMatrices[joints[i][0]];
+                        if (this.initMatrix3d) {
+                            this.skeletonGlobalMatriices[i] = this.skeletonGlobalMatriices[i].clone()
+                                .prepend(this.initMatrix3d);
+                        }
+                    }
+                }
+                return this.skeletonGlobalMatriices;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        SkinnedMeshRenderer.prototype.preRender = function (renderAtomic) {
+            var _this = this;
+            _super.prototype.preRender.call(this, renderAtomic);
+            renderAtomic.uniforms.u_modelMatrix = function () { return _this.u_modelMatrix; };
+            renderAtomic.uniforms.u_ITModelMatrix = function () { return _this.u_ITModelMatrix; };
+            //
+            renderAtomic.uniforms.u_skeletonGlobalMatriices = function () { return _this.u_skeletonGlobalMatriices; };
+        };
+        /**
+         * 销毁
+         */
+        SkinnedMeshRenderer.prototype.dispose = function () {
+            _super.prototype.dispose.call(this);
+        };
+        __decorate([
+            feng3d.serialize,
+            feng3d.oav()
+        ], SkinnedMeshRenderer.prototype, "skinSkeleton", void 0);
+        __decorate([
+            feng3d.serialize,
+            feng3d.oav()
+        ], SkinnedMeshRenderer.prototype, "material", void 0);
+        __decorate([
+            feng3d.serialize
+        ], SkinnedMeshRenderer.prototype, "initMatrix3d", void 0);
+        return SkinnedMeshRenderer;
+    }(feng3d.MeshRenderer));
+    feng3d.SkinnedMeshRenderer = SkinnedMeshRenderer;
+    var SkinSkeleton = /** @class */ (function () {
+        function SkinSkeleton() {
+            /**
+             * [在整个骨架中的编号，骨骼名称]
+             */
+            this.joints = [];
+            /**
+             * 当前模型包含骨骼数量
+             */
+            this.numJoint = 0;
+        }
+        __decorate([
+            feng3d.serialize
+        ], SkinSkeleton.prototype, "joints", void 0);
+        __decorate([
+            feng3d.serialize
+        ], SkinSkeleton.prototype, "numJoint", void 0);
+        return SkinSkeleton;
+    }());
+    feng3d.SkinSkeleton = SkinSkeleton;
+    var SkinSkeletonTemp = /** @class */ (function (_super) {
+        __extends(SkinSkeletonTemp, _super);
+        function SkinSkeletonTemp() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            /**
+             * temp 解析时临时数据
+             */
+            _this.cache_map = {};
+            return _this;
+        }
+        SkinSkeletonTemp.prototype.resetJointIndices = function (jointIndices, skeleton) {
+            var len = jointIndices.length;
+            for (var i = 0; i < len; i++) {
+                if (this.cache_map[jointIndices[i]] === undefined)
+                    this.cache_map[jointIndices[i]] = this.numJoint++;
+                jointIndices[i] = this.cache_map[jointIndices[i]];
+            }
+            this.joints.length = 0;
+            for (var key in this.cache_map) {
+                if (this.cache_map.hasOwnProperty(key)) {
+                    this.joints[this.cache_map[key]] = [parseInt(key), skeleton.joints[key].name];
+                }
+            }
+        };
+        return SkinSkeletonTemp;
+    }(SkinSkeleton));
+    feng3d.SkinSkeletonTemp = SkinSkeletonTemp;
+})(feng3d || (feng3d = {}));
+var feng3d;
+(function (feng3d) {
+    var SkeletonUniforms = /** @class */ (function (_super) {
+        __extends(SkeletonUniforms, _super);
+        function SkeletonUniforms() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        return SkeletonUniforms;
+    }(feng3d.StandardUniforms));
+    feng3d.SkeletonUniforms = SkeletonUniforms;
+    feng3d.shaderConfig.shaders["skeleton"].cls = SkeletonUniforms;
+})(feng3d || (feng3d = {}));
+var feng3d;
+(function (feng3d) {
     var Animation = /** @class */ (function (_super) {
         __extends(Animation, _super);
         function Animation() {
             var _this = _super !== null && _super.apply(this, arguments) || this;
             _this.animations = [];
             _this._time = 0;
-            _this._isplaying = false;
+            _this.isplaying = false;
             /**
              * 播放速度
              */
             _this.playspeed = 1;
-            _this._preTime = 0;
             _this.num = 0;
             _this._objectCache = new Map();
             return _this;
@@ -19720,23 +19686,8 @@ var feng3d;
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(Animation.prototype, "isplaying", {
-            get: function () {
-                return this._isplaying;
-            },
-            set: function (value) {
-                if (this._isplaying == value)
-                    return;
-                this._preTime = Date.now();
-                this._isplaying = value;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Animation.prototype.update = function () {
-            var nowTime = Date.now();
-            this.time += (nowTime - this._preTime) * this.playspeed;
-            this._preTime = nowTime;
+        Animation.prototype.update = function (interval) {
+            this.time += interval * this.playspeed;
         };
         Animation.prototype.updateAni = function () {
             if (!this.animation)
@@ -19814,7 +19765,7 @@ var feng3d;
         __decorate([
             feng3d.oav(),
             feng3d.serialize
-        ], Animation.prototype, "isplaying", null);
+        ], Animation.prototype, "isplaying", void 0);
         __decorate([
             feng3d.oav(),
             feng3d.serialize
@@ -19892,80 +19843,17 @@ var feng3d;
 })(feng3d || (feng3d = {}));
 var feng3d;
 (function (feng3d) {
-    /**
-     * 文件系统类型
-     */
-    var FSType;
-    (function (FSType) {
-        FSType["http"] = "http";
-        FSType["native"] = "native";
-        FSType["indexedDB"] = "indexedDB";
-    })(FSType = feng3d.FSType || (feng3d.FSType = {}));
-    feng3d.assetsmap = feng3d.assetsmap || {};
-    var Assets = /** @class */ (function () {
-        function Assets() {
-            this.fstype = FSType.http;
-        }
-        Assets.prototype.getAssets = function (url) {
-            if (url.indexOf("http://") != -1
-                || url.indexOf("https://") != -1)
-                return feng3d.assetsmap[FSType.http];
-            return feng3d.assetsmap[this.fstype];
-        };
-        /**
-         * 加载图片
-         * @param url 图片路径
-         * @param callback 加载完成回调
-         */
-        Assets.prototype.loadImage = function (url, callback) {
-            if (url == "" || url == null) {
-                callback(null);
-                return;
-            }
-            this.getAssets(url).loadImage(url, function (img) {
-                if (!img) {
-                    console.warn("\u65E0\u6CD5\u52A0\u8F7D\u8D44\u6E90\uFF1A" + url);
-                }
-                callback(img);
-            });
-        };
-        return Assets;
-    }());
-    feng3d.Assets = Assets;
-    feng3d.assets = new Assets();
-})(feng3d || (feng3d = {}));
-var feng3d;
-(function (feng3d) {
-    var HttpAssets = /** @class */ (function () {
-        function HttpAssets() {
-        }
-        /**
-         * 加载图片
-         * @param url 图片路径
-         * @param callback 加载完成回调
-         */
-        HttpAssets.prototype.loadImage = function (url, callback) {
-            var image = new Image();
-            image.crossOrigin = "Anonymous";
-            image.onload = function () {
-                callback && callback(image);
-                image.onload = null;
-            };
-            image.src = url;
-        };
-        return HttpAssets;
-    }());
-    feng3d.HttpAssets = HttpAssets;
-    feng3d.assetsmap[feng3d.FSType.http] = feng3d.httpAssets = new HttpAssets();
-})(feng3d || (feng3d = {}));
-var feng3d;
-(function (feng3d) {
     var databases = {};
-    feng3d.storage = {
+    /**
+     *
+     */
+    var Storage = /** @class */ (function () {
+        function Storage() {
+        }
         /**
          * 是否支持 indexedDB
          */
-        support: function () {
+        Storage.prototype.support = function () {
             if (typeof indexedDB == "undefined") {
                 indexedDB = window.indexedDB || window["mozIndexedDB"] || window["webkitIndexedDB"] || window["msIndexedDB"];
                 if (indexedDB == undefined) {
@@ -19973,8 +19861,8 @@ var feng3d;
                 }
             }
             return true;
-        },
-        getDatabase: function (dbname, callback) {
+        };
+        Storage.prototype.getDatabase = function (dbname, callback) {
             if (databases[dbname]) {
                 callback(null, databases[dbname]);
                 return;
@@ -19989,8 +19877,8 @@ var feng3d;
                 callback(event, null);
                 request.onerror = null;
             };
-        },
-        deleteDatabase: function (dbname, callback) {
+        };
+        Storage.prototype.deleteDatabase = function (dbname, callback) {
             var request = indexedDB.deleteDatabase(dbname);
             request.onsuccess = function (event) {
                 delete databases[dbname];
@@ -20001,23 +19889,23 @@ var feng3d;
                 callback && callback(event);
                 request.onerror = null;
             };
-        },
-        hasObjectStore: function (dbname, objectStroreName, callback) {
-            feng3d.storage.getDatabase(dbname, function (err, database) {
+        };
+        Storage.prototype.hasObjectStore = function (dbname, objectStroreName, callback) {
+            this.getDatabase(dbname, function (err, database) {
                 callback(database.objectStoreNames.contains(objectStroreName));
             });
-        },
-        getObjectStoreNames: function (dbname, callback) {
-            feng3d.storage.getDatabase(dbname, function (err, database) {
+        };
+        Storage.prototype.getObjectStoreNames = function (dbname, callback) {
+            this.getDatabase(dbname, function (err, database) {
                 var objectStoreNames = [];
                 for (var i = 0; i < database.objectStoreNames.length; i++) {
                     objectStoreNames.push(database.objectStoreNames.item(i));
                 }
                 callback(null, objectStoreNames);
             });
-        },
-        createObjectStore: function (dbname, objectStroreName, callback) {
-            feng3d.storage.getDatabase(dbname, function (err, database) {
+        };
+        Storage.prototype.createObjectStore = function (dbname, objectStroreName, callback) {
+            this.getDatabase(dbname, function (err, database) {
                 if (database.objectStoreNames.contains(objectStroreName)) {
                     callback && callback(null);
                     return;
@@ -20040,9 +19928,9 @@ var feng3d;
                     request.onerror = null;
                 };
             });
-        },
-        deleteObjectStore: function (dbname, objectStroreName, callback) {
-            feng3d.storage.getDatabase(dbname, function (err, database) {
+        };
+        Storage.prototype.deleteObjectStore = function (dbname, objectStroreName, callback) {
+            this.getDatabase(dbname, function (err, database) {
                 if (!database.objectStoreNames.contains(objectStroreName)) {
                     callback && callback(null);
                     return;
@@ -20065,9 +19953,9 @@ var feng3d;
                     request.onerror = null;
                 };
             });
-        },
-        getAllKeys: function (dbname, objectStroreName, callback) {
-            feng3d.storage.getDatabase(dbname, function (err, database) {
+        };
+        Storage.prototype.getAllKeys = function (dbname, objectStroreName, callback) {
+            this.getDatabase(dbname, function (err, database) {
                 try {
                     var transaction = database.transaction([objectStroreName], 'readwrite');
                     var objectStore = transaction.objectStore(objectStroreName);
@@ -20081,9 +19969,9 @@ var feng3d;
                     callback && callback(error, null);
                 }
             });
-        },
-        get: function (dbname, objectStroreName, key, callback) {
-            feng3d.storage.getDatabase(dbname, function (err, database) {
+        };
+        Storage.prototype.get = function (dbname, objectStroreName, key, callback) {
+            this.getDatabase(dbname, function (err, database) {
                 var transaction = database.transaction([objectStroreName], 'readwrite');
                 var objectStore = transaction.objectStore(objectStroreName);
                 var request = objectStore.get(key);
@@ -20093,9 +19981,9 @@ var feng3d;
                     request.onsuccess = null;
                 };
             });
-        },
-        set: function (dbname, objectStroreName, key, data, callback) {
-            feng3d.storage.getDatabase(dbname, function (err, database) {
+        };
+        Storage.prototype.set = function (dbname, objectStroreName, key, data, callback) {
+            this.getDatabase(dbname, function (err, database) {
                 try {
                     var transaction = database.transaction([objectStroreName], 'readwrite');
                     var objectStore = transaction.objectStore(objectStroreName);
@@ -20109,9 +19997,9 @@ var feng3d;
                     callback && callback(error);
                 }
             });
-        },
-        delete: function (dbname, objectStroreName, key, callback) {
-            feng3d.storage.getDatabase(dbname, function (err, database) {
+        };
+        Storage.prototype.delete = function (dbname, objectStroreName, key, callback) {
+            this.getDatabase(dbname, function (err, database) {
                 try {
                     var transaction = database.transaction([objectStroreName], 'readwrite');
                     var objectStore = transaction.objectStore(objectStroreName);
@@ -20125,9 +20013,9 @@ var feng3d;
                     callback && callback(error);
                 }
             });
-        },
-        clear: function (dbname, objectStroreName, callback) {
-            feng3d.storage.getDatabase(dbname, function (err, database) {
+        };
+        Storage.prototype.clear = function (dbname, objectStroreName, callback) {
+            this.getDatabase(dbname, function (err, database) {
                 try {
                     var transaction = database.transaction([objectStroreName], 'readwrite');
                     var objectStore = transaction.objectStore(objectStroreName);
@@ -20141,121 +20029,58 @@ var feng3d;
                     callback && callback(error);
                 }
             });
-        }
-    };
+        };
+        return Storage;
+    }());
+    feng3d.Storage = Storage;
+    feng3d.storage = new Storage();
 })(feng3d || (feng3d = {}));
 var feng3d;
 (function (feng3d) {
-    feng3d.DBname = "feng3d-editor";
-    feng3d.projectname = "testproject";
-    var IndexedDBAssets = /** @class */ (function () {
-        function IndexedDBAssets() {
+    /**
+     * 索引数据文件系统
+     */
+    var IndexedDBfs = /** @class */ (function () {
+        function IndexedDBfs(DBname, projectname) {
+            if (DBname === void 0) { DBname = "feng3d-editor"; }
+            if (projectname === void 0) { projectname = "testproject"; }
+            this.DBname = DBname;
+            this.projectname = projectname;
         }
-        IndexedDBAssets.prototype.loadImage = function (url, callback) {
-            feng3d.indexedDBfs.readFile(url, function (err, data) {
-                if (data) {
-                    feng3d.dataTransform.arrayBufferToImage(data, callback);
-                }
-                else {
-                    callback(null);
-                }
+        Object.defineProperty(IndexedDBfs.prototype, "type", {
+            get: function () {
+                return feng3d.FSType.indexedDB;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * 读取文件
+         * @param path 路径
+         * @param callback 读取完成回调 当err不为null时表示读取失败
+         */
+        IndexedDBfs.prototype.readFile = function (path, callback) {
+            feng3d.storage.get(this.DBname, this.projectname, path, function (err, data) {
+                callback(null, data ? data.data : null);
             });
         };
-        return IndexedDBAssets;
-    }());
-    feng3d.IndexedDBAssets = IndexedDBAssets;
-    feng3d.assetsmap[feng3d.FSType.indexedDB] = feng3d.indexedDBAssets = new IndexedDBAssets();
-    function set(key, data, callback) {
-        feng3d.storage.set(feng3d.DBname, feng3d.projectname, key, data, callback);
-    }
-    function get(key, callback) {
-        feng3d.storage.get(feng3d.DBname, feng3d.projectname, key, callback);
-    }
-    function copy(sourcekey, targetkey, callback) {
-        get(sourcekey, function (err, data) {
-            if (err) {
-                callback && callback(err);
-                return;
-            }
-            set(targetkey, data, callback);
-        });
-    }
-    function move(sourcekey, targetkey, callback) {
-        copy(sourcekey, targetkey, function (err) {
-            if (err) {
-                callback && callback(err);
-                return;
-            }
-            deletedata(sourcekey, callback);
-        });
-    }
-    function deletedata(key, callback) {
-        feng3d.storage.delete(feng3d.DBname, feng3d.projectname, key, callback);
-    }
-    function getAllKeys(callback) {
-        feng3d.storage.getAllKeys(feng3d.DBname, feng3d.projectname, callback);
-    }
-    function movefiles(movelists, callback) {
-        copyfiles(movelists.concat(), function (err) {
-            if (err) {
-                callback(err);
-                return;
-            }
-            var deletelists = movelists.reduce(function (value, current) { value.push(current[0]); return value; }, []);
-            deletefiles(deletelists, callback);
-        });
-    }
-    function copyfiles(copylists, callback) {
-        if (copylists.length > 0) {
-            var copyitem = copylists.shift();
-            copy(copyitem[0], copyitem[1], function (err) {
-                if (err) {
-                    callback(err);
-                    return;
-                }
-                copyfiles(copylists, callback);
-            });
-            return;
-        }
-        callback(null);
-    }
-    function deletefiles(deletelists, callback) {
-        if (deletelists.length > 0) {
-            deletedata(deletelists.shift(), function (err) {
-                if (err) {
-                    callback(err);
-                    return;
-                }
-                deletefiles(deletelists, callback);
-            });
-            return;
-        }
-        callback(null);
-    }
-    feng3d.indexedDBfs = {
-        hasProject: function (projectname, callback) {
-            feng3d.storage.hasObjectStore(feng3d.DBname, projectname, callback);
-        },
-        getProjectList: function (callback) {
-            feng3d.storage.getObjectStoreNames(feng3d.DBname, callback);
-        },
-        initproject: function (projectname1, callback) {
-            feng3d.storage.createObjectStore(feng3d.DBname, projectname1, function (err) {
-                if (err) {
-                    feng3d.warn(err);
-                    return;
-                }
-                feng3d.projectname = projectname1;
-                // todo 启动监听 ts代码变化自动编译
-                callback();
-            });
-        },
-        // selectFile?: (callback: (file: FileList) => void, param?: Object) => void;
-        // //
-        stat: function (path, callback) {
-            get(path, function (err, data) {
+        /**
+         * 获取文件绝对路径
+         * @param path （相对）路径
+         * @param callback 回调函数
+         */
+        IndexedDBfs.prototype.getAbsolutePath = function (path, callback) {
+            callback(null, path);
+        };
+        /**
+         * 获取文件信息
+         * @param path 文件路径
+         * @param callback 回调函数
+         */
+        IndexedDBfs.prototype.stat = function (path, callback) {
+            feng3d.storage.get(this.DBname, this.projectname, path, function (err, data) {
                 if (data) {
-                    callback(err, {
+                    callback(null, {
                         path: path,
                         birthtime: data.birthtime.getTime(),
                         mtime: data.birthtime.getTime(),
@@ -20267,10 +20092,14 @@ var feng3d;
                     callback(new Error(path + " 不存在"), null);
                 }
             });
-        },
-        readdir: function (path, callback) {
-            feng3d.assert(path.charAt(path.length - 1) == "/", "\u6587\u4EF6\u5939\u8DEF\u5F84\u5FC5\u987B\u4EE5 / \u7ED3\u5C3E\uFF01");
-            getAllKeys(function (err, allfilepaths) {
+        };
+        /**
+         * 读取文件夹中文件列表
+         * @param path 路径
+         * @param callback 回调函数
+         */
+        IndexedDBfs.prototype.readdir = function (path, callback) {
+            feng3d.storage.getAllKeys(this.DBname, this.projectname, function (err, allfilepaths) {
                 if (!allfilepaths) {
                     callback(err, null);
                     return;
@@ -20288,98 +20117,438 @@ var feng3d;
                 var files = Object.keys(subfilemap);
                 callback(null, files);
             });
-        },
-        writeFile: function (path, data, callback) {
-            set(path, { isDirectory: false, birthtime: new Date(), data: data }, callback);
-        },
+        };
+        /**
+         * 新建文件夹
+         * @param path 文件夹路径
+         * @param callback 回调函数
+         */
+        IndexedDBfs.prototype.mkdir = function (path, callback) {
+            feng3d.storage.set(this.DBname, this.projectname, path, { isDirectory: true, birthtime: new Date() }, callback);
+        };
+        /**
+         * 删除文件
+         * @param path 文件路径
+         * @param callback 回调函数
+         */
+        IndexedDBfs.prototype.deleteFile = function (path, callback) {
+            feng3d.storage.delete(this.DBname, this.projectname, path, callback);
+        };
+        /**
+         * 写文件
+         * @param path 文件路径
+         * @param data 文件数据
+         * @param callback 回调函数
+         */
+        IndexedDBfs.prototype.writeFile = function (path, data, callback) {
+            feng3d.storage.set(this.DBname, this.projectname, path, { isDirectory: false, birthtime: new Date(), data: data }, callback);
+        };
+        /**
+         * 获取所有文件路径
+         * @param callback 回调函数
+         */
+        IndexedDBfs.prototype.getAllPaths = function (callback) {
+            feng3d.storage.getAllKeys(this.DBname, this.projectname, callback);
+        };
+        return IndexedDBfs;
+    }());
+    feng3d.IndexedDBfs = IndexedDBfs;
+    feng3d.indexedDBfs = new IndexedDBfs();
+})(feng3d || (feng3d = {}));
+var feng3d;
+(function (feng3d) {
+    /**
+     * Http可读文件系统
+     */
+    var HttpReadFS = /** @class */ (function () {
+        function HttpReadFS() {
+            /**
+             * 根路径
+             */
+            this.rootPath = "";
+            this.rootPath = document.URL.substring(0, document.URL.lastIndexOf("/") + 1);
+        }
+        Object.defineProperty(HttpReadFS.prototype, "type", {
+            get: function () {
+                return feng3d.FSType.http;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * 读取文件
+         * @param path 路径
+         * @param callback 读取完成回调 当err不为null时表示读取失败
+         */
+        HttpReadFS.prototype.readFile = function (path, callback) {
+            // rootPath
+            feng3d.Loader.loadBinary(path, function (content) {
+                callback(null, content);
+            }, null, function (e) {
+                callback(e, null);
+            });
+        };
+        /**
+         * 获取文件绝对路径
+         * @param path （相对）路径
+         * @param callback 回调函数
+         */
+        HttpReadFS.prototype.getAbsolutePath = function (path, callback) {
+            callback(null, this.rootPath + path);
+        };
+        return HttpReadFS;
+    }());
+    feng3d.HttpReadFS = HttpReadFS;
+    feng3d.httpReadFS = new HttpReadFS();
+})(feng3d || (feng3d = {}));
+var feng3d;
+(function (feng3d) {
+    /**
+     * 文件系统类型
+     */
+    var FSType;
+    (function (FSType) {
+        FSType["http"] = "http";
+        FSType["native"] = "native";
+        FSType["indexedDB"] = "indexedDB";
+    })(FSType = feng3d.FSType || (feng3d.FSType = {}));
+    /**
+     * 资源
+     * 在可读文件系统上进行加工，比如把读取数据转换为图片或者文本
+     */
+    var ReadAssets = /** @class */ (function () {
+        function ReadAssets() {
+            /**
+             * 可读文件系统
+             */
+            this.fs = feng3d.httpReadFS;
+        }
+        Object.defineProperty(ReadAssets.prototype, "type", {
+            get: function () {
+                return this.fs.type;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * 读取文件
+         * @param path 路径
+         * @param callback 读取完成回调 当err不为null时表示读取失败
+         */
+        ReadAssets.prototype.readFile = function (path, callback) {
+            var readFS = this.fs;
+            if (path.indexOf("http://") != -1
+                || path.indexOf("https://") != -1)
+                readFS = feng3d.httpReadFS;
+            readFS.readFile(path, callback);
+        };
+        /**
+         * 获取文件绝对路径
+         * @param path （相对）路径
+         * @param callback 回调函数
+         */
+        ReadAssets.prototype.getAbsolutePath = function (path, callback) {
+            this.fs.getAbsolutePath(path, callback);
+        };
         /**
          * 读取文件为字符串
          */
-        readFileAsString: function (path, callback) {
-            get(path, function (err, data) {
-                path;
+        ReadAssets.prototype.readFileAsString = function (path, callback) {
+            this.readFile(path, function (err, data) {
                 if (err) {
                     callback(err, null);
                     return;
                 }
-                var str = feng3d.dataTransform.arrayBufferToString(data.data, function (content) {
+                feng3d.dataTransform.arrayBufferToString(data, function (content) {
                     callback(null, content);
                 });
             });
-        },
+        };
         /**
-         * 读取文件为Buffer
+         * 加载图片
+         * @param path 图片路径
+         * @param callback 加载完成回调
          */
-        readFile: function (path, callback) {
-            get(path, function (err, data) {
-                callback(null, data ? data.data : null);
-            });
-        },
-        mkdir: function (path, callback) {
-            feng3d.assert(path.charAt(path.length - 1) == "/", "\u6587\u4EF6\u5939\u8DEF\u5F84\u5FC5\u987B\u4EE5 / \u7ED3\u5C3E\uFF01");
-            set(path, { isDirectory: true, birthtime: new Date() }, callback);
-        },
-        rename: function (oldPath, newPath, callback) {
-            getAllKeys(function (err, allfilepaths) {
-                if (!allfilepaths) {
-                    callback(err);
-                    return;
-                }
-                var renamelists = [[oldPath, newPath]];
-                allfilepaths.forEach(function (element) {
-                    var result = new RegExp(oldPath + "\\b").exec(element);
-                    if (result != null && result.index == 0) {
-                        renamelists.push([element, element.replace(oldPath, newPath)]);
-                    }
-                });
-                movefiles(renamelists, callback);
-            });
-        },
-        move: function (src, dest, callback) {
-            feng3d.indexedDBfs.rename(src, dest, callback || (function () { }));
-        },
-        remove: function (path, callback) {
-            getAllKeys(function (err, allfilepaths) {
-                if (!allfilepaths) {
-                    callback && callback(err);
-                    return;
-                }
-                var removelists = [path];
-                allfilepaths.forEach(function (element) {
-                    var result = new RegExp(path + "\\b").exec(element);
-                    if (result != null && result.index == 0) {
-                        removelists.push(element);
-                    }
-                });
-                deletefiles(removelists, callback || (function () { }));
-            });
-        },
-        /**
-         * 获取文件绝对路径
-         */
-        getAbsolutePath: function (path, callback) {
-            callback(null, null);
-        },
-        /**
-         * 获取指定文件下所有文件路径列表
-         */
-        getAllfilepathInFolder: function (dirpath, callback) {
-            getAllKeys(function (err, allfilepaths) {
-                if (!allfilepaths) {
+        ReadAssets.prototype.readFileAsImage = function (path, callback) {
+            if (path == "" || path == null) {
+                callback(new Error("无效路径!"), null);
+                return;
+            }
+            this.readFile(path, function (err, data) {
+                if (err) {
                     callback(err, null);
                     return;
                 }
-                var files = [];
-                allfilepaths.forEach(function (element) {
-                    var result = new RegExp(dirpath + "\\b").exec(element);
-                    if (result != null && result.index == 0) {
-                        files.push(element);
-                    }
+                feng3d.dataTransform.arrayBufferToImage(data, function (img) {
+                    callback(null, img);
                 });
-                callback(null, files);
             });
-        },
-    };
+        };
+        return ReadAssets;
+    }());
+    feng3d.ReadAssets = ReadAssets;
+    feng3d.assets = new ReadAssets();
+    var ReadWriteAssets = /** @class */ (function (_super) {
+        __extends(ReadWriteAssets, _super);
+        function ReadWriteAssets(readWriteFS) {
+            var _this = _super.call(this) || this;
+            /**
+             * 可读写文件系统
+             */
+            // fs: ReadWriteFS = indexedDBfs;
+            _this.fs = feng3d.indexedDBfs;
+            if (readWriteFS)
+                _this.fs = readWriteFS;
+            return _this;
+        }
+        /**
+         * 获取文件信息
+         * @param path 文件路径
+         * @param callback 回调函数
+         */
+        ReadWriteAssets.prototype.stat = function (path, callback) {
+            this.fs.stat(path, callback);
+        };
+        /**
+         * 读取文件夹中文件列表
+         * @param path 路径
+         * @param callback 回调函数
+         */
+        ReadWriteAssets.prototype.readdir = function (path, callback) {
+            feng3d.assert(this.isDir(path), "\u6587\u4EF6\u5939\u8DEF\u5F84\u5FC5\u987B\u4EE5 / \u7ED3\u5C3E\uFF01");
+            this.fs.readdir(path, callback);
+        };
+        /**
+         * 新建文件夹
+         * @param path 文件夹路径
+         * @param callback 回调函数
+         */
+        ReadWriteAssets.prototype.mkdir = function (path, callback) {
+            feng3d.assert(this.isDir(path), "\u6587\u4EF6\u5939\u8DEF\u5F84\u5FC5\u987B\u4EE5 / \u7ED3\u5C3E\uFF01");
+            this.fs.mkdir(path, callback);
+        };
+        /**
+         * 删除文件
+         * @param path 文件路径
+         * @param callback 回调函数
+         */
+        ReadWriteAssets.prototype.deleteFile = function (path, callback) {
+            this.fs.deleteFile(path, callback);
+        };
+        /**
+         * 写文件
+         * @param path 文件路径
+         * @param data 文件数据
+         * @param callback 回调函数
+         */
+        ReadWriteAssets.prototype.writeFile = function (path, data, callback) {
+            if (this.isDir(path)) {
+                this.fs.mkdir(path, callback);
+            }
+            else {
+                this.fs.writeFile(path, data, callback);
+            }
+        };
+        ///--------------------------
+        /**
+         * 获取所有文件路径
+         * @param callback 回调函数
+         */
+        ReadWriteAssets.prototype.getAllPaths = function (callback) {
+            this.getAllfilepathInFolder("", callback);
+        };
+        /**
+         * 获取指定文件下所有文件路径列表
+         */
+        ReadWriteAssets.prototype.getAllfilepathInFolder = function (dirpath, callback) {
+            var _this = this;
+            feng3d.assert(this.isDir(dirpath), "\u6587\u4EF6\u5939\u8DEF\u5F84\u5FC5\u987B\u4EE5 / \u7ED3\u5C3E\uFF01");
+            var dirs = [dirpath];
+            var result = [];
+            var currentdir = "";
+            // 递归获取文件
+            var handle = function () {
+                if (dirs.length > 0) {
+                    currentdir = dirs.shift();
+                    _this.readdir(currentdir, function (err, files) {
+                        files.forEach(function (element) {
+                            var childpath = currentdir + element;
+                            result.push(childpath);
+                            if (_this.isDir(childpath))
+                                dirs.push(childpath);
+                        });
+                        handle();
+                    });
+                }
+                else {
+                    callback(null, result);
+                }
+            };
+            handle();
+        };
+        /**
+         * 复制文件
+         * @param src    源路径
+         * @param dest    目标路径
+         * @param callback 回调函数
+         */
+        ReadWriteAssets.prototype.copyFile = function (src, dest, callback) {
+            var _this = this;
+            this.readFile(src, function (err, data) {
+                if (err) {
+                    callback && callback(err);
+                    return;
+                }
+                _this.writeFile(dest, data, callback);
+            });
+        };
+        /**
+         * 移动文件
+         * @param src 源路径
+         * @param dest 目标路径
+         * @param callback 回调函数
+         */
+        ReadWriteAssets.prototype.moveFile = function (src, dest, callback) {
+            var _this = this;
+            this.copyFile(src, dest, function (err) {
+                if (err) {
+                    callback && callback(err);
+                    return;
+                }
+                _this.deleteFile(src, callback);
+            });
+        };
+        /**
+         * 重命名文件
+         * @param oldPath 老路径
+         * @param newPath 新路径
+         * @param callback 回调函数
+         */
+        ReadWriteAssets.prototype.renameFile = function (oldPath, newPath, callback) {
+            this.moveFile(oldPath, newPath, callback);
+        };
+        /**
+         * 移动一组文件
+         * @param movelists 移动列表
+         * @param callback 回调函数
+         */
+        ReadWriteAssets.prototype.moveFiles = function (movelists, callback) {
+            var _this = this;
+            this.copyFiles(movelists.concat(), function (err) {
+                if (err) {
+                    callback(err);
+                    return;
+                }
+                var deletelists = movelists.reduce(function (value, current) { value.push(current[0]); return value; }, []);
+                _this.deleteFiles(deletelists, callback);
+            });
+        };
+        /**
+         * 复制一组文件
+         * @param copylists 复制列表
+         * @param callback 回调函数
+         */
+        ReadWriteAssets.prototype.copyFiles = function (copylists, callback) {
+            var _this = this;
+            if (copylists.length > 0) {
+                var copyitem = copylists.shift();
+                this.copyFile(copyitem[0], copyitem[1], function (err) {
+                    if (err) {
+                        callback(err);
+                        return;
+                    }
+                    _this.copyFiles(copylists, callback);
+                });
+                return;
+            }
+            callback(null);
+        };
+        /**
+         * 删除一组文件
+         * @param deletelists 删除列表
+         * @param callback 回调函数
+         */
+        ReadWriteAssets.prototype.deleteFiles = function (deletelists, callback) {
+            var _this = this;
+            if (deletelists.length > 0) {
+                this.deleteFile(deletelists.shift(), function (err) {
+                    if (err) {
+                        callback(err);
+                        return;
+                    }
+                    _this.deleteFiles(deletelists, callback);
+                });
+                return;
+            }
+            callback(null);
+        };
+        /**
+         * 重命名文件(夹)
+         * @param oldPath 老路径
+         * @param newPath 新路径
+         * @param callback 回调函数
+         */
+        ReadWriteAssets.prototype.rename = function (oldPath, newPath, callback) {
+            var _this = this;
+            if (this.isDir(oldPath)) {
+                this.getAllfilepathInFolder(oldPath, function (err, filepaths) {
+                    if (err) {
+                        callback(err);
+                        return;
+                    }
+                    var renamelists = [[oldPath, newPath]];
+                    filepaths.forEach(function (element) {
+                        renamelists.push([element, element.replace(oldPath, newPath)]);
+                    });
+                    _this.moveFiles(renamelists, callback);
+                });
+            }
+            else {
+                this.renameFile(oldPath, newPath, callback);
+            }
+        };
+        /**
+         * 移动文件(夹)
+         * @param src 源路径
+         * @param dest 目标路径
+         * @param callback 回调函数
+         */
+        ReadWriteAssets.prototype.move = function (src, dest, callback) {
+            this.rename(src, dest, callback);
+        };
+        /**
+         * 删除文件(夹)
+         * @param path 路径
+         * @param callback 回调函数
+         */
+        ReadWriteAssets.prototype.delete = function (path, callback) {
+            var _this = this;
+            if (this.isDir(path)) {
+                this.getAllfilepathInFolder(path, function (err, filepaths) {
+                    if (err) {
+                        callback && callback(err);
+                        return;
+                    }
+                    var removelists = filepaths.concat(path);
+                    _this.deleteFiles(removelists, callback);
+                });
+            }
+            else {
+                this.deleteFile(path, callback);
+            }
+        };
+        /**
+         * 是否为文件夹
+         * @param path 文件路径
+         */
+        ReadWriteAssets.prototype.isDir = function (path) {
+            if (path == "")
+                return true;
+            return path.charAt(path.length - 1) == "/";
+        };
+        return ReadWriteAssets;
+    }(ReadAssets));
+    feng3d.ReadWriteAssets = ReadWriteAssets;
 })(feng3d || (feng3d = {}));
 var feng3d;
 (function (feng3d) {
@@ -21373,6 +21542,9 @@ var feng3d;
                 this.skeletonComponent.joints = skeletonjoints;
                 for (var i = 0; i < this.geosets.length; i++) {
                     var geoset = this.geosets[i];
+                    var mesh = this.meshs[i] = feng3d.GameObject.create();
+                    // var meshRenderer = mesh.addComponent(MeshRenderer);
+                    var meshRenderer = mesh.addComponent(feng3d.SkinnedMeshRenderer);
                     var geometry = new feng3d.CustomGeometry();
                     geometry.positions = geoset.Vertices;
                     geometry.uvs = geoset.TVertices;
@@ -21387,20 +21559,15 @@ var feng3d;
                     geometry.setVAData("a_jointweight0", skins.jointWeights0, 4);
                     var material = this.materials[geoset.MaterialID];
                     var fBitmap = this.getFBitmap(material);
-                    var material1 = feng3d.materialFactory.create("standard");
                     var image = fBitmap.image;
                     if (image && image.length > 0) {
                         image = image.substring(0, image.indexOf("."));
                         image += ".JPG";
                         image = this.root + image;
-                        material1.uniforms.s_diffuse.url = image;
-                        material1.renderParams.cullFace = feng3d.CullFace.FRONT;
+                        meshRenderer.material.uniforms.s_diffuse.url = image;
+                        meshRenderer.material.renderParams.cullFace = feng3d.CullFace.FRONT;
                     }
-                    var mesh = this.meshs[i] = feng3d.GameObject.create();
-                    // var meshRenderer = mesh.addComponent(MeshRenderer);
-                    var meshRenderer = mesh.addComponent(feng3d.SkinnedMeshRenderer);
                     meshRenderer.geometry = geometry;
-                    meshRenderer.material = material1;
                     meshRenderer.skinSkeleton = skinSkeleton;
                     container.addChild(mesh);
                 }
@@ -22908,6 +23075,7 @@ var feng3d;
     }
     function createMD5Mesh(md5MeshData, completed) {
         var gameObject = feng3d.GameObject.create();
+        gameObject.addComponent(feng3d.Animation);
         gameObject.transform.rx = -90;
         //顶点最大关节关联数
         var _maxJointCount = calculateMaxJointCount(md5MeshData);
@@ -22921,7 +23089,6 @@ var feng3d;
             var skeletonGameObject = feng3d.GameObject.create();
             var skinnedMeshRenderer = skeletonGameObject.addComponent(feng3d.SkinnedMeshRenderer);
             skinnedMeshRenderer.geometry = geometry;
-            skinnedMeshRenderer.material = feng3d.materialFactory.create("standard");
             skinnedMeshRenderer.skinSkeleton = skinSkeleton;
             gameObject.addChild(skeletonGameObject);
         }
@@ -23185,106 +23352,6 @@ var feng3d;
 })(feng3d || (feng3d = {}));
 var feng3d;
 (function (feng3d) {
-    /**
-     * 坐标系，三叉戟
-     * @author feng 2017-02-06
-     */
-    var Trident = /** @class */ (function (_super) {
-        __extends(Trident, _super);
-        function Trident() {
-            var _this = _super !== null && _super.apply(this, arguments) || this;
-            _this.lineLength = 1;
-            _this.arrowradius = 0.05;
-            _this.arrowHeight = 0.18;
-            return _this;
-        }
-        Trident.prototype.init = function (gameObject) {
-            _super.prototype.init.call(this, gameObject);
-            var tridentObject = this.tridentObject = feng3d.GameObject.create("trident");
-            tridentObject.mouseEnabled = false;
-            tridentObject.transform.showInInspector = false;
-            gameObject.addChild(tridentObject);
-            this.buildTrident();
-        };
-        Trident.prototype.buildTrident = function () {
-            var xLine = feng3d.GameObject.create("xLine");
-            xLine.serializable = false;
-            xLine.showinHierarchy = false;
-            var segmentGeometry = new feng3d.SegmentGeometry();
-            segmentGeometry.addSegment(new feng3d.Segment(new feng3d.Vector3(), new feng3d.Vector3(this.lineLength, 0, 0), new feng3d.Color4(1, 0, 0), new feng3d.Color4(1, 0, 0)));
-            var meshRenderer = xLine.addComponent(feng3d.MeshRenderer);
-            meshRenderer.geometry = segmentGeometry;
-            meshRenderer.material = feng3d.materialFactory.create("segment", { renderParams: { renderMode: feng3d.RenderMode.LINES } });
-            this.tridentObject.addChild(xLine);
-            //
-            var yLine = feng3d.GameObject.create("yLine");
-            yLine.serializable = false;
-            yLine.showinHierarchy = false;
-            var segmentGeometry = new feng3d.SegmentGeometry();
-            segmentGeometry.addSegment(new feng3d.Segment(new feng3d.Vector3(), new feng3d.Vector3(0, this.lineLength, 0), new feng3d.Color4(0, 1, 0), new feng3d.Color4(0, 1, 0)));
-            meshRenderer = yLine.addComponent(feng3d.MeshRenderer);
-            meshRenderer.material = feng3d.materialFactory.create("segment", { renderParams: { renderMode: feng3d.RenderMode.LINES } });
-            meshRenderer.geometry = segmentGeometry;
-            this.tridentObject.addChild(yLine);
-            //
-            var zLine = feng3d.GameObject.create("zLine");
-            zLine.serializable = false;
-            zLine.showinHierarchy = false;
-            var segmentGeometry = new feng3d.SegmentGeometry();
-            segmentGeometry.addSegment(new feng3d.Segment(new feng3d.Vector3(), new feng3d.Vector3(0, 0, this.lineLength), new feng3d.Color4(0, 0, 1), new feng3d.Color4(0, 0, 1)));
-            meshRenderer = zLine.addComponent(feng3d.MeshRenderer);
-            meshRenderer.material = feng3d.materialFactory.create("segment", { renderParams: { renderMode: feng3d.RenderMode.LINES } });
-            meshRenderer.geometry = segmentGeometry;
-            this.tridentObject.addChild(zLine);
-            //
-            var xArrow = feng3d.GameObject.create("xArrow");
-            xArrow.serializable = false;
-            xArrow.showinHierarchy = false;
-            xArrow.transform.x = this.lineLength;
-            xArrow.transform.rz = -90;
-            var meshRenderer = xArrow.addComponent(feng3d.MeshRenderer);
-            var material = meshRenderer.material = feng3d.materialFactory.create("color");
-            meshRenderer.geometry = new feng3d.ConeGeometry({ bottomRadius: this.arrowradius, height: this.arrowHeight });
-            ;
-            material.uniforms.u_diffuseInput = new feng3d.Color4(1, 0, 0);
-            this.tridentObject.addChild(xArrow);
-            //
-            var yArrow = feng3d.GameObject.create("yArrow");
-            yArrow.serializable = false;
-            yArrow.showinHierarchy = false;
-            yArrow.transform.y = this.lineLength;
-            meshRenderer = yArrow.addComponent(feng3d.MeshRenderer);
-            var material = meshRenderer.material = feng3d.materialFactory.create("color");
-            meshRenderer.geometry = new feng3d.ConeGeometry({ bottomRadius: this.arrowradius, height: this.arrowHeight });
-            material.uniforms.u_diffuseInput = new feng3d.Color4(0, 1, 0);
-            this.tridentObject.addChild(yArrow);
-            //
-            var zArrow = feng3d.GameObject.create("zArrow");
-            zArrow.serializable = false;
-            zArrow.showinHierarchy = false;
-            zArrow.transform.z = this.lineLength;
-            zArrow.transform.rx = 90;
-            meshRenderer = zArrow.addComponent(feng3d.MeshRenderer);
-            meshRenderer.geometry = new feng3d.ConeGeometry({ bottomRadius: this.arrowradius, height: this.arrowHeight });
-            var material = meshRenderer.material = feng3d.materialFactory.create("color");
-            material.uniforms.u_diffuseInput = new feng3d.Color4(0, 0, 1);
-            this.tridentObject.addChild(zArrow);
-        };
-        __decorate([
-            feng3d.oav()
-        ], Trident.prototype, "lineLength", void 0);
-        __decorate([
-            feng3d.oav()
-        ], Trident.prototype, "arrowradius", void 0);
-        __decorate([
-            feng3d.oav()
-        ], Trident.prototype, "arrowHeight", void 0);
-        return Trident;
-    }(feng3d.Component));
-    feng3d.Trident = Trident;
-})(feng3d || (feng3d = {}));
-var feng3d;
-(function (feng3d) {
     var GameObjectFactory = /** @class */ (function () {
         function GameObjectFactory() {
         }
@@ -23404,23 +23471,20 @@ var feng3d;
         GameObjectFactory.prototype.createParticle = function (name) {
             if (name === void 0) { name = "Particle"; }
             var _particleMesh = feng3d.GameObject.create("particle");
-            var meshRenderer = _particleMesh.addComponent(feng3d.MeshRenderer);
-            meshRenderer.geometry = new feng3d.PointGeometry();
-            var material = meshRenderer.material = feng3d.materialFactory.create("standard");
-            material.renderParams.renderMode = feng3d.RenderMode.POINTS;
-            var particleAnimator = _particleMesh.addComponent(feng3d.ParticleAnimator);
-            particleAnimator.numParticles = 1000;
-            //通过函数来创建粒子初始状态
-            particleAnimator.generateFunctions.push({
-                generate: function (particle) {
-                    particle.birthTime = Math.random() * 5 - 5;
-                    particle.lifetime = 5;
-                    var degree2 = Math.random() * Math.PI * 2;
-                    var r = Math.random() * 1;
-                    particle.velocity = new feng3d.Vector3(r * Math.cos(degree2), r * 2, r * Math.sin(degree2));
-                }, priority: 0
-            });
-            particleAnimator.cycle = 10;
+            var particleSystem = _particleMesh.addComponent(feng3d.ParticleSystem);
+            // particleSystem.numParticles = 1000;
+            // //通过函数来创建粒子初始状态
+            // particleSystem.generateFunctions.push({
+            //     generate: (particle) =>
+            //     {
+            //         particle.birthTime = Math.random() * 5 - 5;
+            //         particle.lifetime = 5;
+            //         var degree2 = Math.random() * Math.PI * 2;
+            //         var r = Math.random() * 1;
+            //         particle.velocity = new Vector3(r * Math.cos(degree2), r * 2, r * Math.sin(degree2));
+            //     }, priority: 0
+            // });
+            // particleSystem.cycle = 10;
             return _particleMesh;
         };
         return GameObjectFactory;

@@ -1,4 +1,5 @@
 /// <reference path="libs/feng3d.d.ts" />
+/// <reference path="out/editor.d.ts" />
 /// <reference path="libs/monaco-editor/monaco.d.ts" />
 
 // 参考 https://microsoft.github.io/monaco-editor/api/index.html
@@ -6,6 +7,8 @@
 var monacoEditor;
 (function ()
 {
+    window.feng3d = window.opener.feng3d;
+
     var compileButton = document.getElementById("compile");
     var watchCB = document.getElementById("watch");
     var logLabel = document.getElementById("log");
@@ -44,7 +47,7 @@ var monacoEditor;
 
     if (fstype == "indexedDB")
     {
-        var DBname = decodeURI(GetQueryString("DBname"));
+        var DBname = "feng3d-editor";
         var project = decodeURI(GetQueryString("project"));
         var path = decodeURI(GetQueryString("path"));
         var extension = decodeURI(GetQueryString("extension"));

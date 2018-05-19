@@ -21,7 +21,7 @@
 		</e:Group>
 		<e:Group id="contentGroup" includeIn="show" y="10" left="0" width="100%" x="10">
 			<e:layout>
-				<e:VerticalLayout horizontalAlign="left" verticalAlign="middle"  gap="0"/>
+				<e:VerticalLayout horizontalAlign="left" verticalAlign="middle"  gap="0" paddingLeft="5"/>
 			</e:layout>
 		</e:Group>
 	</e:Group>

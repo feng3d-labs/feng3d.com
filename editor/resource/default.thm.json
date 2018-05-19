@@ -58,6 +58,7 @@
         "resource/custom_skins/OAVComponentListSkin.exml",
         "resource/custom_skins/OAVVector3DSkin.exml",
         "resource/custom_skins/OAVGameObjectName.exml",
+        "resource/custom_skins/OAVTexture2D.exml",
         "resource/custom_skins/OAVPick.exml",
         "resource/custom_skins/ColorPicker.exml",
         "resource/custom_skins/TreeDisclosureButtonSkin.exml",
