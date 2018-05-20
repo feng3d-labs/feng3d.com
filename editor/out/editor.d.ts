@@ -218,10 +218,6 @@ declare namespace feng3d.editor {
          * 导入项目
          */
         importProject(file: File, callback: () => void): void;
-        /**
-         * 获取文件绝对路径
-         */
-        getAbsolutePath(path: string, callback: (err: Error | null, absolutePath: string | null) => void): void;
     }
 }
 declare namespace feng3d.editor {

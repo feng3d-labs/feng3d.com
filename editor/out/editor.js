@@ -402,13 +402,6 @@ var feng3d;
 (function (feng3d) {
     var editor;
     (function (editor) {
-        // if (typeof require == "undefined")
-        // {
-        // } else
-        // {
-        //     fs = require(__dirname + "/io/file.js").file;
-        //     // assets.fstype = FSType.native;
-        // }
         var EditorAssets1 = /** @class */ (function (_super) {
             __extends(EditorAssets1, _super);
             function EditorAssets1(readWriteFS) {
@@ -427,6 +420,13 @@ var feng3d;
                 if (readWriteFS instanceof feng3d.IndexedDBfs) {
                     feng3d.storage.hasObjectStore(readWriteFS.DBname, projectname, callback);
                 }
+                else if (readWriteFS["getProjectList"] != null) {
+                    readWriteFS["getProjectList"](function (err, projects) {
+                        if (err)
+                            throw err;
+                        callback(projects.indexOf(projectname) != -1);
+                    });
+                }
                 else {
                     throw "未完成 hasProject 功能！";
                 }
@@ -439,6 +439,9 @@ var feng3d;
                 var readWriteFS = this.fs;
                 if (readWriteFS instanceof feng3d.IndexedDBfs) {
                     feng3d.storage.getObjectStoreNames(readWriteFS.DBname, callback);
+                }
+                else if (readWriteFS["getProjectList"] != null) {
+                    readWriteFS["getProjectList"](callback);
                 }
                 else {
                     throw "未完成 hasProject 功能！";
@@ -459,6 +462,14 @@ var feng3d;
                         }
                         readWriteFS.projectname = projectname;
                         // todo 启动监听 ts代码变化自动编译
+                        callback();
+                    });
+                }
+                else if (readWriteFS.type == feng3d.FSType.native) {
+                    readWriteFS.projectname = projectname;
+                    readWriteFS.mkdir("", function (err) {
+                        if (err)
+                            feng3d.error(err);
                         callback();
                     });
                 }
@@ -493,7 +504,11 @@ var feng3d;
                                     }
                                     else {
                                         file.async("arraybuffer").then(function (data) {
-                                            editor.fs.writeFile(filepath, data, readfiles);
+                                            editor.fs.writeFile(filepath, data, function (err) {
+                                                if (err)
+                                                    console.log(err);
+                                                readfiles();
+                                            });
                                         }, function (reason) {
                                             console.warn(reason);
                                             readfiles();
@@ -572,16 +587,16 @@ var feng3d;
                     }
                 });
             };
-            /**
-             * 获取文件绝对路径
-             */
-            EditorAssets1.prototype.getAbsolutePath = function (path, callback) {
-                callback(null, null);
-            };
             return EditorAssets1;
         }(feng3d.ReadWriteAssets));
         editor.EditorAssets1 = EditorAssets1;
-        feng3d.assets = editor.fs = new EditorAssets1(feng3d.indexedDBfs);
+        if (typeof require == "undefined") {
+            feng3d.assets = editor.fs = new EditorAssets1(feng3d.indexedDBfs);
+        }
+        else {
+            var nativeFS = require(__dirname + "/io/NativeFS.js").nativeFS;
+            feng3d.assets = editor.fs = new EditorAssets1(nativeFS);
+        }
         //
         var isSelectFile = false;
         var fileInput = document.createElement('input');
@@ -4552,6 +4567,10 @@ var feng3d;
                 var _this = this;
                 if (this.cacheData) {
                     callback(this.cacheData);
+                    return;
+                }
+                if (this.isDirectory) {
+                    callback({ isDirectory: true });
                     return;
                 }
                 if (this.extension == AssetExtension.material
@@ -10608,6 +10627,10 @@ var feng3d;
          */
         editor.createComponentConfig = [
             //label:显示在创建列表中的名称 className:3d对象的类全路径，将通过classUtils.getDefinitionByName获取定义
+            {
+                label: "SkyBox",
+                click: function () { editor.needcreateComponentGameObject.addComponent(feng3d.SkyBox); }
+            },
             {
                 label: "Animator",
                 submenu: [
