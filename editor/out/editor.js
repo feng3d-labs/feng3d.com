@@ -7955,6 +7955,7 @@ var editor;
         scene.background.setTo(0.408, 0.38, 0.357);
         scene.ambientColor.setTo(0.4, 0.4, 0.4);
         var camera = feng3d.gameObjectFactory.createCamera("Main Camera");
+        camera.addComponent(feng3d.AudioListener);
         camera.transform.position = new feng3d.Vector3(0, 1, -10);
         scene.gameObject.addChild(camera);
         var directionalLight = feng3d.GameObject.create("DirectionalLight");
