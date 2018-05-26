@@ -1,0 +1,249 @@
+{
+    "__class__": "feng3d.GameObject",
+    "name": "trident",
+    "mouseEnabled": false,
+    "children": [
+        {
+            "__class__": "feng3d.GameObject",
+            "name": "xLine",
+            "components": [
+                {
+                    "__class__": "feng3d.Transform"
+                },
+                null,
+                {
+                    "__class__": "feng3d.MeshRenderer",
+                    "geometry": {
+                        "__class__": "feng3d.SegmentGeometry",
+                        "segments": [
+                            {
+                                "__class__": "Object",
+                                "start": {
+                                    "__class__": "feng3d.Vector3"
+                                },
+                                "end": {
+                                    "__class__": "feng3d.Vector3",
+                                    "x": 1
+                                },
+                                "startColor": {
+                                    "__class__": "feng3d.Color4",
+                                    "g": 0,
+                                    "b": 0
+                                },
+                                "endColor": {
+                                    "__class__": "feng3d.Color4",
+                                    "g": 0,
+                                    "b": 0
+                                }
+                            }
+                        ]
+                    },
+                    "material": {
+                        "__class__": "feng3d.Material",
+                        "shaderName": "segment",
+                        "uniforms": {
+                            "__class__": "feng3d.SegmentUniforms"
+                        },
+                        "renderParams": {
+                            "renderMode": "LINES"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "__class__": "feng3d.GameObject",
+            "name": "yLine",
+            "components": [
+                {
+                    "__class__": "feng3d.Transform"
+                },
+                null,
+                {
+                    "__class__": "feng3d.MeshRenderer",
+                    "geometry": {
+                        "__class__": "feng3d.SegmentGeometry",
+                        "segments": [
+                            {
+                                "__class__": "Object",
+                                "start": {
+                                    "__class__": "feng3d.Vector3"
+                                },
+                                "end": {
+                                    "__class__": "feng3d.Vector3",
+                                    "y": 1
+                                },
+                                "startColor": {
+                                    "__class__": "feng3d.Color4",
+                                    "r": 0,
+                                    "b": 0
+                                },
+                                "endColor": {
+                                    "__class__": "feng3d.Color4",
+                                    "r": 0,
+                                    "b": 0
+                                }
+                            }
+                        ]
+                    },
+                    "material": {
+                        "__class__": "feng3d.Material",
+                        "shaderName": "segment",
+                        "uniforms": {
+                            "__class__": "feng3d.SegmentUniforms"
+                        },
+                        "renderParams": {
+                            "renderMode": "LINES"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "__class__": "feng3d.GameObject",
+            "name": "zLine",
+            "components": [
+                {
+                    "__class__": "feng3d.Transform"
+                },
+                null,
+                {
+                    "__class__": "feng3d.MeshRenderer",
+                    "geometry": {
+                        "__class__": "feng3d.SegmentGeometry",
+                        "segments": [
+                            {
+                                "__class__": "Object",
+                                "start": {
+                                    "__class__": "feng3d.Vector3"
+                                },
+                                "end": {
+                                    "__class__": "feng3d.Vector3",
+                                    "z": 1
+                                },
+                                "startColor": {
+                                    "__class__": "feng3d.Color4",
+                                    "r": 0,
+                                    "g": 0
+                                },
+                                "endColor": {
+                                    "__class__": "feng3d.Color4",
+                                    "r": 0,
+                                    "g": 0
+                                }
+                            }
+                        ]
+                    },
+                    "material": {
+                        "__class__": "feng3d.Material",
+                        "shaderName": "segment",
+                        "uniforms": {
+                            "__class__": "feng3d.SegmentUniforms"
+                        },
+                        "renderParams": {
+                            "renderMode": "LINES"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "__class__": "feng3d.GameObject",
+            "name": "xArrow",
+            "components": [
+                {
+                    "__class__": "feng3d.Transform",
+                    "x": 1,
+                    "rz": -90
+                },
+                null,
+                {
+                    "__class__": "feng3d.MeshRenderer",
+                    "geometry": {
+                        "__class__": "feng3d.ConeGeometry",
+                        "bottomRadius": 0.05,
+                        "height": 0.18
+                    },
+                    "material": {
+                        "__class__": "feng3d.Material",
+                        "shaderName": "color",
+                        "uniforms": {
+                            "__class__": "feng3d.ColorUniforms",
+                            "u_diffuseInput": {
+                                "g": 0,
+                                "b": 0
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "__class__": "feng3d.GameObject",
+            "name": "yArrow",
+            "components": [
+                {
+                    "__class__": "feng3d.Transform",
+                    "y": 1
+                },
+                null,
+                {
+                    "__class__": "feng3d.MeshRenderer",
+                    "geometry": {
+                        "__class__": "feng3d.ConeGeometry",
+                        "bottomRadius": 0.05,
+                        "height": 0.18
+                    },
+                    "material": {
+                        "__class__": "feng3d.Material",
+                        "shaderName": "color",
+                        "uniforms": {
+                            "__class__": "feng3d.ColorUniforms",
+                            "u_diffuseInput": {
+                                "r": 0,
+                                "b": 0
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "__class__": "feng3d.GameObject",
+            "name": "zArrow",
+            "components": [
+                {
+                    "__class__": "feng3d.Transform",
+                    "z": 1,
+                    "rx": 90
+                },
+                null,
+                {
+                    "__class__": "feng3d.MeshRenderer",
+                    "geometry": {
+                        "__class__": "feng3d.ConeGeometry",
+                        "bottomRadius": 0.05,
+                        "height": 0.18
+                    },
+                    "material": {
+                        "__class__": "feng3d.Material",
+                        "shaderName": "color",
+                        "uniforms": {
+                            "__class__": "feng3d.ColorUniforms",
+                            "u_diffuseInput": {
+                                "r": 0,
+                                "g": 0
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "components": [
+        {
+            "__class__": "feng3d.Transform"
+        },
+        null
+    ]
+}

@@ -230,8 +230,9 @@ declare namespace feng3d {
         keyCode: number;
         wheelDelta: number;
         private listentypes;
-        private target;
-        constructor(target: EventTarget);
+        target: EventTarget;
+        private _target;
+        constructor(target?: EventTarget);
         /**
          * 监听一次事件后将会被移除
          * @param type						事件的类型。
@@ -272,34 +273,34 @@ declare namespace feng3d {
     /**
      * 全局事件
      */
-    var globalEvent: GlobalEventDispatcher;
-    interface GlobalEventMap {
+    var feng3dDispatcher: Feng3dDispatcher;
+    interface Feng3dEventMap {
         /**
          * shader资源发生变化
          */
-        shaderChanged: any;
+        "assets.shaderChanged": any;
         /**
          * 脚本发生变化
          */
-        scriptChanged: any;
+        "assets.scriptChanged": any;
         /**
          * 图片资源发生变化
          */
-        imageAssetsChanged: {
+        "assets.imageAssetsChanged": {
             url: string;
         };
     }
-    interface GlobalEventDispatcher {
-        once<K extends keyof GlobalEventMap>(type: K, listener: (event: Event<GlobalEventMap[K]>) => void, thisObject?: any, priority?: number): void;
-        dispatch<K extends keyof GlobalEventMap>(type: K, data?: GlobalEventMap[K], bubbles?: boolean): any;
-        has<K extends keyof GlobalEventMap>(type: K): boolean;
-        on<K extends keyof GlobalEventMap>(type: K, listener: (event: Event<GlobalEventMap[K]>) => any, thisObject?: any, priority?: number, once?: boolean): any;
-        off<K extends keyof GlobalEventMap>(type?: K, listener?: (event: Event<GlobalEventMap[K]>) => any, thisObject?: any): any;
+    interface Feng3dDispatcher {
+        once<K extends keyof Feng3dEventMap>(type: K, listener: (event: Event<Feng3dEventMap[K]>) => void, thisObject?: any, priority?: number): void;
+        dispatch<K extends keyof Feng3dEventMap>(type: K, data?: Feng3dEventMap[K], bubbles?: boolean): any;
+        has<K extends keyof Feng3dEventMap>(type: K): boolean;
+        on<K extends keyof Feng3dEventMap>(type: K, listener: (event: Event<Feng3dEventMap[K]>) => any, thisObject?: any, priority?: number, once?: boolean): any;
+        off<K extends keyof Feng3dEventMap>(type?: K, listener?: (event: Event<Feng3dEventMap[K]>) => any, thisObject?: any): any;
     }
     /**
      * 全局事件
      */
-    class GlobalEventDispatcher extends EventDispatcher {
+    class Feng3dDispatcher extends EventDispatcher {
     }
 }
 declare namespace feng3d {
@@ -367,6 +368,9 @@ declare namespace feng3d {
     /**
      * 观察装饰器，观察被装饰属性的变化
      *
+     * @param onChange 属性变化回调  例如参数为“onChange”时，回调将会调用this.onChange(property, oldValue, newValue)
+     * @see https://gitee.com/feng3d/feng3d/issues/IGIK0
+     *
      * 使用@watch后会自动生成一个带"_"的属性，例如 属性"a"会生成"_a"
      *
      * 通过使用 eval 函数 生成出 与自己手动写的set get 一样的函数，性能已经接近 手动写的get set函数。
@@ -424,10 +428,8 @@ getset平均耗时比 17.3
      *
      * 注：不适用eval的情况下，chrome表现最好的，与此次测试结果差不多；在nodejs与firfox上将会出现比使用eval情况下消耗的（40-400）倍，其中详细原因不明，求高人解释！
      *
-     * @param onChange 属性变化回调
-     * @see https://gitee.com/feng3d/feng3d/issues/IGIK0
      */
-    function watch(onChange: string): (target: any, propertyKey: string) => void;
+    function watch(onChange: string): (target: any, property: string) => void;
     var watcher: Watcher;
     class Watcher {
         /**
@@ -1015,6 +1017,7 @@ declare namespace feng3d {
          * 先构造Image对象，src为dataURL，图片onload之后绘制到canvas
          */
         dataURLDrawCanvas(dataurl: string, canvas: HTMLCanvasElement, callback: (img: HTMLImageElement) => void): void;
+        dataURLToArrayBuffer(dataurl: string, callback: (arraybuffer: ArrayBuffer) => void): void;
         arrayBufferToDataURL(arrayBuffer: ArrayBuffer, callback: (dataurl: string) => void): void;
         dataURLToImage(dataurl: string, callback: (img: HTMLImageElement) => void): void;
         arrayBufferToImage(arrayBuffer: ArrayBuffer, callback: (img: HTMLImageElement) => void): void;
@@ -1095,21 +1098,6 @@ declare namespace feng3d {
 interface Performance {
     memory: any;
 }
-interface Element {
-    style: {
-        display;
-        cssText;
-        cursor;
-        position;
-        top;
-        width;
-        height;
-        textAlign;
-        opacity;
-        left;
-        textDecoration;
-    };
-}
 declare namespace feng3d {
     class Stats {
         static instance: Stats;
@@ -1129,6 +1117,505 @@ declare namespace feng3d {
         dom: HTMLCanvasElement;
         update: (value: number, maxValue: number) => void;
         constructor(name: string, fg: string, bg: string);
+    }
+}
+declare namespace feng3d {
+    /**
+     * 路径工具
+     */
+    var pathUtils: PathUtils;
+    /**
+     * 路径工具
+     */
+    class PathUtils {
+        /**
+         * 获取不带后缀名称
+         * @param path 路径
+         */
+        getName(path: string): string;
+        /**
+         * 获取带后缀名称
+         * @param path 路径
+         */
+        getNameWithExtension(path: string): string;
+        /**
+         * 获取后缀
+         * @param path 路径
+         */
+        getExtension(path: string): string;
+        /**
+         * 父路径
+         * @param path 路径
+         */
+        getParentPath(path: string): string;
+        /**
+         * 是否文件夹
+         * @param path 路径
+         */
+        isDirectory(path: string): boolean;
+        /**
+         * 获取目录深度
+         * @param path 路径
+         */
+        getDirDepth(path: string): number;
+    }
+}
+interface IDBObjectStore {
+    getAllKeys(): IDBRequest;
+}
+declare namespace feng3d {
+    /**
+     *
+     */
+    var storage: Storage;
+    /**
+     *
+     */
+    class Storage {
+        /**
+         * 是否支持 indexedDB
+         */
+        support(): boolean;
+        getDatabase(dbname: string, callback: (err, database: IDBDatabase) => void): void;
+        deleteDatabase(dbname: string, callback?: (err) => void): void;
+        hasObjectStore(dbname: string, objectStroreName: string, callback: (has: boolean) => void): void;
+        getObjectStoreNames(dbname: string, callback: (err: Error | null, objectStoreNames: string[]) => void): void;
+        createObjectStore(dbname: string, objectStroreName: string, callback?: (err) => void): void;
+        deleteObjectStore(dbname: string, objectStroreName: string, callback?: (err) => void): void;
+        getAllKeys(dbname: string, objectStroreName: string, callback?: (err: Error, keys: string[]) => void): void;
+        get(dbname: string, objectStroreName: string, key: string | number, callback?: (err: Error, data: ArrayBuffer) => void): void;
+        set(dbname: string, objectStroreName: string, key: string | number, data: ArrayBuffer, callback?: (err: Error) => void): void;
+        delete(dbname: string, objectStroreName: string, key: string | number, callback?: (err?: Error) => void): void;
+        clear(dbname: string, objectStroreName: string, callback?: (err?: Error) => void): void;
+    }
+}
+declare namespace feng3d {
+    /**
+     * 索引数据文件系统
+     */
+    var indexedDBfs: IndexedDBfs;
+    /**
+     * 索引数据文件系统
+     */
+    class IndexedDBfs implements ReadWriteFS {
+        readonly type: FSType;
+        /**
+         * 数据库名称
+         */
+        DBname: string;
+        /**
+         * 项目名称（表单名称）
+         */
+        projectname: string;
+        constructor(DBname?: string, projectname?: string);
+        /**
+         * 读取文件
+         * @param path 路径
+         * @param callback 读取完成回调 当err不为null时表示读取失败
+         */
+        readFile(path: string, callback: (err: Error, data: ArrayBuffer) => void): void;
+        /**
+         * 获取文件绝对路径
+         * @param path （相对）路径
+         * @param callback 回调函数
+         */
+        getAbsolutePath(path: string, callback: (err: Error, absolutePath: string) => void): void;
+        /**
+         * 文件是否存在
+         * @param path 文件路径
+         * @param callback 回调函数
+         */
+        exists(path: string, callback: (exists: boolean) => void): void;
+        /**
+         * 读取文件夹中文件列表
+         * @param path 路径
+         * @param callback 回调函数
+         */
+        readdir(path: string, callback: (err: Error, files: string[]) => void): void;
+        /**
+         * 新建文件夹
+         * @param path 文件夹路径
+         * @param callback 回调函数
+         */
+        mkdir(path: string, callback: (err: Error) => void): void;
+        /**
+         * 删除文件
+         * @param path 文件路径
+         * @param callback 回调函数
+         */
+        deleteFile(path: string, callback: (err: Error) => void): void;
+        /**
+         * 写文件
+         * @param path 文件路径
+         * @param data 文件数据
+         * @param callback 回调函数
+         */
+        writeFile(path: string, data: ArrayBuffer, callback: (err: Error) => void): void;
+        /**
+         * 获取所有文件路径
+         * @param callback 回调函数
+         */
+        getAllPaths(callback: (err: Error, allPaths: string[]) => void): void;
+    }
+}
+declare namespace feng3d {
+    /**
+     * Http可读文件系统
+     */
+    var httpFS: HttpFS;
+    /**
+     * Http可读文件系统
+     */
+    class HttpFS implements ReadFS {
+        /**
+         * 根路径
+         */
+        rootPath: string;
+        readonly type: FSType;
+        constructor();
+        /**
+         * 读取文件
+         * @param path 路径
+         * @param callback 读取完成回调 当err不为null时表示读取失败
+         */
+        readFile(path: string, callback: (err, data: ArrayBuffer) => void): void;
+        /**
+         * 获取文件绝对路径
+         * @param path （相对）路径
+         * @param callback 回调函数
+         */
+        getAbsolutePath(path: string, callback: (err: Error, absolutePath: string) => void): void;
+    }
+}
+declare namespace feng3d {
+    /**
+     * 文件系统类型
+     */
+    enum FSType {
+        http = "http",
+        native = "native",
+        indexedDB = "indexedDB",
+    }
+    /**
+     * 资源系统
+     */
+    var assets: ReadAssets;
+    /**
+     * 资源
+     * 在可读文件系统上进行加工，比如把读取数据转换为图片或者文本
+     */
+    class ReadAssets implements ReadFS {
+        /**
+         * 可读文件系统
+         */
+        fs: ReadFS;
+        readonly type: FSType;
+        /**
+         * 读取文件
+         * @param path 路径
+         * @param callback 读取完成回调 当err不为null时表示读取失败
+         */
+        readFile(path: string, callback: (err, data: ArrayBuffer) => void): void;
+        /**
+         * 获取文件绝对路径
+         * @param path （相对）路径
+         * @param callback 回调函数
+         */
+        getAbsolutePath(path: string, callback: (err: Error, absolutePath: string) => void): void;
+        /**
+         * 读取文件为字符串
+         */
+        readFileAsString(path: string, callback: (err: Error | null, data: string | null) => void): void;
+        /**
+         * 加载图片
+         * @param path 图片路径
+         * @param callback 加载完成回调
+         */
+        readFileAsImage(path: string, callback: (err: Error, img: HTMLImageElement) => void): void;
+    }
+    class ReadWriteAssets extends ReadAssets implements ReadWriteFS {
+        /**
+         * 可读写文件系统
+         */
+        fs: ReadWriteFS;
+        projectname: string;
+        constructor(readWriteFS?: ReadWriteFS);
+        /**
+         * 文件是否存在
+         * @param path 文件路径
+         * @param callback 回调函数
+         */
+        exists(path: string, callback: (exists: boolean) => void): void;
+        /**
+         * 读取文件夹中文件列表
+         * @param path 路径
+         * @param callback 回调函数
+         */
+        readdir(path: string, callback: (err: Error, files: string[]) => void): void;
+        /**
+         * 新建文件夹
+         * @param path 文件夹路径
+         * @param callback 回调函数
+         */
+        mkdir(path: string, callback: (err: Error) => void): void;
+        /**
+         * 删除文件
+         * @param path 文件路径
+         * @param callback 回调函数
+         */
+        deleteFile(path: string, callback: (err: Error) => void): void;
+        /**
+         * 写文件
+         * @param path 文件路径
+         * @param data 文件数据
+         * @param callback 回调函数
+         */
+        writeFile(path: string, data: ArrayBuffer, callback: (err: Error) => void): void;
+        /**
+         * 获取所有文件路径
+         * @param callback 回调函数
+         */
+        getAllPaths(callback: (err: Error, allPaths: string[]) => void): void;
+        /**
+         * 获取指定文件下所有文件路径列表
+         */
+        getAllfilepathInFolder(dirpath: string, callback: (err: Error, filepaths: string[]) => void): void;
+        /**
+         * 复制文件
+         * @param src    源路径
+         * @param dest    目标路径
+         * @param callback 回调函数
+         */
+        copyFile(src: string, dest: string, callback: (err: Error) => void): void;
+        /**
+         * 移动文件
+         * @param src 源路径
+         * @param dest 目标路径
+         * @param callback 回调函数
+         */
+        moveFile(src: string, dest: string, callback: (err: Error) => void): void;
+        /**
+         * 重命名文件
+         * @param oldPath 老路径
+         * @param newPath 新路径
+         * @param callback 回调函数
+         */
+        renameFile(oldPath: string, newPath: string, callback: (err: Error) => void): void;
+        /**
+         * 移动一组文件
+         * @param movelists 移动列表
+         * @param callback 回调函数
+         */
+        moveFiles(movelists: [string, string][], callback: (err: Error) => void): void;
+        /**
+         * 复制一组文件
+         * @param copylists 复制列表
+         * @param callback 回调函数
+         */
+        copyFiles(copylists: [string, string][], callback: (err: Error) => void): void;
+        /**
+         * 删除一组文件
+         * @param deletelists 删除列表
+         * @param callback 回调函数
+         */
+        deleteFiles(deletelists: string[], callback: (err: Error) => void): void;
+        /**
+         * 重命名文件(夹)
+         * @param oldPath 老路径
+         * @param newPath 新路径
+         * @param callback 回调函数
+         */
+        rename(oldPath: string, newPath: string, callback: (err: Error) => void): void;
+        /**
+         * 移动文件(夹)
+         * @param src 源路径
+         * @param dest 目标路径
+         * @param callback 回调函数
+         */
+        move(src: string, dest: string, callback: (err: Error) => void): void;
+        /**
+         * 删除文件(夹)
+         * @param path 路径
+         * @param callback 回调函数
+         */
+        delete(path: string, callback: (err: Error) => void): void;
+        /**
+         * 是否为文件夹
+         * @param path 文件路径
+         */
+        isDir(path: string): boolean;
+    }
+    /**
+     * 可读文件系统
+     */
+    interface ReadFS {
+        /**
+         * 文件系统类型
+         */
+        readonly type: FSType;
+        /**
+         * 读取文件
+         * @param path 路径
+         * @param callback 读取完成回调 当err不为null时表示读取失败
+         */
+        readFile(path: string, callback: (err, data: ArrayBuffer) => void): any;
+        /**
+         * 获取文件绝对路径
+         * @param path （相对）路径
+         * @param callback 回调函数
+         */
+        getAbsolutePath(path: string, callback: (err: Error, absolutePath: string) => void): void;
+    }
+    /**
+     * 可读写文件系统
+     */
+    interface ReadWriteFS extends ReadFS {
+        /**
+         * 项目名称
+         */
+        projectname: string;
+        /**
+         * 文件是否存在
+         * @param path 文件路径
+         * @param callback 回调函数
+         */
+        exists(path: string, callback: (exists: boolean) => void): void;
+        /**
+         * 读取文件夹中文件列表
+         * @param path 路径
+         * @param callback 回调函数
+         */
+        readdir(path: string, callback: (err: Error, files: string[]) => void): void;
+        /**
+         * 新建文件夹
+         * @param path 文件夹路径
+         * @param callback 回调函数
+         */
+        mkdir(path: string, callback: (err: Error) => void): void;
+        /**
+         * 删除文件
+         * @param path 文件路径
+         * @param callback 回调函数
+         */
+        deleteFile(path: string, callback: (err) => void): void;
+        /**
+         * 写(新建)文件
+         * @param path 文件路径
+         * @param data 文件数据
+         * @param callback 回调函数
+         */
+        writeFile(path: string, data: ArrayBuffer, callback: (err: Error) => void): void;
+    }
+}
+declare namespace feng3d {
+    /**
+     * 资源扩展名
+     */
+    enum AssetExtension {
+        /**
+         * 文件夹
+         */
+        folder = "folder",
+        /**
+         * png 图片
+         */
+        png = "png",
+        /**
+         * jpg图片
+         */
+        jpg = "jpg",
+        /**
+         * jpeg图片
+         */
+        jpeg = "jpeg",
+        /**
+         * gif图片
+         */
+        gif = "gif",
+        /**
+         * mp3声音
+         */
+        mp3 = "mp3",
+        /**
+         * ogg声音
+         */
+        ogg = "ogg",
+        /**
+         * wav声音
+         */
+        wav = "wav",
+        /**
+         * ts文件
+         */
+        ts = "ts",
+        /**
+         * js文件
+         */
+        js = "js",
+        /**
+         * 文本文件
+         */
+        txt = "txt",
+        /**
+         * json文件
+         */
+        json = "json",
+        /**
+         * 纹理
+         */
+        texture2d = "texture2d.json",
+        /**
+         * 立方体纹理
+         */
+        texturecube = "texturecube.json",
+        /**
+         * 材质
+         */
+        material = "material.json",
+        /**
+         * 几何体
+         */
+        geometry = "geometry.json",
+        /**
+         * 游戏对象
+         */
+        gameobject = "gameobject.json",
+        /**
+         * 场景文件
+         */
+        scene = "scene.json",
+        /**
+         * 动画文件
+         */
+        anim = "anim.json",
+        /**
+         * 着色器文件
+         */
+        shader = "shader.ts",
+        /**
+         * 脚本文件
+         */
+        script = "script.ts",
+    }
+}
+declare namespace feng3d {
+    /**
+     * feng3d资源
+     */
+    class Feng3dAssets {
+        /**
+         * 路径
+         */
+        path: string;
+        /**
+         * 文件(夹)名称
+         */
+        name: string;
+        /**
+         * 扩展名
+         */
+        extension: AssetExtension;
+        private pathChanged();
     }
 }
 declare namespace feng3d {
@@ -4458,16 +4945,6 @@ declare namespace feng3d {
          * gl.TEXTURE_CUBE_MAP: A cube-mapped texture.
          */
         TEXTURE_CUBE_MAP = "TEXTURE_CUBE_MAP",
-        /**
-         * using a WebGL 2 context
-         * gl.TEXTURE_3D: A three-dimensional texture.
-         */
-        TEXTURE_3D = "TEXTURE_3D",
-        /**
-         * using a WebGL 2 context
-         * gl.TEXTURE_2D_ARRAY: A two-dimensional array texture.
-         */
-        TEXTURE_2D_ARRAY = "TEXTURE_2D_ARRAY",
     }
 }
 declare namespace feng3d {
@@ -6430,7 +6907,7 @@ declare namespace feng3d {
          * 是否使用 viewRect
          */
         useViewRect: boolean;
-        constructor(raw?: Partial<RenderParams>);
+        constructor(raw?: gPartial<RenderParams>);
     }
 }
 declare namespace feng3d {
@@ -6628,40 +7105,6 @@ declare namespace feng3d {
     }
 }
 declare namespace feng3d {
-    interface TextureInfoRaw {
-        /**
-         * 各向异性过滤。使用各向异性过滤能够使纹理的效果更好，但是会消耗更多的内存、CPU、GPU时间。默认为0。
-         */
-        anisotropy?: number;
-        /**
-         * 对图像进行Y轴反转。默认值为false
-         */
-        flipY?: boolean;
-        /**
-         * 格式
-         */
-        format?: TextureFormat;
-        /**
-         * 是否生成mipmap
-         */
-        generateMipmap?: boolean;
-        magFilter?: TextureMagFilter;
-        minFilter?: TextureMinFilter;
-        premulAlpha?: boolean;
-        type?: TextureDataType;
-        /**
-         * 表示x轴的纹理的回环方式，就是当纹理的宽度小于需要贴图的平面的宽度的时候，平面剩下的部分应该p以何种方式贴图的问题。
-         */
-        wrapS?: TextureWrap;
-        /**
-         * 表示y轴的纹理回环方式。 magFilter和minFilter表示过滤的方式，这是OpenGL的基本概念，我将在下面讲一下，目前你不用担心它的使用。当您不设置的时候，它会取默认值，所以，我们这里暂时不理睬他。
-         */
-        wrapT?: TextureWrap;
-        /**
-         * 当贴图数据未加载好等情况时代替使用
-         */
-        noPixels?: ImageData | ImageData[] | HTMLImageElement | HTMLImageElement[];
-    }
     /**
      * 纹理信息
      * @author feng 2016-12-20
@@ -6708,15 +7151,15 @@ declare namespace feng3d {
         /**
          * 需要使用的贴图数据
          */
-        protected _pixels: ImageData | ImageData[] | HTMLImageElement | HTMLImageElement[];
+        protected _pixels: (ImageData | HTMLImageElement) | (ImageData | HTMLImageElement)[];
         /**
          * 当贴图数据未加载好等情况时代替使用
          */
-        noPixels: ImageData | ImageData[] | HTMLImageElement | HTMLImageElement[];
+        noPixels: (ImageData | HTMLImageElement) | (ImageData | HTMLImageElement)[];
         /**
          * 当前使用的贴图数据
          */
-        protected _activePixels: ImageData | ImageData[] | HTMLImageElement | HTMLImageElement[];
+        protected _activePixels: (ImageData | HTMLImageElement) | (ImageData | HTMLImageElement)[];
         /**
          * 纹理缓冲
          */
@@ -6729,7 +7172,7 @@ declare namespace feng3d {
          * 是否为2的幂贴图
          */
         readonly isPowerOfTwo: boolean;
-        constructor(raw?: TextureInfoRaw);
+        constructor(raw?: gPartial<TextureInfo>);
         /**
          * 判断数据是否满足渲染需求
          */
@@ -7037,6 +7480,7 @@ declare namespace feng3d {
          * 每帧执行
          */
         update(interval?: number): void;
+        dispose(): void;
     }
 }
 declare namespace feng3d {
@@ -7213,14 +7657,33 @@ declare namespace feng3d {
     }
 }
 declare namespace feng3d {
-    var skyboxRenderer: {
-        draw: (gl: GL, scene3d: Scene3D, camera: Camera, renderObjectflag: GameObjectFlag) => void;
-    };
+    /**
+     * 天空盒组件
+     */
     class SkyBox extends Component {
-        texture: TextureCube;
+        s_skyboxTexture: TextureCube;
         constructor();
         init(gameObject: GameObject): void;
         preRender(renderAtomic: RenderAtomic): void;
+    }
+}
+declare namespace feng3d {
+    /**
+     * 天空盒渲染器
+     */
+    var skyboxRenderer: SkyboxRenderer;
+    /**
+     * 天空盒渲染器
+     */
+    class SkyboxRenderer {
+        private renderAtomic;
+        private renderParams;
+        private shader;
+        init(): void;
+        /**
+         * 渲染
+         */
+        draw(gl: GL, scene3d: Scene3D, camera: Camera, renderObjectflag: GameObjectFlag): void;
     }
 }
 declare namespace feng3d {
@@ -7244,21 +7707,6 @@ declare namespace feng3d {
     }
 }
 declare namespace feng3d {
-    interface ComponentRawMap {
-        TransformRaw: TransformRaw;
-    }
-    interface TransformRaw {
-        __class__?: "feng3d.Transform";
-        rx?: number;
-        ry?: number;
-        rz?: number;
-        sx?: number;
-        sy?: number;
-        sz?: number;
-        x?: number;
-        y?: number;
-        z?: number;
-    }
     interface TransformEventMap {
         /**
          * 变换矩阵变化
@@ -7414,61 +7862,7 @@ declare namespace feng3d {
 }
 declare namespace feng3d {
     type ComponentConstructor<T> = (new () => T);
-    interface Mouse3DEventMap {
-        /**
-         * 鼠标移出对象
-         */
-        mouseout: any;
-        /**
-         * 鼠标移入对象
-         */
-        mouseover: any;
-        /**
-         * 鼠标在对象上移动
-         */
-        mousemove: any;
-        /**
-         * 鼠标左键按下
-         */
-        mousedown: any;
-        /**
-         * 鼠标左键弹起
-         */
-        mouseup: any;
-        /**
-         * 单击
-         */
-        click: any;
-        /**
-         * 鼠标中键按下
-         */
-        middlemousedown: any;
-        /**
-         * 鼠标中键弹起
-         */
-        middlemouseup: any;
-        /**
-         * 鼠标中键单击
-         */
-        middleclick: any;
-        /**
-         * 鼠标右键按下
-         */
-        rightmousedown: any;
-        /**
-         * 鼠标右键弹起
-         */
-        rightmouseup: any;
-        /**
-         * 鼠标右键单击
-         */
-        rightclick: any;
-        /**
-         * 鼠标双击
-         */
-        dblclick: any;
-    }
-    interface GameObjectEventMap extends Mouse3DEventMap {
+    interface GameObjectEventMap extends MouseEventMap {
         /**
          * 添加子组件事件
          */
@@ -7522,12 +7916,6 @@ declare namespace feng3d {
     enum GameObjectFlag {
         feng3d = 1,
         editor = 2,
-    }
-    interface GameObjectRaw {
-        __class__?: "feng3d.GameObject";
-        name?: string;
-        children?: GameObjectRaw[];
-        components?: ComponentRaw[];
     }
     /**
      * Base class for all entities in feng3d scenes.
@@ -7597,7 +7985,7 @@ declare namespace feng3d {
         /**
          * 构建3D对象
          */
-        constructor(raw: GameObjectRaw);
+        constructor(raw: gPartial<GameObject>);
         find(name: string): GameObject | null;
         contains(child: GameObject): boolean;
         addChild(child: GameObject): GameObject;
@@ -7633,7 +8021,7 @@ declare namespace feng3d {
          * 添加脚本
          * @param script   脚本路径
          */
-        addScript(script: string): string;
+        addScript(script: string): ScriptComponent;
         /**
          * 判断是否拥有组件
          * @param com	被检测的组件
@@ -7711,7 +8099,7 @@ declare namespace feng3d {
          * @param name
          */
         static find(name: string): GameObject;
-        static create(name?: string, raw?: GameObjectRaw): GameObject;
+        static create(name?: string, raw?: gPartial<GameObject>): GameObject;
         /**
          * 组件列表
          */
@@ -7777,8 +8165,6 @@ declare namespace feng3d {
          */
         private updateBounds();
     }
-}
-declare namespace feng3d {
 }
 interface HTMLCanvasElement {
     gl: feng3d.GL;
@@ -7883,8 +8269,8 @@ declare namespace feng3d {
     }
     interface MeshRendererRaw {
         __class__: "feng3d.MeshRenderer";
-        geometry?: GeometryRaw;
-        material?: MaterialRaw;
+        geometry?: Geometrys;
+        material?: ValueOf<MaterialRawMap>;
     }
     class MeshRenderer extends Behaviour {
         readonly single: boolean;
@@ -7905,6 +8291,7 @@ declare namespace feng3d {
          */
         dispose(): void;
         private onBoundsInvalid(event);
+        private materialChanged();
     }
 }
 declare namespace feng3d {
@@ -7914,17 +8301,15 @@ declare namespace feng3d {
      */
     class ScriptComponent extends Behaviour {
         /**
-         * 脚本对象
-         */
-        private scriptInstance;
-        scriptData: Object;
-        /**
          * 脚本路径
          */
         script: string;
-        private _script;
+        /**
+         * 脚本对象
+         */
+        scriptInstance: Script;
         init(gameObject: GameObject): void;
-        private initScript();
+        private scriptChanged();
         /**
          * 每帧执行
          */
@@ -8063,7 +8448,9 @@ declare namespace feng3d {
     }
 }
 declare namespace feng3d {
-    type GeometryRaw = SegmentGeometryRaw | PlaneGeometryRaw | CubeGeometryRaw | SphereGeometryRaw | CapsuleGeometryRaw | CylinderGeometryRaw | ConeGeometryRaw | TorusGeometryRaw;
+    type Geometrys = gPartial<SegmentGeometry> & {
+        __class__: "feng3d.SegmentGeometry";
+    } | gPartial<PlaneGeometry> | gPartial<CubeGeometry> | gPartial<SphereGeometry> | gPartial<CapsuleGeometry> | gPartial<CylinderGeometry> | gPartial<ConeGeometry> | gPartial<TorusGeometry>;
     interface GeometryEventMap {
         /**
          * 包围盒失效
@@ -8561,45 +8948,34 @@ declare namespace feng3d {
 }
 declare namespace feng3d {
     /**
-     * 平面几何体原始数据
-     */
-    interface PlaneGeometryRaw {
-        __class__?: "feng3d.PlaneGeometry";
-        /**
-         * 宽度
-         */
-        width?: number;
-        /**
-         * 高度
-         */
-        height?: number;
-        /**
-         * 横向分割数
-         */
-        segmentsW?: number;
-        /**
-         * 纵向分割数
-         */
-        segmentsH?: number;
-        /**
-         * 是否朝上
-         */
-        yUp?: boolean;
-    }
-    /**
      * 平面几何体
      * @author feng 2016-09-12
      */
-    class PlaneGeometry extends Geometry implements PlaneGeometryRaw {
+    class PlaneGeometry extends Geometry {
+        /**
+         * 宽度
+         */
         width: number;
+        /**
+         * 高度
+         */
         height: number;
+        /**
+         * 横向分割数
+         */
         segmentsW: number;
+        /**
+         * 纵向分割数
+         */
         segmentsH: number;
+        /**
+         * 是否朝上
+         */
         yUp: boolean;
         /**
          * 创建平面几何体
          */
-        constructor(raw?: PlaneGeometryRaw);
+        constructor(raw?: gPartial<PlaneGeometry>);
         /**
          * 构建几何体数据
          */
@@ -8644,55 +9020,42 @@ declare namespace feng3d {
 }
 declare namespace feng3d {
     /**
-     * 立方体几何体原始数据
-     */
-    interface CubeGeometryRaw {
-        __class__?: "feng3d.CubeGeometry";
-        /**
-         * 宽度
-         */
-        width?: number;
-        /**
-         * 高度
-         */
-        height?: number;
-        /**
-         * 深度
-         */
-        depth?: number;
-        /**
-         * 宽度方向分割数
-         */
-        segmentsW?: number;
-        /**
-         * 高度方向分割数
-         */
-        segmentsH?: number;
-        /**
-         * 深度方向分割数
-         */
-        segmentsD?: number;
-        /**
-         * 是否为6块贴图，默认true。
-         */
-        tile6?: boolean;
-    }
-    /**
      * 立方体几何体
      * @author feng 2016-09-12
      */
-    class CubeGeometry extends Geometry implements CubeGeometryRaw {
+    class CubeGeometry extends Geometry {
+        /**
+         * 宽度
+         */
         width: number;
+        /**
+         * 高度
+         */
         height: number;
+        /**
+         * 深度
+         */
         depth: number;
+        /**
+         * 宽度方向分割数
+         */
         segmentsW: number;
+        /**
+         * 高度方向分割数
+         */
         segmentsH: number;
+        /**
+         * 深度方向分割数
+         */
         segmentsD: number;
+        /**
+         * 是否为6块贴图，默认true。
+         */
         tile6: boolean;
         /**
          * 创建立方几何体
          */
-        constructor(raw?: CubeGeometryRaw);
+        constructor(raw?: gPartial<CubeGeometry>);
         protected buildGeometry(): void;
         /**
          * 构建坐标
@@ -8737,40 +9100,30 @@ declare namespace feng3d {
 }
 declare namespace feng3d {
     /**
-     * 球体几何体原始数据
-     */
-    interface SphereGeometryRaw {
-        __class__?: "feng3d.SphereGeometry";
-        /**
-         * 球体半径
-         */
-        radius?: number;
-        /**
-         * 横向分割数
-         */
-        segmentsW?: number;
-        /**
-         * 纵向分割数
-         */
-        segmentsH?: number;
-        /**
-         * 是否朝上
-         */
-        yUp?: boolean;
-    }
-    /**
      * 球体几何体
      * @author DawnKing 2016-09-12
      */
-    class SphereGeometry extends Geometry implements SphereGeometryRaw {
+    class SphereGeometry extends Geometry {
+        /**
+         * 球体半径
+         */
         radius: number;
+        /**
+         * 横向分割数
+         */
         segmentsW: number;
+        /**
+         * 纵向分割数
+         */
         segmentsH: number;
+        /**
+         * 是否朝上
+         */
         yUp: boolean;
         /**
          * 创建球形几何体
          */
-        constructor(raw?: SphereGeometryRaw);
+        constructor(raw?: gPartial<SphereGeometry>);
         /**
          * 构建几何体数据
          * @param this.radius 球体半径
@@ -8796,40 +9149,29 @@ declare namespace feng3d {
 }
 declare namespace feng3d {
     /**
-     * 胶囊体几何体原始数据
-     */
-    interface CapsuleGeometryRaw {
-        __class__?: "feng3d.CapsuleGeometry";
-        /**
-         * 胶囊体半径
-         */
-        radius?: number;
-        /**
-         * 胶囊体高度
-         */
-        height?: number;
-        /**
-         * 横向分割数
-         */
-        segmentsH?: number;
-        /**
-         * 纵向分割数
-         */
-        segmentsW?: number;
-        /**
-         * 正面朝向 true:Y+ false:Z+
-         */
-        yUp?: boolean;
-    }
-    /**
      * 胶囊体几何体
      * @author DawnKing 2016-09-12
      */
-    class CapsuleGeometry extends Geometry implements CapsuleGeometryRaw {
+    class CapsuleGeometry extends Geometry {
+        /**
+         * 胶囊体半径
+         */
         radius: number;
+        /**
+         * 胶囊体高度
+         */
         height: number;
+        /**
+         * 横向分割数
+         */
         segmentsW: number;
+        /**
+         * 纵向分割数
+         */
         segmentsH: number;
+        /**
+         * 正面朝向 true:Y+ false:Z+
+         */
         yUp: boolean;
         /**
          * 创建胶囊几何体
@@ -8839,7 +9181,7 @@ declare namespace feng3d {
          * @param segmentsH 纵向分割数
          * @param yUp 正面朝向 true:Y+ false:Z+
          */
-        constructor(raw?: CapsuleGeometryRaw);
+        constructor(raw?: gPartial<CapsuleGeometry>);
         /**
          * 构建几何体数据
          * @param radius 胶囊体半径
@@ -8866,65 +9208,50 @@ declare namespace feng3d {
 }
 declare namespace feng3d {
     /**
-     * 圆柱体几何体原始数据
-     */
-    interface CylinderGeometryRaw {
-        __class__?: "feng3d.CylinderGeometry";
-        /**
-         * 顶部半径
-         */
-        topRadius?: number;
-        /**
-         * 底部半径
-         */
-        bottomRadius?: number;
-        /**
-         * 高度
-         */
-        height?: number;
-        /**
-         * 横向分割数
-         */
-        segmentsW?: number;
-        /**
-         * 纵向分割数
-         */
-        segmentsH?: number;
-        /**
-         * 顶部是否封口
-         */
-        topClosed?: boolean;
-        /**
-         * 底部是否封口
-         */
-        bottomClosed?: boolean;
-        /**
-         * 侧面是否封口
-         */
-        surfaceClosed?: boolean;
-        /**
-         * 是否朝上
-         */
-        yUp?: boolean;
-    }
-    /**
      * 圆柱体几何体
      * @author DawnKing 2016-09-12
      */
-    class CylinderGeometry extends Geometry implements CylinderGeometryRaw {
+    class CylinderGeometry extends Geometry {
+        /**
+         * 顶部半径
+         */
         topRadius: number;
+        /**
+         * 底部半径
+         */
         bottomRadius: number;
+        /**
+         * 高度
+         */
         height: number;
+        /**
+         * 横向分割数
+         */
         segmentsW: number;
+        /**
+         * 纵向分割数
+         */
         segmentsH: number;
+        /**
+         * 顶部是否封口
+         */
         topClosed: boolean;
+        /**
+         * 底部是否封口
+         */
         bottomClosed: boolean;
+        /**
+         * 侧面是否封口
+         */
         surfaceClosed: boolean;
+        /**
+         * 是否朝上
+         */
         yUp: boolean;
         /**
          * 创建圆柱体
          */
-        constructor(raw?: CylinderGeometryRaw);
+        constructor(raw?: gPartial<CylinderGeometry>);
         /**
          * 构建几何体数据
          */
@@ -8946,89 +9273,57 @@ declare namespace feng3d {
 }
 declare namespace feng3d {
     /**
-     * 圆锥体原始数据
-     */
-    interface ConeGeometryRaw {
-        __class__?: "feng3d.ConeGeometry";
-        /**
-         * 底部半径
-         */
-        bottomRadius?: number;
-        /**
-         * 高度
-         */
-        height?: number;
-        /**
-         * 横向分割数
-         */
-        segmentsW?: number;
-        /**
-         * 纵向分割数
-         */
-        segmentsH?: number;
-        /**
-         * 底部是否封口
-         */
-        bottomClosed?: boolean;
-        /**
-         * 是否朝上
-         */
-        yUp?: boolean;
-    }
-    /**
      * 圆锥体
      * @author feng 2017-02-07
      */
-    class ConeGeometry extends CylinderGeometry implements ConeGeometryRaw {
+    class ConeGeometry extends CylinderGeometry {
+        /**
+         * 底部半径 private
+         */
         topRadius: number;
+        /**
+         * 顶部是否封口 private
+         */
         topClosed: boolean;
+        /**
+         * 侧面是否封口 private
+         */
         surfaceClosed: boolean;
         /**
          * 创建圆锥体
          */
-        constructor(raw?: ConeGeometryRaw);
+        constructor(raw?: gPartial<ConeGeometry>);
     }
 }
 declare namespace feng3d {
     /**
-     * 圆环几何体原始数据
+     * 圆环几何体
      */
-    interface TorusGeometryRaw {
-        __class__?: "feng3d.TorusGeometry";
+    class TorusGeometry extends Geometry {
         /**
          * 半径
          */
-        radius?: number;
+        radius: number;
         /**
          * 管道半径
          */
-        tubeRadius?: number;
+        tubeRadius: number;
         /**
          * 半径方向分割数
          */
-        segmentsR?: number;
+        segmentsR: number;
         /**
          * 管道方向分割数
          */
-        segmentsT?: number;
+        segmentsT: number;
         /**
          * 是否朝上
          */
-        yUp?: boolean;
-    }
-    /**
-     * 圆环几何体
-     */
-    class TorusGeometry extends Geometry implements TorusGeometryRaw {
-        radius: number;
-        tubeRadius: number;
-        segmentsR: number;
-        segmentsT: number;
         yUp: boolean;
         /**
          * 创建<code>Torus</code>实例
          */
-        constructor(raw?: TorusGeometryRaw);
+        constructor(raw?: gPartial<TorusGeometry>);
         protected _vertexPositionData: number[];
         protected _vertexNormalData: number[];
         protected _vertexTangentData: number[];
@@ -9062,13 +9357,6 @@ declare namespace feng3d {
     }
 }
 declare namespace feng3d {
-    interface Texture2DRaw extends TextureInfoRaw {
-        __class__?: "feng3d.Texture2D";
-        /**
-         * 纹理路径
-         */
-        url?: string;
-    }
     var imageDatas: {
         black: ImageData;
         white: ImageData;
@@ -9082,13 +9370,15 @@ declare namespace feng3d {
      * @author feng 2016-12-20
      */
     class Texture2D extends TextureInfo {
-        protected _pixels: HTMLImageElement;
+        protected _pixels: ImageData | HTMLImageElement;
+        noPixels: ImageData;
         url: string;
+        protected _textureType: TextureType;
         /**
          * 纹理尺寸
          */
         readonly size: Vector2;
-        constructor(raw?: Texture2DRaw);
+        constructor(raw?: gPartial<Texture2D>);
         /**
          * 判断数据是否满足渲染需求
          */
@@ -9098,33 +9388,26 @@ declare namespace feng3d {
     }
 }
 declare namespace feng3d {
-    interface TextureCubeRaw extends TextureInfoRaw {
-        __class__: "feng3d.TextureCube";
-        negative_x_url?: string;
-        negative_y_url?: string;
-        negative_z_url?: string;
-        positive_x_url?: string;
-        positive_y_url?: string;
-        positive_z_url?: string;
-    }
     /**
      * 立方体纹理
      * @author feng 2016-12-28
      */
     class TextureCube extends TextureInfo {
-        protected _pixels: HTMLImageElement[];
         positive_x_url: string;
         positive_y_url: string;
         positive_z_url: string;
         negative_x_url: string;
         negative_y_url: string;
         negative_z_url: string;
-        constructor(images?: string[]);
+        protected _pixels: (HTMLImageElement | ImageData)[];
+        noPixels: ImageData[];
+        protected _textureType: TextureType;
+        constructor(raw?: gPartial<TextureCube>);
         /**
          * 判断数据是否满足渲染需求
          */
         checkRenderData(): boolean;
-        private urlChanged();
+        private urlChanged(property, oldValue, newValue);
     }
 }
 declare namespace feng3d {
@@ -9141,18 +9424,6 @@ declare namespace feng3d {
 declare namespace feng3d {
 }
 declare namespace feng3d {
-    interface MaterialRawMap {
-    }
-    type MaterialRaw = ValueOf<MaterialRawMap>;
-    /**
-     * 基础材质原始数据
-     */
-    interface MaterialBaseRaw {
-        __class__?: "feng3d.Material";
-        shaderName?: string;
-        uniforms?: Object;
-        renderParams?: Partial<RenderParams>;
-    }
     /**
      * 材质工厂
      */
@@ -9163,7 +9434,7 @@ declare namespace feng3d {
      * 材质
      * @author feng 2016-05-02
      */
-    class Material {
+    class Material extends Feng3dAssets {
         /**
          * shader名称
          */
@@ -9180,7 +9451,7 @@ declare namespace feng3d {
          * 渲染程序
          */
         shader: Shader;
-        constructor(raw?: MaterialRaw);
+        constructor(raw?: gPartial<Material>);
         preRender(renderAtomic: RenderAtomic): void;
         private onShaderChanged();
     }
@@ -9194,28 +9465,10 @@ declare namespace feng3d {
         uniforms: PointUniforms;
     };
     interface MaterialFactory {
-        create(shader: "point", raw?: PointMaterialRaw): PointMaterial;
+        create(shader: "point", raw?: gPartial<PointMaterial>): PointMaterial;
     }
     interface MaterialRawMap {
-        point: PointMaterialRaw;
-    }
-    interface PointMaterialRaw extends MaterialBaseRaw {
-        shaderName?: "point";
-        uniforms?: PointUniformsRaw;
-    }
-    interface PointUniformsRaw {
-        /**
-         * 类全名
-         */
-        __class__?: "feng3d.SegmentUniforms";
-        /**
-         * 颜色
-         */
-        u_color?: Color4 | Color4Raw;
-        /**
-         * 点绘制时点的尺寸
-         */
-        u_PointSize?: number;
+        point: gPartial<PointMaterial>;
     }
     class PointUniforms {
         /**
@@ -9237,18 +9490,10 @@ declare namespace feng3d {
         uniforms: ColorUniforms;
     };
     interface MaterialFactory {
-        create(shader: "color", raw?: ColorMaterialRaw): ColorMaterial;
+        create(shader: "color", raw?: gPartial<ColorMaterial>): ColorMaterial;
     }
     interface MaterialRawMap {
-        color: ColorMaterialRaw;
-    }
-    interface ColorMaterialRaw extends MaterialBaseRaw {
-        shaderName?: "color";
-        uniforms?: ColorUniformsRaw;
-    }
-    interface ColorUniformsRaw {
-        __class__?: "feng3d.ColorUniforms";
-        u_diffuseInput?: Color4 | Color4Raw;
+        color: gPartial<ColorMaterial>;
     }
     class ColorUniforms {
         /**
@@ -9267,24 +9512,10 @@ declare namespace feng3d {
         uniforms: SegmentUniforms;
     };
     interface MaterialFactory {
-        create(shader: "segment", raw?: SegmentMaterialRaw): SegmentMaterial;
+        create(shader: "segment", raw?: gPartial<SegmentMaterial>): SegmentMaterial;
     }
     interface MaterialRawMap {
-        segment: SegmentMaterialRaw;
-    }
-    interface SegmentMaterialRaw extends MaterialBaseRaw {
-        shaderName?: "segment";
-        uniforms?: SegmentUniformsRaw;
-    }
-    interface SegmentUniformsRaw {
-        /**
-         * 类全名
-         */
-        __class__?: "feng3d.SegmentUniforms";
-        /**
-         * 颜色
-         */
-        u_segmentColor?: Color4 | Color4Raw;
+        segment: gPartial<SegmentMaterial>;
     }
     class SegmentUniforms {
         /**
@@ -9302,19 +9533,10 @@ declare namespace feng3d {
         uniforms: TextureUniforms;
     };
     interface MaterialFactory {
-        create(shader: "texture", raw?: TextureMaterialRaw): TextureMaterial;
+        create(shader: "texture", raw?: gPartial<TextureMaterial>): TextureMaterial;
     }
     interface MaterialRawMap {
-        texture: TextureMaterialRaw;
-    }
-    interface TextureMaterialRaw extends MaterialBaseRaw {
-        shaderName?: "texture";
-        uniforms?: TextureUniformsRaw;
-    }
-    interface TextureUniformsRaw {
-        __class__?: "feng3d.TextureUniforms";
-        u_color?: Color4 | Color4Raw;
-        s_texture?: Texture2D | Texture2DRaw;
+        texture: gPartial<TextureMaterial>;
     }
     class TextureUniforms {
         /**
@@ -9327,31 +9549,18 @@ declare namespace feng3d {
         s_texture: Texture2D;
     }
 }
+interface Object {
+    __class__: string;
+}
 declare namespace feng3d {
     type StandardMaterial = Material & {
         uniforms: StandardUniforms;
     };
     interface MaterialFactory {
-        create(shader: "standard", raw?: StandardMaterialRaw): StandardMaterial;
+        create(shader: "standard", raw?: gPartial<StandardMaterial>): StandardMaterial;
     }
     interface MaterialRawMap {
-        standard: StandardMaterialRaw;
-    }
-    interface StandardMaterialRaw extends MaterialBaseRaw {
-        shaderName?: "standard";
-        uniforms?: StandardUniformsRaw;
-    }
-    interface StandardUniformsRaw {
-        __class__?: "feng3d.StandardUniforms";
-        s_ambient?: Texture2DRaw;
-        s_diffuse?: Texture2DRaw;
-        s_envMap?: TextureCubeRaw;
-        s_normal?: Texture2DRaw;
-        s_specular?: Texture2DRaw;
-        u_ambient?: Color3Raw;
-        u_diffuse?: Color3Raw;
-        u_reflectivity?: number;
-        u_specular?: Color3Raw;
+        standard: gPartial<StandardMaterial>;
     }
     /**
      * 雾模式
@@ -9514,16 +9723,6 @@ declare namespace feng3d {
     }
 }
 declare namespace feng3d {
-    interface ComponentRawMap {
-        PointLight: PointLightRaw;
-    }
-    interface PointLightRaw extends LightRaw {
-        __class__?: "feng3d.PointLight";
-        /**
-         * 光照范围
-         */
-        range?: number;
-    }
     /**
      * 点光源
      * @author feng 2016-12-13
@@ -9718,6 +9917,176 @@ declare namespace feng3d {
     }
 }
 declare namespace feng3d {
+    var audioCtx: AudioContext;
+    var globalGain: GainNode;
+    /**
+     * 声音监听器
+     */
+    class AudioListener extends Behaviour {
+        gain: GainNode;
+        enabled: boolean;
+        /**
+         * 音量
+         */
+        volume: number;
+        private _volume;
+        constructor();
+        init(gameObject: GameObject): void;
+        private onScenetransformChanged();
+        private enabledChanged();
+        dispose(): void;
+    }
+}
+interface AudioListener {
+    positionX: {
+        value: number;
+    };
+    positionY: {
+        value: number;
+    };
+    positionZ: {
+        value: number;
+    };
+    forwardX: {
+        value: number;
+    };
+    forwardY: {
+        value: number;
+    };
+    forwardZ: {
+        value: number;
+    };
+    upX: {
+        value: number;
+    };
+    upY: {
+        value: number;
+    };
+    upZ: {
+        value: number;
+    };
+}
+declare namespace feng3d {
+    /**
+     * 音量与距离算法
+     * @see https://developer.mozilla.org/en-US/docs/Web/API/PannerNode/distanceModel
+     */
+    enum DistanceModelType {
+        /**
+         * 1 - rolloffFactor * (distance - refDistance) / (maxDistance - refDistance)
+         */
+        linear = "linear",
+        /**
+         * refDistance / (refDistance + rolloffFactor * (distance - refDistance))
+         */
+        inverse = "inverse",
+        /**
+         * pow(distance / refDistance, -rolloffFactor)
+         */
+        exponential = "exponential",
+    }
+    /**
+     * 声源
+     * @see https://developer.mozilla.org/en-US/docs/Web/API/AudioContext
+     */
+    class AudioSource extends Behaviour {
+        private panner;
+        private source;
+        private buffer;
+        private gain;
+        enabled: boolean;
+        /**
+         * 声音文件路径
+         */
+        url: string;
+        /**
+         * 是否循环播放
+         */
+        loop: boolean;
+        private _loop;
+        /**
+         * 音量
+         */
+        volume: number;
+        private _volume;
+        /**
+         * 是否启用位置影响声音
+         */
+        enablePosition: boolean;
+        private _enablePosition;
+        coneInnerAngle: number;
+        private _coneInnerAngle;
+        coneOuterAngle: number;
+        private _coneOuterAngle;
+        coneOuterGain: number;
+        private _coneOuterGain;
+        /**
+         * 该接口的distanceModel属性PannerNode是一个枚举值，用于确定在音频源离开收听者时用于减少音频源音量的算法。
+         *
+         * 可能的值是：
+         * * linear：根据以下公式计算由距离引起的增益的线性距离模型：
+         *      1 - rolloffFactor * (distance - refDistance) / (maxDistance - refDistance)
+         * * inverse：根据以下公式计算由距离引起的增益的反距离模型：
+         *      refDistance / (refDistance + rolloffFactor * (distance - refDistance))
+         * * exponential：按照下式计算由距离引起的增益的指数距离模型
+         *      pow(distance / refDistance, -rolloffFactor)。
+         *
+         * inverse是的默认值distanceModel。
+         */
+        distanceModel: DistanceModelType;
+        private _distanceModel;
+        /**
+         * 表示音频源和收听者之间的最大距离，之后音量不会再降低。该值仅由linear距离模型使用。默认值是10000。
+         */
+        maxDistance: number;
+        private _maxDistance;
+        panningModel: "equalpower";
+        private _panningModel;
+        /**
+         * 表示随着音频源远离收听者而减小音量的参考距离。此值由所有距离模型使用。默认值是1。
+         */
+        refDistance: number;
+        private _refDistance;
+        /**
+         * 描述了音源离开收听者音量降低的速度。此值由所有距离模型使用。默认值是1。
+         */
+        rolloffFactor: number;
+        private _rolloffFactor;
+        constructor();
+        init(gameObject: GameObject): void;
+        private onScenetransformChanged();
+        private onUrlChanged();
+        play(): void;
+        stop(): void;
+        private connect();
+        private disconnect();
+        private getAudioNodes();
+        private enabledChanged();
+        dispose(): void;
+    }
+}
+interface PannerNode {
+    positionX: {
+        value: number;
+    };
+    positionY: {
+        value: number;
+    };
+    positionZ: {
+        value: number;
+    };
+    orientationX: {
+        value: number;
+    };
+    orientationY: {
+        value: number;
+    };
+    orientationZ: {
+        value: number;
+    };
+}
+declare function createPanner(): PannerNode;
+declare namespace feng3d {
     /**
      * 地形几何体原始数据
      */
@@ -9803,31 +10172,7 @@ declare namespace feng3d {
         uniforms: TerrainUniforms;
     };
     interface MaterialFactory {
-        create(shader: "terrain", raw?: TerrainMaterialRaw): TerrainMaterial;
-    }
-    interface MaterialRawMap {
-        terrain: TerrainMaterialRaw;
-    }
-    interface TerrainMaterialRaw extends MaterialBaseRaw {
-        shaderName?: "terrain";
-        uniforms?: TerrainUniformsRaw;
-    }
-    interface TerrainUniformsRaw {
-        __class__?: "feng3d.TerrainUniforms";
-        s_ambient?: Texture2DRaw;
-        s_diffuse?: Texture2DRaw;
-        s_envMap?: TextureCubeRaw;
-        s_normal?: Texture2DRaw;
-        s_specular?: Texture2DRaw;
-        u_ambient?: Color3Raw;
-        u_diffuse?: Color3Raw;
-        u_reflectivity?: number;
-        u_specular?: Color3Raw;
-        s_splatTexture1: Texture2D | Texture2DRaw;
-        s_splatTexture2: Texture2D | Texture2DRaw;
-        s_splatTexture3: Texture2D | Texture2DRaw;
-        s_blendTexture: Texture2D | Texture2DRaw;
-        u_splatRepeats: Vector4;
+        create(shader: "terrain", raw?: gPartial<TerrainMaterial>): TerrainMaterial;
     }
     class TerrainUniforms extends StandardUniforms {
         s_splatTexture1: Texture2D;
@@ -10155,26 +10500,10 @@ declare namespace feng3d {
         uniforms: ParticleUniforms;
     };
     interface MaterialFactory {
-        create(shader: "particle", raw?: ParticleMaterialRaw): ParticleMaterial;
+        create(shader: "particle", raw?: gPartial<ParticleMaterial>): ParticleMaterial;
     }
     interface MaterialRawMap {
-        particle: ParticleMaterialRaw;
-    }
-    interface ParticleMaterialRaw extends MaterialBaseRaw {
-        shaderName?: "particle";
-        uniforms?: ParticleUniformsRaw;
-    }
-    interface ParticleUniformsRaw {
-        __class__?: "feng3d.ParticleUniforms";
-        s_ambient?: Texture2DRaw;
-        s_diffuse?: Texture2DRaw;
-        s_envMap?: TextureCubeRaw;
-        s_normal?: Texture2DRaw;
-        s_specular?: Texture2DRaw;
-        u_ambient?: Color3Raw;
-        u_diffuse?: Color3Raw;
-        u_reflectivity?: number;
-        u_specular?: Color3Raw;
+        particle: gPartial<ParticleMaterial>;
     }
     class ParticleUniforms extends StandardUniforms {
     }
@@ -10271,26 +10600,10 @@ declare namespace feng3d {
         uniforms: SkeletonUniforms;
     };
     interface MaterialFactory {
-        create(shader: "skeleton", raw?: SkeletonMaterialRaw): SkeletonMaterial;
+        create(shader: "skeleton", raw?: gPartial<SkeletonMaterial>): SkeletonMaterial;
     }
     interface MaterialRawMap {
-        skeleton: SkeletonMaterialRaw;
-    }
-    interface SkeletonMaterialRaw extends MaterialBaseRaw {
-        shaderName?: "skeleton";
-        uniforms?: SkeletonUniformsRaw;
-    }
-    interface SkeletonUniformsRaw {
-        __class__?: "feng3d.SkeletonUniforms";
-        s_ambient?: Texture2DRaw;
-        s_diffuse?: Texture2DRaw;
-        s_envMap?: TextureCubeRaw;
-        s_normal?: Texture2DRaw;
-        s_specular?: Texture2DRaw;
-        u_ambient?: Color3Raw;
-        u_diffuse?: Color3Raw;
-        u_reflectivity?: number;
-        u_specular?: Color3Raw;
+        skeleton: gPartial<SkeletonMaterial>;
     }
     class SkeletonUniforms extends StandardUniforms {
     }
@@ -10344,375 +10657,6 @@ declare namespace feng3d {
     enum PropertyClipPathItemType {
         GameObject = 0,
         Component = 1,
-    }
-}
-interface IDBObjectStore {
-    getAllKeys(): IDBRequest;
-}
-declare namespace feng3d {
-    /**
-     *
-     */
-    var storage: Storage;
-    /**
-     *
-     */
-    class Storage {
-        /**
-         * 是否支持 indexedDB
-         */
-        support(): boolean;
-        getDatabase(dbname: string, callback: (err, database: IDBDatabase) => void): void;
-        deleteDatabase(dbname: string, callback?: (err) => void): void;
-        hasObjectStore(dbname: string, objectStroreName: string, callback: (has: boolean) => void): void;
-        getObjectStoreNames(dbname: string, callback: (err: Error | null, objectStoreNames: string[]) => void): void;
-        createObjectStore(dbname: string, objectStroreName: string, callback?: (err) => void): void;
-        deleteObjectStore(dbname: string, objectStroreName: string, callback?: (err) => void): void;
-        getAllKeys(dbname: string, objectStroreName: string, callback?: (err: Error, keys: string[]) => void): void;
-        get(dbname: string, objectStroreName: string, key: string | number, callback?: (err: Error | null, data: any) => void): void;
-        set(dbname: string, objectStroreName: string, key: string | number, data: any, callback?: (err: Error | null) => void): void;
-        delete(dbname: string, objectStroreName: string, key: string | number, callback?: (err?: Error) => void): void;
-        clear(dbname: string, objectStroreName: string, callback?: (err?: Error) => void): void;
-    }
-}
-declare namespace feng3d {
-    /**
-     * 索引数据文件系统
-     */
-    var indexedDBfs: IndexedDBfs;
-    /**
-     * 索引数据文件系统
-     */
-    class IndexedDBfs implements ReadWriteFS {
-        readonly type: FSType;
-        /**
-         * 数据库名称
-         */
-        DBname: string;
-        /**
-         * 项目名称（表单名称）
-         */
-        projectname: string;
-        constructor(DBname?: string, projectname?: string);
-        /**
-         * 读取文件
-         * @param path 路径
-         * @param callback 读取完成回调 当err不为null时表示读取失败
-         */
-        readFile(path: string, callback: (err: Error, data: ArrayBuffer) => void): void;
-        /**
-         * 获取文件绝对路径
-         * @param path （相对）路径
-         * @param callback 回调函数
-         */
-        getAbsolutePath(path: string, callback: (err: Error, absolutePath: string) => void): void;
-        /**
-         * 获取文件信息
-         * @param path 文件路径
-         * @param callback 回调函数
-         */
-        stat(path: string, callback: (err: Error, stats: FileInfo) => void): void;
-        /**
-         * 读取文件夹中文件列表
-         * @param path 路径
-         * @param callback 回调函数
-         */
-        readdir(path: string, callback: (err: Error, files: string[]) => void): void;
-        /**
-         * 新建文件夹
-         * @param path 文件夹路径
-         * @param callback 回调函数
-         */
-        mkdir(path: string, callback: (err: Error) => void): void;
-        /**
-         * 删除文件
-         * @param path 文件路径
-         * @param callback 回调函数
-         */
-        deleteFile(path: string, callback: (err: Error) => void): void;
-        /**
-         * 写文件
-         * @param path 文件路径
-         * @param data 文件数据
-         * @param callback 回调函数
-         */
-        writeFile(path: string, data: ArrayBuffer, callback: (err: Error) => void): void;
-        /**
-         * 获取所有文件路径
-         * @param callback 回调函数
-         */
-        getAllPaths(callback: (err: Error, allPaths: string[]) => void): void;
-    }
-    type FileInfo = {
-        /**
-         * 路径
-         */
-        path: string;
-        /**
-         * 创建时间
-         */
-        birthtime: number;
-        /**
-         * 修改时间
-         */
-        mtime: number;
-        /**
-         * 是否为文件夹
-         */
-        isDirectory: boolean;
-        /**
-         * 大小
-         */
-        size: number;
-    };
-}
-declare namespace feng3d {
-    /**
-     * Http可读文件系统
-     */
-    var httpFS: HttpFS;
-    /**
-     * Http可读文件系统
-     */
-    class HttpFS implements ReadFS {
-        /**
-         * 根路径
-         */
-        rootPath: string;
-        readonly type: FSType;
-        constructor();
-        /**
-         * 读取文件
-         * @param path 路径
-         * @param callback 读取完成回调 当err不为null时表示读取失败
-         */
-        readFile(path: string, callback: (err, data: ArrayBuffer) => void): void;
-        /**
-         * 获取文件绝对路径
-         * @param path （相对）路径
-         * @param callback 回调函数
-         */
-        getAbsolutePath(path: string, callback: (err: Error, absolutePath: string) => void): void;
-    }
-}
-declare namespace feng3d {
-    /**
-     * 文件系统类型
-     */
-    enum FSType {
-        http = "http",
-        native = "native",
-        indexedDB = "indexedDB",
-    }
-    /**
-     * 资源系统
-     */
-    var assets: ReadAssets;
-    /**
-     * 资源
-     * 在可读文件系统上进行加工，比如把读取数据转换为图片或者文本
-     */
-    class ReadAssets implements ReadFS {
-        /**
-         * 可读文件系统
-         */
-        fs: ReadFS;
-        readonly type: FSType;
-        /**
-         * 读取文件
-         * @param path 路径
-         * @param callback 读取完成回调 当err不为null时表示读取失败
-         */
-        readFile(path: string, callback: (err, data: ArrayBuffer) => void): void;
-        /**
-         * 获取文件绝对路径
-         * @param path （相对）路径
-         * @param callback 回调函数
-         */
-        getAbsolutePath(path: string, callback: (err: Error, absolutePath: string) => void): void;
-        /**
-         * 读取文件为字符串
-         */
-        readFileAsString(path: string, callback: (err: Error | null, data: string | null) => void): void;
-        /**
-         * 加载图片
-         * @param path 图片路径
-         * @param callback 加载完成回调
-         */
-        readFileAsImage(path: string, callback: (err: Error, img: HTMLImageElement) => void): void;
-    }
-    class ReadWriteAssets extends ReadAssets implements ReadWriteFS {
-        /**
-         * 可读写文件系统
-         */
-        fs: ReadWriteFS;
-        projectname: string;
-        constructor(readWriteFS?: ReadWriteFS);
-        /**
-         * 获取文件信息
-         * @param path 文件路径
-         * @param callback 回调函数
-         */
-        stat(path: string, callback: (err: Error, stats: FileInfo) => void): void;
-        /**
-         * 读取文件夹中文件列表
-         * @param path 路径
-         * @param callback 回调函数
-         */
-        readdir(path: string, callback: (err: Error, files: string[]) => void): void;
-        /**
-         * 新建文件夹
-         * @param path 文件夹路径
-         * @param callback 回调函数
-         */
-        mkdir(path: string, callback: (err: Error) => void): void;
-        /**
-         * 删除文件
-         * @param path 文件路径
-         * @param callback 回调函数
-         */
-        deleteFile(path: string, callback: (err: Error) => void): void;
-        /**
-         * 写文件
-         * @param path 文件路径
-         * @param data 文件数据
-         * @param callback 回调函数
-         */
-        writeFile(path: string, data: ArrayBuffer, callback: (err: Error) => void): void;
-        /**
-         * 获取所有文件路径
-         * @param callback 回调函数
-         */
-        getAllPaths(callback: (err: Error, allPaths: string[]) => void): void;
-        /**
-         * 获取指定文件下所有文件路径列表
-         */
-        getAllfilepathInFolder(dirpath: string, callback: (err: Error, filepaths: string[]) => void): void;
-        /**
-         * 复制文件
-         * @param src    源路径
-         * @param dest    目标路径
-         * @param callback 回调函数
-         */
-        copyFile(src: string, dest: string, callback: (err: Error) => void): void;
-        /**
-         * 移动文件
-         * @param src 源路径
-         * @param dest 目标路径
-         * @param callback 回调函数
-         */
-        moveFile(src: string, dest: string, callback: (err: Error) => void): void;
-        /**
-         * 重命名文件
-         * @param oldPath 老路径
-         * @param newPath 新路径
-         * @param callback 回调函数
-         */
-        renameFile(oldPath: string, newPath: string, callback: (err: Error) => void): void;
-        /**
-         * 移动一组文件
-         * @param movelists 移动列表
-         * @param callback 回调函数
-         */
-        moveFiles(movelists: [string, string][], callback: (err: Error) => void): void;
-        /**
-         * 复制一组文件
-         * @param copylists 复制列表
-         * @param callback 回调函数
-         */
-        copyFiles(copylists: [string, string][], callback: (err: Error) => void): void;
-        /**
-         * 删除一组文件
-         * @param deletelists 删除列表
-         * @param callback 回调函数
-         */
-        deleteFiles(deletelists: string[], callback: (err: Error) => void): void;
-        /**
-         * 重命名文件(夹)
-         * @param oldPath 老路径
-         * @param newPath 新路径
-         * @param callback 回调函数
-         */
-        rename(oldPath: string, newPath: string, callback: (err: Error) => void): void;
-        /**
-         * 移动文件(夹)
-         * @param src 源路径
-         * @param dest 目标路径
-         * @param callback 回调函数
-         */
-        move(src: string, dest: string, callback: (err: Error) => void): void;
-        /**
-         * 删除文件(夹)
-         * @param path 路径
-         * @param callback 回调函数
-         */
-        delete(path: string, callback: (err: Error) => void): void;
-        /**
-         * 是否为文件夹
-         * @param path 文件路径
-         */
-        isDir(path: string): boolean;
-    }
-    /**
-     * 可读文件系统
-     */
-    interface ReadFS {
-        /**
-         * 文件系统类型
-         */
-        readonly type: FSType;
-        /**
-         * 读取文件
-         * @param path 路径
-         * @param callback 读取完成回调 当err不为null时表示读取失败
-         */
-        readFile(path: string, callback: (err, data: ArrayBuffer) => void): any;
-        /**
-         * 获取文件绝对路径
-         * @param path （相对）路径
-         * @param callback 回调函数
-         */
-        getAbsolutePath(path: string, callback: (err: Error, absolutePath: string) => void): void;
-    }
-    /**
-     * 可读写文件系统
-     */
-    interface ReadWriteFS extends ReadFS {
-        /**
-         * 项目名称
-         */
-        projectname: string;
-        /**
-         * 获取文件信息
-         * @param path 文件路径
-         * @param callback 回调函数
-         */
-        stat(path: string, callback: (err: Error, stats: FileInfo) => void): void;
-        /**
-         * 读取文件夹中文件列表
-         * @param path 路径
-         * @param callback 回调函数
-         */
-        readdir(path: string, callback: (err: Error, files: string[]) => void): void;
-        /**
-         * 新建文件夹
-         * @param path 文件夹路径
-         * @param callback 回调函数
-         */
-        mkdir(path: string, callback: (err: Error) => void): void;
-        /**
-         * 删除文件
-         * @param path 文件路径
-         * @param callback 回调函数
-         */
-        deleteFile(path: string, callback: (err) => void): void;
-        /**
-         * 写(新建)文件
-         * @param path 文件路径
-         * @param data 文件数据
-         * @param callback 回调函数
-         */
-        writeFile(path: string, data: ArrayBuffer, callback: (err: Error) => void): void;
     }
 }
 declare namespace feng3d {
@@ -11280,21 +11224,177 @@ declare namespace feng3d {
     }
 }
 declare namespace feng3d {
+    interface MouseInput {
+        once<K extends keyof MouseEventMap>(type: K, listener: (event: Event<MouseEventMap[K]>) => void, thisObject?: any, priority?: number): void;
+        has<K extends keyof MouseEventMap>(type: K): boolean;
+        on<K extends keyof MouseEventMap>(type: K, listener: (event: Event<MouseEventMap[K]>) => any, thisObject?: any, priority?: number, once?: boolean): any;
+        off<K extends keyof MouseEventMap>(type?: K, listener?: (event: Event<MouseEventMap[K]>) => any, thisObject?: any): any;
+    }
+    /**
+     * 鼠标事件输入
+     */
+    class MouseInput extends EventDispatcher {
+        /**
+         * 是否启动
+         */
+        enable: boolean;
+        /**
+         * 是否捕获鼠标移动
+         */
+        catchMouseMove: boolean;
+        /**
+         * 派发事件
+         * @param event   事件对象
+         */
+        dispatchEvent(event: Event<any>): void;
+    }
+    /**
+     * Window鼠标事件输入
+     */
+    class WindowMouseInput extends MouseInput {
+        constructor();
+        /**
+         * 监听鼠标事件收集事件类型
+         */
+        private onMouseEvent(event);
+    }
     /**
      * 鼠标事件管理
      * @author feng 2014-4-29
      */
     class Mouse3DManager {
-        draw: (scene3d: Scene3D, camera: Camera, viewRect: Rectangle) => void;
-        catchMouseMove: (value: any) => void;
-        getSelectedGameObject: () => GameObject;
-        setEnable: (value: boolean) => void;
-        getEnable: () => boolean;
-        constructor(canvas: HTMLCanvasElement);
+        mouseInput: MouseInput;
+        readonly selectedGameObject: GameObject;
+        private _selectedGameObject;
+        private mouseEventTypes;
+        /**
+         * 鼠标按下时的对象，用于与鼠标弹起时对象做对比，如果相同触发click
+         */
+        private preMouseDownGameObject;
+        /**
+         * 统计处理click次数，判断是否达到dblclick
+         */
+        private gameObjectClickNum;
+        /**
+         * 视窗，鼠标在该矩形内时为有效事件
+         */
+        viewport: Lazy<Rectangle>;
+        constructor(mouseInput: MouseInput, viewport?: Lazy<Rectangle>);
+        private mouseInputChanged(property, oldValue, newValue);
+        /**
+         * 渲染
+         */
+        draw(scene3d: Scene3D, camera: Camera): void;
+        dispatch(type: any): void;
+        /**
+         * 监听鼠标事件收集事件类型
+         */
+        private onMouseEvent(event);
+        private pick(scene3d, camera);
+        /**
+         * 设置选中对象
+         */
+        private setSelectedGameObject(value);
+    }
+    interface MouseEventMap {
+        /**
+         * 鼠标移出对象
+         */
+        mouseout: {
+            clientX: number;
+            clientY: number;
+        };
+        /**
+         * 鼠标移入对象
+         */
+        mouseover: {
+            clientX: number;
+            clientY: number;
+        };
+        /**
+         * 鼠标在对象上移动
+         */
+        mousemove: {
+            clientX: number;
+            clientY: number;
+        };
+        /**
+         * 鼠标左键按下
+         */
+        mousedown: {
+            clientX: number;
+            clientY: number;
+        };
+        /**
+         * 鼠标左键弹起
+         */
+        mouseup: {
+            clientX: number;
+            clientY: number;
+        };
+        /**
+         * 单击
+         */
+        click: {
+            clientX: number;
+            clientY: number;
+        };
+        /**
+         * 鼠标中键按下
+         */
+        middlemousedown: {
+            clientX: number;
+            clientY: number;
+        };
+        /**
+         * 鼠标中键弹起
+         */
+        middlemouseup: {
+            clientX: number;
+            clientY: number;
+        };
+        /**
+         * 鼠标中键单击
+         */
+        middleclick: {
+            clientX: number;
+            clientY: number;
+        };
+        /**
+         * 鼠标右键按下
+         */
+        rightmousedown: {
+            clientX: number;
+            clientY: number;
+        };
+        /**
+         * 鼠标右键弹起
+         */
+        rightmouseup: {
+            clientX: number;
+            clientY: number;
+        };
+        /**
+         * 鼠标右键单击
+         */
+        rightclick: {
+            clientX: number;
+            clientY: number;
+        };
+        /**
+         * 鼠标双击
+         */
+        dblclick: {
+            clientX: number;
+            clientY: number;
+        };
     }
 }
 declare namespace feng3d {
 }
+declare type gPartial<T> = {
+    [P in keyof T]?: gPartial<T[P]>;
+};
 declare namespace feng3d {
     /**
      * 运行环境枚举

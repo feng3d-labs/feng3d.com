@@ -19,7 +19,18 @@
     <div id="container" style="border: 1px solid grey; position: absolute; box-sizing: border-box; top: 50px; left: 25px; right: 25px; bottom: 25px;">
     </div>
 
+    <script src="libs/feng3d.js"></script>
+    <script>
+        // Monaco uses a custom amd loader that overrides node's require.
+        // Keep a reference to node's require so we can restore it after executing the amd loader file.
+        var nodeRequire = window.require;
+    </script>
     <script src="libs/monaco-editor/min/vs/loader.js"></script>
+    <script>
+        // Save Monaco's amd require and restore Node's require
+        var amdRequire = window.require;
+        window.require = nodeRequire;
+    </script>
     <script src="codeeditor.js"></script>
 </body>
 

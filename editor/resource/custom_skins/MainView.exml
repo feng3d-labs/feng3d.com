@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <e:Skin class="MainViewSkin" width="900" height="500" xmlns:e="http://ns.egret.com/eui"
-        xmlns:w="http://ns.egret.com/wing" xmlns:editor="feng3d.editor.*">
+        xmlns:w="http://ns.egret.com/wing" xmlns:editor="editor.*">
 	<w:Config id="15a73de4177"></w:Config>
 	<e:Group id="mainGroup" x="0" y="0" width="100%" height="100%">
 		<editor:TopView id="topGroup" x="671" y="-29" scaleX="1" scaleY="1" skinName="TopView"  width="100%"/>

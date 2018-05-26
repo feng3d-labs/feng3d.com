@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<e:Skin class="OAVVector3DSkin" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing" xmlns:editor="feng3d.editor.*" >
+<e:Skin class="OAVVector3DSkin" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing" xmlns:editor="editor.*" >
 	<w:Config id="15a6ae1c5b4" ></w:Config>
 	<e:Group y="0" width="100%">
 		<e:Label id="label" text="{_attributeName}" size="12" width="80" x="0" y="0" verticalAlign="middle" textColor="0x000000" multiline="false"/>

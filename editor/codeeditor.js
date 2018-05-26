@@ -4,10 +4,32 @@
 
 // 参考 https://microsoft.github.io/monaco-editor/api/index.html
 
+// 解决monaco-editor在electron下运行问题
+// https://github.com/Microsoft/monaco-editor-samples/blob/master/electron-amd/electron-index.html
+
+var ts;
 var monacoEditor;
 (function ()
 {
-    window.feng3d = window.opener.feng3d;
+    var DBname = "feng3d-editor";
+    var fstype = GetQueryString("fstype");
+    var project = decodeURI(GetQueryString("project"));
+    var path = decodeURI(GetQueryString("path"));
+
+    // var assetsfs:feng3d.ReadWriteAssets;
+    var assetsfs;
+    if (fstype == "indexedDB")
+    {
+        window.feng3d = window.opener.feng3d;
+        feng3d.indexedDBfs.DBname = DBname;
+        feng3d.indexedDBfs.projectname = project;
+        assetsfs = feng3d.assets.fs = new feng3d.ReadWriteAssets(feng3d.indexedDBfs);
+    } else if (fstype == "native")
+    {
+        var nativeFS = require(__dirname + "/io/NativeFS.js").nativeFS;
+        nativeFS.projectname = project;
+        assetsfs = feng3d.assets = new feng3d.ReadWriteAssets(nativeFS);
+    }
 
     var compileButton = document.getElementById("compile");
     var watchCB = document.getElementById("watch");
@@ -38,115 +60,131 @@ var monacoEditor;
         }, 1000);
     }
 
-    var fstype = GetQueryString("fstype");
-    var code;
-    var codedata;
     // ts 列表
     var tslist = [];
     var tslibs = [];
 
-    if (fstype == "indexedDB")
+    var extension = path.split(".").pop();
+
+    document.head.getElementsByTagName("title")[0].innerText = path;
+
+    // 加载所有ts文件
+    function loadallts(callback)
     {
-        var DBname = "feng3d-editor";
-        var project = decodeURI(GetQueryString("project"));
-        var path = decodeURI(GetQueryString("path"));
-        var extension = decodeURI(GetQueryString("extension"));
-        if (!extension)
-            extension = path.split(".").pop();
-
-        document.head.getElementsByTagName("title")[0].innerText = path;
-
-        // 加载所有ts文件
-        function loadallts(callback)
+        assetsfs.getAllPaths((err, keys) =>
         {
-            feng3d.storage.getAllKeys(DBname, project, (err, keys) =>
+            var tspaths = keys.filter((v) =>
             {
-                var tspaths = keys.filter((v) =>
-                {
-                    var ext = v.split(".").pop();
-                    return ext == "ts" || ext == "shader";
-                });
-                loadts();
-
-                function loadts()
-                {
-                    logLabel.textContent = "加载脚本中。。。。";
-                    if (tspaths.length > 0)
-                    {
-                        var path = tspaths.pop();
-                        feng3d.storage.get(DBname, project, path, (err, data) =>
-                        {
-                            feng3d.dataTransform.arrayBufferToString(data.data, function (str)
-                            {
-                                tslist.push({ path: path, code: str });
-                                loadts();
-                            });
-                        });
-                    } else
-                    {
-                        logLabel.textContent = "加载脚本完成！";
-                        callback();
-                    }
-                }
+                var ext = v.split(".").pop();
+                return ext == "ts" || ext == "shader";
             });
-        }
+            loadts();
 
-        loadallts(init);
-
-        var modelMap = { ts: "typescript", shader: "typescript", js: "javascript", json: "json", text: "text" };
-
-        function init()
-        {
-            // 获取文件内容
-            feng3d.storage.get(DBname, project, path, function (err, data)
+            function loadts()
             {
-                codedata = data;
-                feng3d.assert(data.data.constructor == ArrayBuffer, "读取的数据不是 ArrayBuffer");
-                feng3d.dataTransform.arrayBufferToString(data.data, function (str)
+                logLabel.textContent = "加载脚本中。。。。";
+                if (tspaths.length > 0)
                 {
-                    var code = str;
-                    initEditor(extension, function ()
+                    var path = tspaths.pop();
+                    assetsfs.readFileAsString(path, (err, str) =>
                     {
-                        var oldModel = monacoEditor.getModel();
-                        var newModel = monaco.editor.createModel(code, modelMap[extension] || modelMap.text);
-                        monacoEditor.setModel(newModel);
-                        if (oldModel) oldModel.dispose();
-
-                        // monacoEditor.setValue(code);
-                        if (extension == "ts" || extension == "shader")
-                        {
-                            logLabel.textContent = "初次编译中。。。。";
-                            triggerCompile();
-                        }
-                        monacoEditor.onDidChangeModelContent(function ()
-                        {
-                            logLabel.textContent = "";
-                            code = monacoEditor.getValue();
-                            feng3d.dataTransform.stringToArrayBuffer(code, (arrayBuffer) =>
-                            {
-                                codedata.data = arrayBuffer;
-                                feng3d.storage.set(DBname, project, path, codedata);
-                                logLabel.textContent = "自动保存完成！";
-                                if (extension == "ts" || extension == "shader")
-                                {
-                                    tslist.filter((v) => v.path == path)[0].code = code;
-                                    if (watch.checked)
-                                    {
-                                        autoCompile();
-                                    }
-                                }
-                            })
-                        });
+                        if (err)
+                            console.warn(err);
+                        else
+                            tslist.push({ path: path, code: str });
+                        loadts();
                     });
+                } else
+                {
+                    logLabel.textContent = "加载脚本完成！";
+                    callback();
+                }
+            }
+        });
+    }
+
+    loadallts(init);
+
+    var modelMap = { ts: "typescript", shader: "typescript", js: "javascript", json: "json", text: "text" };
+
+    function init()
+    {
+        // 获取文件内容
+        assetsfs.readFileAsString(path, (err, code) =>
+        {
+            initEditor(extension, function ()
+            {
+                var oldModel = monacoEditor.getModel();
+                var newModel = monaco.editor.createModel(code, modelMap[extension] || modelMap.text);
+                monacoEditor.setModel(newModel);
+                if (oldModel) oldModel.dispose();
+
+                // monacoEditor.setValue(code);
+                if (extension == "ts" || extension == "shader")
+                {
+                    logLabel.textContent = "初次编译中。。。。";
+                    triggerCompile();
+                }
+                monacoEditor.onDidChangeModelContent(function ()
+                {
+                    logLabel.textContent = "";
+                    code = monacoEditor.getValue();
+                    feng3d.dataTransform.stringToArrayBuffer(code, (arrayBuffer) =>
+                    {
+                        assetsfs.writeFile(path, arrayBuffer, (err) =>
+                        {
+                            if (err)
+                                console.warn(err);
+                            logLabel.textContent = "自动保存完成！";
+                            if (extension == "ts" || extension == "shader")
+                            {
+                                tslist.filter((v) => v.path == path)[0].code = code;
+                                if (watch.checked)
+                                {
+                                    autoCompile();
+                                }
+                            }
+                        });
+                    })
                 });
             });
-        }
+        });
     }
 
     function initEditor(extension, callback)
     {
-        require.config({ paths: { 'vs': 'libs/monaco-editor/min/vs' } });
-        require(['vs/editor/editor.main', 'vs/language/typescript/lib/typescriptServices'], function ()
+        if (fstype == feng3d.FSType.native)
+        {
+            var nodepath = require('path');
+            function uriFromPath(_path)
+            {
+                var pathName = nodepath.resolve(_path).replace(/\\/g, '/');
+                if (pathName.length > 0 && pathName.charAt(0) !== '/')
+                {
+                    pathName = '/' + pathName;
+                }
+                return encodeURI('file://' + pathName);
+            }
+
+            amdRequire.config({
+                baseUrl: uriFromPath(nodepath.join(__dirname, 'libs/monaco-editor/min'))
+            });
+            // workaround monaco-css not understanding the environment
+            self.module = undefined;
+            // workaround monaco-typescript not understanding the environment
+            self.process.browser = true;
+            amdRequire(['vs/editor/editor.main', 'vs/language/typescript/lib/typescriptServices'], () =>
+            {
+                ts = amdRequire("vs/language/typescript/lib/typescriptServices");
+                init();
+            });
+        } else
+        {
+            amdRequire.config({ paths: { 'vs': 'libs/monaco-editor/min/vs' } });
+            amdRequire(['vs/editor/editor.main', 'vs/language/typescript/lib/typescriptServices'], init);
+        }
+
+        function init()
         {
             // 设置ts编译选项
             monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
@@ -180,7 +218,7 @@ var monacoEditor;
                 });
                 callback();
             });
-        });
+        }
     }
 
     function loadLibs(libpaths, callback)
@@ -220,17 +258,18 @@ var monacoEditor;
             outputStr += `\n//# sourceURL=project.js`;
             feng3d.dataTransform.stringToArrayBuffer(outputStr, (arrayBuffer) =>
             {
-                codedata.data = arrayBuffer;
-                feng3d.storage.set(DBname, project, "project.js", codedata);
                 logLabel.textContent = "编译完成！";
-                if (window.opener)
+                assetsfs.writeFile("project.js", arrayBuffer, (err) =>
                 {
-                    window.opener.feng3d.editor.editorAssets.runProjectScript(() =>
+                    if (feng3d.editor)
                     {
-                        window.opener.feng3d.globalEvent.dispatch("shaderChanged");
-                        window.opener.feng3d.globalEvent.dispatch("scriptChanged");
-                    });
-                }
+                        feng3d.editor.editorAssets.runProjectScript(() =>
+                        {
+                            feng3d.globalEvent.dispatch("shaderChanged");
+                            feng3d.globalEvent.dispatch("scriptChanged");
+                        });
+                    }
+                });
             });
         }
         catch (e)

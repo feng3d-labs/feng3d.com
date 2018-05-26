@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <e:Skin class="Feng3dViewSkin" width="400" height="300" xmlns:e="http://ns.egret.com/eui"
-        xmlns:w="http://ns.egret.com/wing" xmlns:editor="feng3d.editor.*">
+        xmlns:w="http://ns.egret.com/wing" xmlns:editor="editor.*">
 	<w:Config id="15a7d5dea78"></w:Config>
 	<e:Button id="fullbutton" label="Button" width="100%" height="100%" alpha="0" />
 	<editor:CameraPreview width="200" height="200" right="10" bottom="10" />

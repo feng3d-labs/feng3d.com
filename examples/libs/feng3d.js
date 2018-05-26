@@ -348,6 +348,29 @@ var feng3d;
             _this.target = target;
             return _this;
         }
+        Object.defineProperty(EventProxy.prototype, "target", {
+            get: function () {
+                return this._target;
+            },
+            set: function (v) {
+                var _this = this;
+                if (this._target == v)
+                    return;
+                if (this._target) {
+                    this.listentypes.forEach(function (element) {
+                        _this._target.removeEventListener(element, _this.onMouseKey);
+                    });
+                }
+                this._target = v;
+                if (this._target) {
+                    this.listentypes.forEach(function (element) {
+                        _this._target.addEventListener(element, _this.onMouseKey);
+                    });
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
         /**
          * 监听一次事件后将会被移除
          * @param type						事件的类型。
@@ -356,7 +379,7 @@ var feng3d;
          * @param priority					事件侦听器的优先级。数字越大，优先级越高。默认优先级为 0。
          */
         EventProxy.prototype.once = function (type, listener, thisObject, priority) {
-            _super.prototype.once.call(this, type, listener, thisObject, priority);
+            this.on(type, listener, thisObject, priority, true);
         };
         /**
          * 添加监听
@@ -370,7 +393,7 @@ var feng3d;
             _super.prototype.on.call(this, type, listener, thisObject, priority, once);
             if (this.listentypes.indexOf(type) == -1) {
                 this.listentypes.push(type);
-                this.target.addEventListener(type, this.onMouseKey);
+                this._target.addEventListener(type, this.onMouseKey);
             }
         };
         /**
@@ -384,12 +407,12 @@ var feng3d;
             _super.prototype.off.call(this, type, listener, thisObject);
             if (!type) {
                 this.listentypes.forEach(function (element) {
-                    _this.target.removeEventListener(element, _this.onMouseKey);
+                    _this._target.removeEventListener(element, _this.onMouseKey);
                 });
                 this.listentypes.length = 0;
             }
             else if (!this.has(type)) {
-                this.target.removeEventListener(type, this.onMouseKey);
+                this._target.removeEventListener(type, this.onMouseKey);
                 this.listentypes.splice(this.listentypes.indexOf(type), 1);
             }
         };
@@ -417,15 +440,15 @@ var feng3d;
     /**
      * 全局事件
      */
-    var GlobalEventDispatcher = /** @class */ (function (_super) {
-        __extends(GlobalEventDispatcher, _super);
-        function GlobalEventDispatcher() {
+    var Feng3dDispatcher = /** @class */ (function (_super) {
+        __extends(Feng3dDispatcher, _super);
+        function Feng3dDispatcher() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
-        return GlobalEventDispatcher;
+        return Feng3dDispatcher;
     }(feng3d.EventDispatcher));
-    feng3d.GlobalEventDispatcher = GlobalEventDispatcher;
-    feng3d.globalEvent = new GlobalEventDispatcher();
+    feng3d.Feng3dDispatcher = Feng3dDispatcher;
+    feng3d.feng3dDispatcher = new Feng3dDispatcher();
 })(feng3d || (feng3d = {}));
 var feng3d;
 (function (feng3d) {
@@ -889,6 +912,9 @@ var feng3d;
     /**
      * 观察装饰器，观察被装饰属性的变化
      *
+     * @param onChange 属性变化回调  例如参数为“onChange”时，回调将会调用this.onChange(property, oldValue, newValue)
+     * @see https://gitee.com/feng3d/feng3d/issues/IGIK0
+     *
      * 使用@watch后会自动生成一个带"_"的属性，例如 属性"a"会生成"_a"
      *
      * 通过使用 eval 函数 生成出 与自己手动写的set get 一样的函数，性能已经接近 手动写的get set函数。
@@ -946,12 +972,10 @@ getset平均耗时比 17.3
      *
      * 注：不适用eval的情况下，chrome表现最好的，与此次测试结果差不多；在nodejs与firfox上将会出现比使用eval情况下消耗的（40-400）倍，其中详细原因不明，求高人解释！
      *
-     * @param onChange 属性变化回调
-     * @see https://gitee.com/feng3d/feng3d/issues/IGIK0
      */
     function watch(onChange) {
-        return function (target, propertyKey) {
-            var key = "_" + propertyKey;
+        return function (target, property) {
+            var key = "_" + property;
             var get;
             // get = function () { return this[key]; };
             eval("get = function (){return this." + key + "}");
@@ -964,8 +988,8 @@ getset平均耗时比 17.3
             //     this[key] = value;
             //     this[onChange](propertyKey, oldValue, this[key]);
             // };
-            eval("set = function (value){\n                if (this." + key + " == value)\n                    return;\n                var oldValue = this." + key + ";\n                this." + key + " = value;\n                this." + onChange + "(\"" + propertyKey + "\", oldValue, this." + key + ");\n            }");
-            Object.defineProperty(target, propertyKey, {
+            eval("set = function (value){\n                if (this." + key + " == value)\n                    return;\n                var oldValue = this." + key + ";\n                this." + key + " = value;\n                this." + onChange + "(\"" + property + "\", oldValue, value);\n            }");
+            Object.defineProperty(target, property, {
                 get: get,
                 set: set,
                 enumerable: true,
@@ -1174,19 +1198,17 @@ var feng3d;
      * @param {string} propertyKey      序列化属性
      */
     function serialize(target, propertyKey) {
-        var serializeInfo = target[SERIALIZE_KEY];
         if (!Object.getOwnPropertyDescriptor(target, SERIALIZE_KEY)) {
             Object.defineProperty(target, SERIALIZE_KEY, {
                 /**
                  * uv数据
                  */
-                value: {},
+                value: { propertys: [] },
                 enumerable: false,
                 configurable: true
             });
         }
-        serializeInfo = target[SERIALIZE_KEY];
-        serializeInfo.propertys = serializeInfo.propertys || [];
+        var serializeInfo = target[SERIALIZE_KEY];
         serializeInfo.propertys.push(propertyKey);
     }
     feng3d.serialize = serialize;
@@ -1414,6 +1436,16 @@ var feng3d;
      * 获取默认实例
      */
     function getDefaultInstance(object) {
+        if (!Object.getOwnPropertyDescriptor(object, SERIALIZE_KEY)) {
+            Object.defineProperty(object, SERIALIZE_KEY, {
+                /**
+                 * uv数据
+                 */
+                value: { propertys: [] },
+                enumerable: false,
+                configurable: true
+            });
+        }
         var serializeInfo = object[SERIALIZE_KEY];
         serializeInfo.default = serializeInfo.default || new object.constructor();
         return serializeInfo.default;
@@ -2207,6 +2239,12 @@ var feng3d;
                 callback(img);
             });
         };
+        DataTransform.prototype.dataURLToArrayBuffer = function (dataurl, callback) {
+            var _this = this;
+            this.dataURLtoBlob(dataurl, function (blob) {
+                _this.blobToArrayBuffer(blob, callback);
+            });
+        };
         DataTransform.prototype.arrayBufferToDataURL = function (arrayBuffer, callback) {
             var _this = this;
             this.arrayBufferToBlob(arrayBuffer, function (blob) {
@@ -2542,6 +2580,904 @@ var feng3d;
         return StatsPanel;
     }());
     feng3d.StatsPanel = StatsPanel;
+})(feng3d || (feng3d = {}));
+var feng3d;
+(function (feng3d) {
+    /**
+     * 路径工具
+     */
+    var PathUtils = /** @class */ (function () {
+        function PathUtils() {
+        }
+        /**
+         * 获取不带后缀名称
+         * @param path 路径
+         */
+        PathUtils.prototype.getName = function (path) {
+            var name = this.getNameWithExtension(path);
+            if (this.isDirectory(path))
+                return name;
+            name = name.split(".").shift();
+            return name;
+        };
+        /**
+         * 获取带后缀名称
+         * @param path 路径
+         */
+        PathUtils.prototype.getNameWithExtension = function (path) {
+            var paths = path.split("/");
+            var name = paths.pop();
+            if (name == "")
+                name = paths.pop();
+            return name;
+        };
+        /**
+         * 获取后缀
+         * @param path 路径
+         */
+        PathUtils.prototype.getExtension = function (path) {
+            var name = this.getNameWithExtension(path);
+            var names = name.split(".");
+            names.shift();
+            var extension = names.join(".");
+            return extension;
+        };
+        /**
+         * 父路径
+         * @param path 路径
+         */
+        PathUtils.prototype.getParentPath = function (path) {
+            var paths = path.split("/");
+            if (this.isDirectory(path))
+                paths.pop();
+            paths.pop();
+            return paths.join("/") + "/";
+        };
+        /**
+         * 是否文件夹
+         * @param path 路径
+         */
+        PathUtils.prototype.isDirectory = function (path) {
+            return path.split("/").pop() == "";
+        };
+        /**
+         * 获取目录深度
+         * @param path 路径
+         */
+        PathUtils.prototype.getDirDepth = function (path) {
+            var length = path.split("/").length;
+            if (this.isDirectory(path))
+                length--;
+            return length - 1;
+        };
+        return PathUtils;
+    }());
+    feng3d.PathUtils = PathUtils;
+    feng3d.pathUtils = new PathUtils();
+})(feng3d || (feng3d = {}));
+var feng3d;
+(function (feng3d) {
+    var databases = {};
+    /**
+     *
+     */
+    var Storage = /** @class */ (function () {
+        function Storage() {
+        }
+        /**
+         * 是否支持 indexedDB
+         */
+        Storage.prototype.support = function () {
+            if (typeof indexedDB == "undefined") {
+                indexedDB = window.indexedDB || window["mozIndexedDB"] || window["webkitIndexedDB"] || window["msIndexedDB"];
+                if (indexedDB == undefined) {
+                    return false;
+                }
+            }
+            return true;
+        };
+        Storage.prototype.getDatabase = function (dbname, callback) {
+            if (databases[dbname]) {
+                callback(null, databases[dbname]);
+                return;
+            }
+            var request = indexedDB.open(dbname);
+            request.onsuccess = function (event) {
+                databases[dbname] = event.target["result"];
+                callback(null, databases[dbname]);
+                request.onsuccess = null;
+            };
+            request.onerror = function (event) {
+                callback(event, null);
+                request.onerror = null;
+            };
+        };
+        Storage.prototype.deleteDatabase = function (dbname, callback) {
+            var request = indexedDB.deleteDatabase(dbname);
+            request.onsuccess = function (event) {
+                delete databases[dbname];
+                callback && callback(null);
+                request.onsuccess = null;
+            };
+            request.onerror = function (event) {
+                callback && callback(event);
+                request.onerror = null;
+            };
+        };
+        Storage.prototype.hasObjectStore = function (dbname, objectStroreName, callback) {
+            this.getDatabase(dbname, function (err, database) {
+                callback(database.objectStoreNames.contains(objectStroreName));
+            });
+        };
+        Storage.prototype.getObjectStoreNames = function (dbname, callback) {
+            this.getDatabase(dbname, function (err, database) {
+                var objectStoreNames = [];
+                for (var i = 0; i < database.objectStoreNames.length; i++) {
+                    objectStoreNames.push(database.objectStoreNames.item(i));
+                }
+                callback(null, objectStoreNames);
+            });
+        };
+        Storage.prototype.createObjectStore = function (dbname, objectStroreName, callback) {
+            this.getDatabase(dbname, function (err, database) {
+                if (database.objectStoreNames.contains(objectStroreName)) {
+                    callback && callback(null);
+                    return;
+                }
+                database.close();
+                var request = indexedDB.open(database.name, database.version + 1);
+                request.onupgradeneeded = function (event) {
+                    var newdatabase = event.target["result"];
+                    newdatabase.createObjectStore(objectStroreName);
+                    callback && callback(null);
+                    request.onupgradeneeded = null;
+                };
+                request.onsuccess = function (event) {
+                    var newdatabase = event.target["result"];
+                    databases[newdatabase.name] = newdatabase;
+                    request.onsuccess = null;
+                };
+                request.onerror = function (event) {
+                    callback && callback(event);
+                    request.onerror = null;
+                };
+            });
+        };
+        Storage.prototype.deleteObjectStore = function (dbname, objectStroreName, callback) {
+            this.getDatabase(dbname, function (err, database) {
+                if (!database.objectStoreNames.contains(objectStroreName)) {
+                    callback && callback(null);
+                    return;
+                }
+                database.close();
+                var request = indexedDB.open(database.name, database.version + 1);
+                request.onupgradeneeded = function (event) {
+                    var newdatabase = event.target["result"];
+                    newdatabase.deleteObjectStore(objectStroreName);
+                    callback && callback(null);
+                    request.onupgradeneeded = null;
+                };
+                request.onsuccess = function (event) {
+                    var newdatabase = event.target["result"];
+                    databases[newdatabase.name] = newdatabase;
+                    request.onsuccess = null;
+                };
+                request.onerror = function (event) {
+                    callback && callback(event);
+                    request.onerror = null;
+                };
+            });
+        };
+        Storage.prototype.getAllKeys = function (dbname, objectStroreName, callback) {
+            this.getDatabase(dbname, function (err, database) {
+                try {
+                    var transaction = database.transaction([objectStroreName], 'readwrite');
+                    var objectStore = transaction.objectStore(objectStroreName);
+                    var request = objectStore.getAllKeys();
+                    request.onsuccess = function (event) {
+                        callback && callback(null, event.target["result"]);
+                        request.onsuccess = null;
+                    };
+                }
+                catch (error) {
+                    callback && callback(error, null);
+                }
+            });
+        };
+        Storage.prototype.get = function (dbname, objectStroreName, key, callback) {
+            this.getDatabase(dbname, function (err, database) {
+                var transaction = database.transaction([objectStroreName], 'readwrite');
+                var objectStore = transaction.objectStore(objectStroreName);
+                var request = objectStore.get(key);
+                request.onsuccess = function (event) {
+                    var result = event.target["result"];
+                    callback && callback(result ? null : new Error("\u6CA1\u6709\u627E\u5230\u8D44\u6E90 " + key), result);
+                    request.onsuccess = null;
+                };
+            });
+        };
+        Storage.prototype.set = function (dbname, objectStroreName, key, data, callback) {
+            this.getDatabase(dbname, function (err, database) {
+                try {
+                    var transaction = database.transaction([objectStroreName], 'readwrite');
+                    var objectStore = transaction.objectStore(objectStroreName);
+                    var request = objectStore.put(data, key);
+                    request.onsuccess = function (event) {
+                        callback && callback(null);
+                        request.onsuccess = null;
+                    };
+                }
+                catch (error) {
+                    callback && callback(error);
+                }
+            });
+        };
+        Storage.prototype.delete = function (dbname, objectStroreName, key, callback) {
+            this.getDatabase(dbname, function (err, database) {
+                try {
+                    var transaction = database.transaction([objectStroreName], 'readwrite');
+                    var objectStore = transaction.objectStore(objectStroreName);
+                    var request = objectStore.delete(key);
+                    request.onsuccess = function (event) {
+                        callback && callback();
+                        request.onsuccess = null;
+                    };
+                }
+                catch (error) {
+                    callback && callback(error);
+                }
+            });
+        };
+        Storage.prototype.clear = function (dbname, objectStroreName, callback) {
+            this.getDatabase(dbname, function (err, database) {
+                try {
+                    var transaction = database.transaction([objectStroreName], 'readwrite');
+                    var objectStore = transaction.objectStore(objectStroreName);
+                    var request = objectStore.clear();
+                    request.onsuccess = function (event) {
+                        callback && callback();
+                        request.onsuccess = null;
+                    };
+                }
+                catch (error) {
+                    callback && callback(error);
+                }
+            });
+        };
+        return Storage;
+    }());
+    feng3d.Storage = Storage;
+    feng3d.storage = new Storage();
+})(feng3d || (feng3d = {}));
+var feng3d;
+(function (feng3d) {
+    /**
+     * 索引数据文件系统
+     */
+    var IndexedDBfs = /** @class */ (function () {
+        function IndexedDBfs(DBname, projectname) {
+            if (DBname === void 0) { DBname = "feng3d-editor"; }
+            if (projectname === void 0) { projectname = "testproject"; }
+            this.DBname = DBname;
+            this.projectname = projectname;
+        }
+        Object.defineProperty(IndexedDBfs.prototype, "type", {
+            get: function () {
+                return feng3d.FSType.indexedDB;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * 读取文件
+         * @param path 路径
+         * @param callback 读取完成回调 当err不为null时表示读取失败
+         */
+        IndexedDBfs.prototype.readFile = function (path, callback) {
+            feng3d.storage.get(this.DBname, this.projectname, path, function (err, data) {
+                callback(err, data);
+            });
+        };
+        /**
+         * 获取文件绝对路径
+         * @param path （相对）路径
+         * @param callback 回调函数
+         */
+        IndexedDBfs.prototype.getAbsolutePath = function (path, callback) {
+            callback(null, path);
+        };
+        /**
+         * 文件是否存在
+         * @param path 文件路径
+         * @param callback 回调函数
+         */
+        IndexedDBfs.prototype.exists = function (path, callback) {
+            feng3d.storage.get(this.DBname, this.projectname, path, function (err, data) {
+                callback(!!data);
+            });
+        };
+        /**
+         * 读取文件夹中文件列表
+         * @param path 路径
+         * @param callback 回调函数
+         */
+        IndexedDBfs.prototype.readdir = function (path, callback) {
+            feng3d.storage.getAllKeys(this.DBname, this.projectname, function (err, allfilepaths) {
+                if (!allfilepaths) {
+                    callback(err, null);
+                    return;
+                }
+                var subfilemap = {};
+                allfilepaths.forEach(function (element) {
+                    if (element.substr(0, path.length) == path && element != path) {
+                        var result = element.substr(path.length);
+                        var index = result.indexOf("/");
+                        if (index != -1)
+                            result = result.substring(0, index + 1);
+                        subfilemap[result] = 1;
+                    }
+                });
+                var files = Object.keys(subfilemap);
+                callback(null, files);
+            });
+        };
+        /**
+         * 新建文件夹
+         * @param path 文件夹路径
+         * @param callback 回调函数
+         */
+        IndexedDBfs.prototype.mkdir = function (path, callback) {
+            feng3d.storage.set(this.DBname, this.projectname, path, new ArrayBuffer(0), callback);
+        };
+        /**
+         * 删除文件
+         * @param path 文件路径
+         * @param callback 回调函数
+         */
+        IndexedDBfs.prototype.deleteFile = function (path, callback) {
+            feng3d.storage.delete(this.DBname, this.projectname, path, callback);
+        };
+        /**
+         * 写文件
+         * @param path 文件路径
+         * @param data 文件数据
+         * @param callback 回调函数
+         */
+        IndexedDBfs.prototype.writeFile = function (path, data, callback) {
+            feng3d.storage.set(this.DBname, this.projectname, path, data, callback);
+        };
+        /**
+         * 获取所有文件路径
+         * @param callback 回调函数
+         */
+        IndexedDBfs.prototype.getAllPaths = function (callback) {
+            feng3d.storage.getAllKeys(this.DBname, this.projectname, callback);
+        };
+        return IndexedDBfs;
+    }());
+    feng3d.IndexedDBfs = IndexedDBfs;
+    feng3d.indexedDBfs = new IndexedDBfs();
+})(feng3d || (feng3d = {}));
+var feng3d;
+(function (feng3d) {
+    /**
+     * Http可读文件系统
+     */
+    var HttpFS = /** @class */ (function () {
+        function HttpFS() {
+            /**
+             * 根路径
+             */
+            this.rootPath = "";
+            this.rootPath = document.URL.substring(0, document.URL.lastIndexOf("/") + 1);
+        }
+        Object.defineProperty(HttpFS.prototype, "type", {
+            get: function () {
+                return feng3d.FSType.http;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * 读取文件
+         * @param path 路径
+         * @param callback 读取完成回调 当err不为null时表示读取失败
+         */
+        HttpFS.prototype.readFile = function (path, callback) {
+            // rootPath
+            feng3d.Loader.loadBinary(path, function (content) {
+                callback(null, content);
+            }, null, function (e) {
+                callback(e, null);
+            });
+        };
+        /**
+         * 获取文件绝对路径
+         * @param path （相对）路径
+         * @param callback 回调函数
+         */
+        HttpFS.prototype.getAbsolutePath = function (path, callback) {
+            callback(null, this.rootPath + path);
+        };
+        return HttpFS;
+    }());
+    feng3d.HttpFS = HttpFS;
+    feng3d.httpFS = new HttpFS();
+})(feng3d || (feng3d = {}));
+var feng3d;
+(function (feng3d) {
+    /**
+     * 文件系统类型
+     */
+    var FSType;
+    (function (FSType) {
+        FSType["http"] = "http";
+        FSType["native"] = "native";
+        FSType["indexedDB"] = "indexedDB";
+    })(FSType = feng3d.FSType || (feng3d.FSType = {}));
+    /**
+     * 资源
+     * 在可读文件系统上进行加工，比如把读取数据转换为图片或者文本
+     */
+    var ReadAssets = /** @class */ (function () {
+        function ReadAssets() {
+            /**
+             * 可读文件系统
+             */
+            this.fs = feng3d.httpFS;
+        }
+        Object.defineProperty(ReadAssets.prototype, "type", {
+            get: function () {
+                return this.fs.type;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * 读取文件
+         * @param path 路径
+         * @param callback 读取完成回调 当err不为null时表示读取失败
+         */
+        ReadAssets.prototype.readFile = function (path, callback) {
+            var readFS = this.fs;
+            if (path.indexOf("http://") != -1
+                || path.indexOf("https://") != -1)
+                readFS = feng3d.httpFS;
+            if (path.indexOf("file:///") != -1
+                || path.indexOf("file:///") != -1)
+                readFS = feng3d.httpFS;
+            readFS.readFile(path, callback);
+        };
+        /**
+         * 获取文件绝对路径
+         * @param path （相对）路径
+         * @param callback 回调函数
+         */
+        ReadAssets.prototype.getAbsolutePath = function (path, callback) {
+            this.fs.getAbsolutePath(path, callback);
+        };
+        /**
+         * 读取文件为字符串
+         */
+        ReadAssets.prototype.readFileAsString = function (path, callback) {
+            this.readFile(path, function (err, data) {
+                if (err) {
+                    callback(err, null);
+                    return;
+                }
+                feng3d.dataTransform.arrayBufferToString(data, function (content) {
+                    callback(null, content);
+                });
+            });
+        };
+        /**
+         * 加载图片
+         * @param path 图片路径
+         * @param callback 加载完成回调
+         */
+        ReadAssets.prototype.readFileAsImage = function (path, callback) {
+            if (path == "" || path == null) {
+                callback(new Error("无效路径!"), null);
+                return;
+            }
+            this.readFile(path, function (err, data) {
+                if (err) {
+                    callback(err, null);
+                    return;
+                }
+                feng3d.dataTransform.arrayBufferToImage(data, function (img) {
+                    callback(null, img);
+                });
+            });
+        };
+        return ReadAssets;
+    }());
+    feng3d.ReadAssets = ReadAssets;
+    feng3d.assets = new ReadAssets();
+    var ReadWriteAssets = /** @class */ (function (_super) {
+        __extends(ReadWriteAssets, _super);
+        function ReadWriteAssets(readWriteFS) {
+            var _this = _super.call(this) || this;
+            /**
+             * 可读写文件系统
+             */
+            _this.fs = feng3d.indexedDBfs;
+            if (readWriteFS)
+                _this.fs = readWriteFS;
+            return _this;
+        }
+        Object.defineProperty(ReadWriteAssets.prototype, "projectname", {
+            // fs = indexedDBfs;
+            get: function () {
+                return this.fs.projectname;
+            },
+            set: function (v) {
+                this.fs.projectname = v;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * 文件是否存在
+         * @param path 文件路径
+         * @param callback 回调函数
+         */
+        ReadWriteAssets.prototype.exists = function (path, callback) {
+            this.fs.exists(path, callback);
+        };
+        /**
+         * 读取文件夹中文件列表
+         * @param path 路径
+         * @param callback 回调函数
+         */
+        ReadWriteAssets.prototype.readdir = function (path, callback) {
+            feng3d.assert(this.isDir(path), "\u6587\u4EF6\u5939\u8DEF\u5F84\u5FC5\u987B\u4EE5 / \u7ED3\u5C3E\uFF01");
+            this.fs.readdir(path, callback);
+        };
+        /**
+         * 新建文件夹
+         * @param path 文件夹路径
+         * @param callback 回调函数
+         */
+        ReadWriteAssets.prototype.mkdir = function (path, callback) {
+            feng3d.assert(this.isDir(path), "\u6587\u4EF6\u5939\u8DEF\u5F84\u5FC5\u987B\u4EE5 / \u7ED3\u5C3E\uFF01");
+            this.fs.mkdir(path, callback);
+        };
+        /**
+         * 删除文件
+         * @param path 文件路径
+         * @param callback 回调函数
+         */
+        ReadWriteAssets.prototype.deleteFile = function (path, callback) {
+            this.fs.deleteFile(path, callback);
+        };
+        /**
+         * 写文件
+         * @param path 文件路径
+         * @param data 文件数据
+         * @param callback 回调函数
+         */
+        ReadWriteAssets.prototype.writeFile = function (path, data, callback) {
+            if (this.isDir(path)) {
+                this.fs.mkdir(path, callback);
+            }
+            else {
+                this.fs.writeFile(path, data, callback);
+            }
+        };
+        ///--------------------------
+        /**
+         * 获取所有文件路径
+         * @param callback 回调函数
+         */
+        ReadWriteAssets.prototype.getAllPaths = function (callback) {
+            this.getAllfilepathInFolder("", callback);
+        };
+        /**
+         * 获取指定文件下所有文件路径列表
+         */
+        ReadWriteAssets.prototype.getAllfilepathInFolder = function (dirpath, callback) {
+            var _this = this;
+            feng3d.assert(this.isDir(dirpath), "\u6587\u4EF6\u5939\u8DEF\u5F84\u5FC5\u987B\u4EE5 / \u7ED3\u5C3E\uFF01");
+            var dirs = [dirpath];
+            var result = [];
+            var currentdir = "";
+            // 递归获取文件
+            var handle = function () {
+                if (dirs.length > 0) {
+                    currentdir = dirs.shift();
+                    _this.readdir(currentdir, function (err, files) {
+                        files.forEach(function (element) {
+                            var childpath = currentdir + element;
+                            result.push(childpath);
+                            if (_this.isDir(childpath))
+                                dirs.push(childpath);
+                        });
+                        handle();
+                    });
+                }
+                else {
+                    callback(null, result);
+                }
+            };
+            handle();
+        };
+        /**
+         * 复制文件
+         * @param src    源路径
+         * @param dest    目标路径
+         * @param callback 回调函数
+         */
+        ReadWriteAssets.prototype.copyFile = function (src, dest, callback) {
+            var _this = this;
+            this.readFile(src, function (err, data) {
+                if (err) {
+                    callback && callback(err);
+                    return;
+                }
+                _this.writeFile(dest, data, callback);
+            });
+        };
+        /**
+         * 移动文件
+         * @param src 源路径
+         * @param dest 目标路径
+         * @param callback 回调函数
+         */
+        ReadWriteAssets.prototype.moveFile = function (src, dest, callback) {
+            var _this = this;
+            this.copyFile(src, dest, function (err) {
+                if (err) {
+                    callback && callback(err);
+                    return;
+                }
+                _this.deleteFile(src, callback);
+            });
+        };
+        /**
+         * 重命名文件
+         * @param oldPath 老路径
+         * @param newPath 新路径
+         * @param callback 回调函数
+         */
+        ReadWriteAssets.prototype.renameFile = function (oldPath, newPath, callback) {
+            this.moveFile(oldPath, newPath, callback);
+        };
+        /**
+         * 移动一组文件
+         * @param movelists 移动列表
+         * @param callback 回调函数
+         */
+        ReadWriteAssets.prototype.moveFiles = function (movelists, callback) {
+            var _this = this;
+            this.copyFiles(movelists.concat(), function (err) {
+                if (err) {
+                    callback(err);
+                    return;
+                }
+                var deletelists = movelists.reduce(function (value, current) { value.push(current[0]); return value; }, []);
+                _this.deleteFiles(deletelists, callback);
+            });
+        };
+        /**
+         * 复制一组文件
+         * @param copylists 复制列表
+         * @param callback 回调函数
+         */
+        ReadWriteAssets.prototype.copyFiles = function (copylists, callback) {
+            var _this = this;
+            if (copylists.length > 0) {
+                var copyitem = copylists.shift();
+                this.copyFile(copyitem[0], copyitem[1], function (err) {
+                    if (err) {
+                        callback(err);
+                        return;
+                    }
+                    _this.copyFiles(copylists, callback);
+                });
+                return;
+            }
+            callback(null);
+        };
+        /**
+         * 删除一组文件
+         * @param deletelists 删除列表
+         * @param callback 回调函数
+         */
+        ReadWriteAssets.prototype.deleteFiles = function (deletelists, callback) {
+            var _this = this;
+            if (deletelists.length > 0) {
+                this.deleteFile(deletelists.shift(), function (err) {
+                    if (err) {
+                        callback(err);
+                        return;
+                    }
+                    _this.deleteFiles(deletelists, callback);
+                });
+                return;
+            }
+            callback(null);
+        };
+        /**
+         * 重命名文件(夹)
+         * @param oldPath 老路径
+         * @param newPath 新路径
+         * @param callback 回调函数
+         */
+        ReadWriteAssets.prototype.rename = function (oldPath, newPath, callback) {
+            var _this = this;
+            if (this.isDir(oldPath)) {
+                this.getAllfilepathInFolder(oldPath, function (err, filepaths) {
+                    if (err) {
+                        callback(err);
+                        return;
+                    }
+                    var renamelists = [[oldPath, newPath]];
+                    filepaths.forEach(function (element) {
+                        renamelists.push([element, element.replace(oldPath, newPath)]);
+                    });
+                    _this.moveFiles(renamelists, callback);
+                });
+            }
+            else {
+                this.renameFile(oldPath, newPath, callback);
+            }
+        };
+        /**
+         * 移动文件(夹)
+         * @param src 源路径
+         * @param dest 目标路径
+         * @param callback 回调函数
+         */
+        ReadWriteAssets.prototype.move = function (src, dest, callback) {
+            this.rename(src, dest, callback);
+        };
+        /**
+         * 删除文件(夹)
+         * @param path 路径
+         * @param callback 回调函数
+         */
+        ReadWriteAssets.prototype.delete = function (path, callback) {
+            var _this = this;
+            if (this.isDir(path)) {
+                this.getAllfilepathInFolder(path, function (err, filepaths) {
+                    if (err) {
+                        callback && callback(err);
+                        return;
+                    }
+                    var removelists = filepaths.concat(path);
+                    _this.deleteFiles(removelists, callback);
+                });
+            }
+            else {
+                this.deleteFile(path, callback);
+            }
+        };
+        /**
+         * 是否为文件夹
+         * @param path 文件路径
+         */
+        ReadWriteAssets.prototype.isDir = function (path) {
+            if (path == "")
+                return true;
+            return path.charAt(path.length - 1) == "/";
+        };
+        return ReadWriteAssets;
+    }(ReadAssets));
+    feng3d.ReadWriteAssets = ReadWriteAssets;
+})(feng3d || (feng3d = {}));
+var feng3d;
+(function (feng3d) {
+    /**
+     * 资源扩展名
+     */
+    var AssetExtension;
+    (function (AssetExtension) {
+        /**
+         * 文件夹
+         */
+        AssetExtension["folder"] = "folder";
+        /**
+         * png 图片
+         */
+        AssetExtension["png"] = "png";
+        /**
+         * jpg图片
+         */
+        AssetExtension["jpg"] = "jpg";
+        /**
+         * jpeg图片
+         */
+        AssetExtension["jpeg"] = "jpeg";
+        /**
+         * gif图片
+         */
+        AssetExtension["gif"] = "gif";
+        /**
+         * mp3声音
+         */
+        AssetExtension["mp3"] = "mp3";
+        /**
+         * ogg声音
+         */
+        AssetExtension["ogg"] = "ogg";
+        /**
+         * wav声音
+         */
+        AssetExtension["wav"] = "wav";
+        /**
+         * ts文件
+         */
+        AssetExtension["ts"] = "ts";
+        /**
+         * js文件
+         */
+        AssetExtension["js"] = "js";
+        /**
+         * 文本文件
+         */
+        AssetExtension["txt"] = "txt";
+        /**
+         * json文件
+         */
+        AssetExtension["json"] = "json";
+        // -- feng3d中的类型
+        /**
+         * 纹理
+         */
+        AssetExtension["texture2d"] = "texture2d.json";
+        /**
+         * 立方体纹理
+         */
+        AssetExtension["texturecube"] = "texturecube.json";
+        /**
+         * 材质
+         */
+        AssetExtension["material"] = "material.json";
+        /**
+         * 几何体
+         */
+        AssetExtension["geometry"] = "geometry.json";
+        /**
+         * 游戏对象
+         */
+        AssetExtension["gameobject"] = "gameobject.json";
+        /**
+         * 场景文件
+         */
+        AssetExtension["scene"] = "scene.json";
+        /**
+         * 动画文件
+         */
+        AssetExtension["anim"] = "anim.json";
+        /**
+         * 着色器文件
+         */
+        AssetExtension["shader"] = "shader.ts";
+        /**
+         * 脚本文件
+         */
+        AssetExtension["script"] = "script.ts";
+    })(AssetExtension = feng3d.AssetExtension || (feng3d.AssetExtension = {}));
+})(feng3d || (feng3d = {}));
+var feng3d;
+(function (feng3d) {
+    /**
+     * feng3d资源
+     */
+    var Feng3dAssets = /** @class */ (function () {
+        function Feng3dAssets() {
+        }
+        Feng3dAssets.prototype.pathChanged = function () {
+            // 更新名字
+            this.name = feng3d.pathUtils.getName(this.path);
+        };
+        __decorate([
+            feng3d.watch("pathChanged")
+        ], Feng3dAssets.prototype, "path", void 0);
+        return Feng3dAssets;
+    }());
+    feng3d.Feng3dAssets = Feng3dAssets;
 })(feng3d || (feng3d = {}));
 var feng3d;
 (function (feng3d) {
@@ -9055,16 +9991,16 @@ var feng3d;
          * gl.TEXTURE_CUBE_MAP: A cube-mapped texture.
          */
         TextureType["TEXTURE_CUBE_MAP"] = "TEXTURE_CUBE_MAP";
-        /**
-         * using a WebGL 2 context
-         * gl.TEXTURE_3D: A three-dimensional texture.
-         */
-        TextureType["TEXTURE_3D"] = "TEXTURE_3D";
-        /**
-         * using a WebGL 2 context
-         * gl.TEXTURE_2D_ARRAY: A two-dimensional array texture.
-         */
-        TextureType["TEXTURE_2D_ARRAY"] = "TEXTURE_2D_ARRAY";
+        // /**
+        //  * using a WebGL 2 context
+        //  * gl.TEXTURE_3D: A three-dimensional texture.
+        //  */
+        // TEXTURE_3D = "TEXTURE_3D",
+        // /**
+        //  * using a WebGL 2 context
+        //  * gl.TEXTURE_2D_ARRAY: A two-dimensional array texture.
+        //  */
+        // TEXTURE_2D_ARRAY = "TEXTURE_2D_ARRAY",
     })(TextureType = feng3d.TextureType || (feng3d.TextureType = {}));
 })(feng3d || (feng3d = {}));
 var feng3d;
@@ -10715,7 +11651,7 @@ var feng3d;
      */
     var ShaderLib = /** @class */ (function () {
         function ShaderLib() {
-            feng3d.globalEvent.on("shaderChanged", this.onShaderChanged, this);
+            feng3d.feng3dDispatcher.on("assets.shaderChanged", this.onShaderChanged, this);
         }
         Object.defineProperty(ShaderLib.prototype, "shaderConfig", {
             get: function () {
@@ -11131,6 +12067,10 @@ var feng3d;
          * 每帧执行
          */
         Behaviour.prototype.update = function (interval) {
+        };
+        Behaviour.prototype.dispose = function () {
+            this.enabled = false;
+            _super.prototype.dispose.call(this);
         };
         __decorate([
             feng3d.oav(),
@@ -11820,103 +12760,105 @@ var feng3d;
 })(feng3d || (feng3d = {}));
 var feng3d;
 (function (feng3d) {
-    feng3d.skyboxRenderer = {
-        draw: draw
-    };
-    var renderAtomic;
-    var renderParams;
-    var shader;
-    function init() {
-        if (!renderAtomic) {
-            renderAtomic = new feng3d.RenderAtomic();
-            //八个顶点，32个number
-            var vertexPositionData = [
-                -1, 1, -1,
-                1, 1, -1,
-                1, 1, 1,
-                -1, 1, 1,
-                -1, -1, -1,
-                1, -1, -1,
-                1, -1, 1,
-                -1, -1, 1 //
-            ];
-            renderAtomic.attributes.a_position = new feng3d.Attribute("a_position", vertexPositionData, 3);
-            //6个面，12个三角形，36个顶点索引
-            var indices = [
-                0, 1, 2, 2, 3, 0,
-                6, 5, 4, 4, 7, 6,
-                2, 6, 7, 7, 3, 2,
-                4, 5, 1, 1, 0, 4,
-                4, 0, 3, 3, 7, 4,
-                2, 1, 5, 5, 6, 2 //
-            ];
-            renderAtomic.indexBuffer = new feng3d.Index();
-            renderAtomic.indexBuffer.indices = indices;
-            //
-            renderParams = new feng3d.RenderParams();
-            renderParams.renderMode = feng3d.RenderMode.TRIANGLES;
-            renderParams.enableBlend = false;
-            renderParams.depthMask = true;
-            renderParams.depthtest = true;
-            renderParams.cullFace = feng3d.CullFace.NONE;
-            //
-            shader = feng3d.shaderlib.getShader("skybox");
-        }
-    }
     /**
-     * 渲染
+     * 天空盒组件
      */
-    function draw(gl, scene3d, camera, renderObjectflag) {
-        init();
-        var skyboxs = scene3d.collectComponents.skyboxs.list.filter(function (skybox) {
-            return skybox.gameObject.visible && (renderObjectflag & skybox.gameObject.flag);
-        });
-        if (skyboxs.length == 0)
-            return;
-        var skybox = skyboxs[0];
-        //
-        renderAtomic.renderParams = renderParams;
-        renderAtomic.shader = shader;
-        skybox.gameObject.preRender(renderAtomic);
-        //
-        renderAtomic.uniforms.u_viewProjection = camera.viewProjection;
-        renderAtomic.uniforms.u_viewMatrix = camera.transform.worldToLocalMatrix;
-        renderAtomic.uniforms.u_cameraMatrix = camera.transform.localToWorldMatrix;
-        renderAtomic.uniforms.u_skyBoxSize = camera.lens.far / Math.sqrt(3);
-        gl.renderer.draw(renderAtomic);
-    }
     var SkyBox = /** @class */ (function (_super) {
         __extends(SkyBox, _super);
         function SkyBox() {
-            return _super.call(this) || this;
+            var _this = _super.call(this) || this;
+            _this.s_skyboxTexture = new feng3d.TextureCube();
+            return _this;
             //
         }
-        Object.defineProperty(SkyBox.prototype, "texture", {
-            get: function () {
-                return this._texture;
-            },
-            set: function (value) {
-                if (this._texture == value)
-                    return;
-                this._texture = value;
-            },
-            enumerable: true,
-            configurable: true
-        });
         SkyBox.prototype.init = function (gameObject) {
             _super.prototype.init.call(this, gameObject);
         };
         SkyBox.prototype.preRender = function (renderAtomic) {
             var _this = this;
-            renderAtomic.uniforms.s_skyboxTexture = function () { return _this.texture; };
+            renderAtomic.uniforms.s_skyboxTexture = function () { return _this.s_skyboxTexture; };
         };
         __decorate([
             feng3d.serialize,
-            feng3d.oav()
-        ], SkyBox.prototype, "texture", null);
+            feng3d.oav({ component: "OAVPick", componentParam: { accepttype: "texturecube", datatype: "texturecube" } })
+        ], SkyBox.prototype, "s_skyboxTexture", void 0);
         return SkyBox;
     }(feng3d.Component));
     feng3d.SkyBox = SkyBox;
+})(feng3d || (feng3d = {}));
+var feng3d;
+(function (feng3d) {
+    /**
+     * 天空盒渲染器
+     */
+    var SkyboxRenderer = /** @class */ (function () {
+        function SkyboxRenderer() {
+        }
+        SkyboxRenderer.prototype.init = function () {
+            if (!this.renderAtomic) {
+                var renderAtomic = new feng3d.RenderAtomic();
+                //八个顶点，32个number
+                var vertexPositionData = [
+                    -1, 1, -1,
+                    1, 1, -1,
+                    1, 1, 1,
+                    -1, 1, 1,
+                    -1, -1, -1,
+                    1, -1, -1,
+                    1, -1, 1,
+                    -1, -1, 1 //
+                ];
+                renderAtomic.attributes.a_position = new feng3d.Attribute("a_position", vertexPositionData, 3);
+                //6个面，12个三角形，36个顶点索引
+                var indices = [
+                    0, 1, 2, 2, 3, 0,
+                    6, 5, 4, 4, 7, 6,
+                    2, 6, 7, 7, 3, 2,
+                    4, 5, 1, 1, 0, 4,
+                    4, 0, 3, 3, 7, 4,
+                    2, 1, 5, 5, 6, 2 //
+                ];
+                renderAtomic.indexBuffer = new feng3d.Index();
+                renderAtomic.indexBuffer.indices = indices;
+                this.renderAtomic = renderAtomic;
+                //
+                var renderParams = new feng3d.RenderParams();
+                renderParams.renderMode = feng3d.RenderMode.TRIANGLES;
+                renderParams.enableBlend = false;
+                renderParams.depthMask = true;
+                renderParams.depthtest = true;
+                renderParams.cullFace = feng3d.CullFace.NONE;
+                this.renderParams = renderParams;
+                //
+                this.shader = feng3d.shaderlib.getShader("skybox");
+            }
+        };
+        /**
+         * 渲染
+         */
+        SkyboxRenderer.prototype.draw = function (gl, scene3d, camera, renderObjectflag) {
+            this.init();
+            var skyboxs = scene3d.collectComponents.skyboxs.list.filter(function (skybox) {
+                return skybox.gameObject.visible && (renderObjectflag & skybox.gameObject.flag);
+            });
+            if (skyboxs.length == 0)
+                return;
+            var skybox = skyboxs[0];
+            //
+            this.renderAtomic.renderParams = this.renderParams;
+            this.renderAtomic.shader = this.shader;
+            skybox.gameObject.preRender(this.renderAtomic);
+            //
+            this.renderAtomic.uniforms.u_viewProjection = camera.viewProjection;
+            this.renderAtomic.uniforms.u_viewMatrix = camera.transform.worldToLocalMatrix;
+            this.renderAtomic.uniforms.u_cameraMatrix = camera.transform.localToWorldMatrix;
+            this.renderAtomic.uniforms.u_skyBoxSize = camera.lens.far / Math.sqrt(3);
+            gl.renderer.draw(this.renderAtomic);
+        };
+        return SkyboxRenderer;
+    }());
+    feng3d.SkyboxRenderer = SkyboxRenderer;
+    feng3d.skyboxRenderer = new SkyboxRenderer();
 })(feng3d || (feng3d = {}));
 var feng3d;
 (function (feng3d) {
@@ -12952,9 +13894,10 @@ var feng3d;
          * @param script   脚本路径
          */
         GameObject.prototype.addScript = function (script) {
-            var scriptComponent = this.addComponent(feng3d.ScriptComponent);
+            var scriptComponent = new feng3d.ScriptComponent();
             scriptComponent.script = script;
-            return script;
+            this.addComponentAt(scriptComponent, this._components.length);
+            return scriptComponent;
         };
         /**
          * 判断是否拥有组件
@@ -13379,6 +14322,7 @@ var feng3d;
          * @param camera    摄像机
          */
         function Engine(canvas, scene, camera) {
+            var _this = this;
             /**
              * 渲染对象标记，用于过滤渲染对象
              */
@@ -13399,7 +14343,7 @@ var feng3d;
             this.camera = camera;
             this.start();
             this.renderContext = new feng3d.RenderContext();
-            this.mouse3DManager = new feng3d.Mouse3DManager(canvas);
+            this.mouse3DManager = new feng3d.Mouse3DManager(new feng3d.WindowMouseInput(), function () { return _this.viewRect; });
         }
         Object.defineProperty(Engine.prototype, "camera", {
             /**
@@ -13505,7 +14449,7 @@ var feng3d;
             this.camera.viewRect = viewRect;
             this.camera.lens.aspectRatio = viewRect.width / viewRect.height;
             //鼠标拾取渲染
-            this.mouse3DManager.draw(this.scene, this.camera, viewRect);
+            this.mouse3DManager.draw(this.scene, this.camera);
             //绘制阴影图
             // this.shadowRenderer.draw(this._gl, this._scene, this._camera.camera);
             init(this.gl, this.scene);
@@ -13732,13 +14676,19 @@ var feng3d;
             if (this.gameObject)
                 this.gameObject.dispatch(event.type, event.data);
         };
+        MeshRenderer.prototype.materialChanged = function () {
+            if (this.material && this.material.constructor == Object) {
+                feng3d.error("material 必须继承与 Material!");
+            }
+        };
         __decorate([
-            feng3d.oav({ componentParam: { dragparam: { accepttype: "geometry", datatype: "geometry" } } }),
+            feng3d.oav({ component: "OAVPick", componentParam: { accepttype: "geometry", datatype: "geometry" } }),
             feng3d.serialize
         ], MeshRenderer.prototype, "geometry", null);
         __decorate([
-            feng3d.oav({ componentParam: { dragparam: { accepttype: "material", datatype: "material" } } }),
-            feng3d.serialize
+            feng3d.oav({ component: "OAVPick", componentParam: { accepttype: "material", datatype: "material" } }),
+            feng3d.serialize,
+            feng3d.watch("materialChanged")
         ], MeshRenderer.prototype, "material", void 0);
         return MeshRenderer;
     }(feng3d.Behaviour));
@@ -13754,65 +14704,61 @@ var feng3d;
         __extends(ScriptComponent, _super);
         function ScriptComponent() {
             var _this = _super !== null && _super.apply(this, arguments) || this;
-            _this._script = "";
-            return _this;
-        }
-        Object.defineProperty(ScriptComponent.prototype, "script", {
             /**
              * 脚本路径
              */
-            get: function () {
-                return this._script;
-            },
-            set: function (value) {
-                if (this._script == value)
-                    return;
-                this._script = value;
-                this.initScript();
-            },
-            enumerable: true,
-            configurable: true
-        });
+            _this.script = "";
+            return _this;
+        }
         ScriptComponent.prototype.init = function (gameObject) {
             _super.prototype.init.call(this, gameObject);
-            this.initScript();
-            this.enabled = this.enabled;
+            if (feng3d.runEnvironment == feng3d.RunEnvironment.feng3d) {
+                this.scriptInstance && this.scriptInstance.init();
+            }
         };
-        ScriptComponent.prototype.initScript = function () {
-            if (this._script && this.gameObject && feng3d.runEnvironment == feng3d.RunEnvironment.feng3d) {
-                var cls = feng3d.classUtils.getDefinitionByName(this._script);
-                this.scriptInstance = new cls(this);
-                var scriptData = this.scriptData = this.scriptData || {};
-                for (var key in scriptData) {
-                    if (scriptData.hasOwnProperty(key)) {
-                        this.scriptInstance[key] = scriptData[key];
-                    }
+        ScriptComponent.prototype.scriptChanged = function () {
+            if (this.scriptInstance) {
+                if (feng3d.runEnvironment == feng3d.RunEnvironment.feng3d) {
+                    this.scriptInstance.dispose();
                 }
-                this.scriptInstance.init();
+                this.scriptInstance = null;
+            }
+            if (this.script) {
+                var cls = feng3d.classUtils.getDefinitionByName(this.script);
+                this.scriptInstance = new cls(this);
+                if (feng3d.runEnvironment == feng3d.RunEnvironment.feng3d) {
+                    if (this.gameObject)
+                        this.scriptInstance.init();
+                }
             }
         };
         /**
          * 每帧执行
          */
         ScriptComponent.prototype.update = function () {
-            this.scriptInstance && this.scriptInstance.update();
+            if (feng3d.runEnvironment == feng3d.RunEnvironment.feng3d) {
+                this.scriptInstance && this.scriptInstance.update();
+            }
         };
         /**
          * 销毁
          */
         ScriptComponent.prototype.dispose = function () {
             this.enabled = false;
-            this.scriptInstance && this.scriptInstance.dispose();
+            if (feng3d.runEnvironment == feng3d.RunEnvironment.feng3d) {
+                this.scriptInstance && this.scriptInstance.dispose();
+            }
             this.scriptInstance = null;
             _super.prototype.dispose.call(this);
         };
         __decorate([
-            feng3d.serialize
-        ], ScriptComponent.prototype, "scriptData", void 0);
-        __decorate([
             feng3d.oav({ component: "OAVPick", componentParam: { accepttype: "file_script" } }),
+            feng3d.serialize,
+            feng3d.watch("scriptChanged")
+        ], ScriptComponent.prototype, "script", void 0);
+        __decorate([
             feng3d.serialize
-        ], ScriptComponent.prototype, "script", null);
+        ], ScriptComponent.prototype, "scriptInstance", void 0);
         return ScriptComponent;
     }(feng3d.Behaviour));
     feng3d.ScriptComponent = ScriptComponent;
@@ -15579,10 +16525,25 @@ var feng3d;
          */
         function PlaneGeometry(raw) {
             var _this = _super.call(this) || this;
+            /**
+             * 宽度
+             */
             _this.width = 1;
+            /**
+             * 高度
+             */
             _this.height = 1;
+            /**
+             * 横向分割数
+             */
             _this.segmentsW = 1;
+            /**
+             * 纵向分割数
+             */
             _this.segmentsH = 1;
+            /**
+             * 是否朝上
+             */
             _this.yUp = true;
             _this.name = "Plane";
             feng3d.serialization.setValue(_this, raw);
@@ -15784,12 +16745,33 @@ var feng3d;
          */
         function CubeGeometry(raw) {
             var _this = _super.call(this) || this;
+            /**
+             * 宽度
+             */
             _this.width = 1;
+            /**
+             * 高度
+             */
             _this.height = 1;
+            /**
+             * 深度
+             */
             _this.depth = 1;
+            /**
+             * 宽度方向分割数
+             */
             _this.segmentsW = 1;
+            /**
+             * 高度方向分割数
+             */
             _this.segmentsH = 1;
+            /**
+             * 深度方向分割数
+             */
             _this.segmentsD = 1;
+            /**
+             * 是否为6块贴图，默认true。
+             */
             _this.tile6 = true;
             _this.name = "Cube";
             feng3d.serialization.setValue(_this, raw);
@@ -16192,9 +17174,21 @@ var feng3d;
          */
         function SphereGeometry(raw) {
             var _this = _super.call(this) || this;
+            /**
+             * 球体半径
+             */
             _this.radius = 0.5;
+            /**
+             * 横向分割数
+             */
             _this.segmentsW = 16;
+            /**
+             * 纵向分割数
+             */
             _this.segmentsH = 12;
+            /**
+             * 是否朝上
+             */
             _this.yUp = true;
             _this.name = "Sphere";
             feng3d.serialization.setValue(_this, raw);
@@ -16374,10 +17368,25 @@ var feng3d;
          */
         function CapsuleGeometry(raw) {
             var _this = _super.call(this) || this;
+            /**
+             * 胶囊体半径
+             */
             _this.radius = 0.5;
+            /**
+             * 胶囊体高度
+             */
             _this.height = 1;
+            /**
+             * 横向分割数
+             */
             _this.segmentsW = 16;
+            /**
+             * 纵向分割数
+             */
             _this.segmentsH = 15;
+            /**
+             * 正面朝向 true:Y+ false:Z+
+             */
             _this.yUp = true;
             _this.name = "Capsule";
             feng3d.serialization.setValue(_this, raw);
@@ -16558,14 +17567,41 @@ var feng3d;
          */
         function CylinderGeometry(raw) {
             var _this = _super.call(this) || this;
+            /**
+             * 顶部半径
+             */
             _this.topRadius = 0.5;
+            /**
+             * 底部半径
+             */
             _this.bottomRadius = 0.5;
+            /**
+             * 高度
+             */
             _this.height = 2;
+            /**
+             * 横向分割数
+             */
             _this.segmentsW = 16;
+            /**
+             * 纵向分割数
+             */
             _this.segmentsH = 1;
+            /**
+             * 顶部是否封口
+             */
             _this.topClosed = true;
+            /**
+             * 底部是否封口
+             */
             _this.bottomClosed = true;
+            /**
+             * 侧面是否封口
+             */
             _this.surfaceClosed = true;
+            /**
+             * 是否朝上
+             */
             _this.yUp = true;
             _this.name = "Cylinder";
             feng3d.serialization.setValue(_this, raw);
@@ -16888,8 +17924,17 @@ var feng3d;
          */
         function ConeGeometry(raw) {
             var _this = _super.call(this, raw) || this;
+            /**
+             * 底部半径 private
+             */
             _this.topRadius = 0;
+            /**
+             * 顶部是否封口 private
+             */
             _this.topClosed = false;
+            /**
+             * 侧面是否封口 private
+             */
             _this.surfaceClosed = true;
             _this.name = "Cone";
             return _this;
@@ -16910,10 +17955,25 @@ var feng3d;
          */
         function TorusGeometry(raw) {
             var _this = _super.call(this) || this;
+            /**
+             * 半径
+             */
             _this.radius = 0.5;
+            /**
+             * 管道半径
+             */
             _this.tubeRadius = 0.1;
+            /**
+             * 半径方向分割数
+             */
             _this.segmentsR = 16;
+            /**
+             * 管道方向分割数
+             */
             _this.segmentsT = 8;
+            /**
+             * 是否朝上
+             */
             _this.yUp = true;
             _this._vertexPositionStride = 3;
             _this._vertexNormalStride = 3;
@@ -17098,10 +18158,11 @@ var feng3d;
         __extends(Texture2D, _super);
         function Texture2D(raw) {
             var _this = _super.call(this, raw) || this;
+            _this.noPixels = feng3d.imageDatas.white;
             _this.url = "";
             _this._textureType = feng3d.TextureType.TEXTURE_2D;
-            _this.noPixels = _this.noPixels || feng3d.imageDatas.white;
-            feng3d.globalEvent.on("imageAssetsChanged", _this.onImageAssetsChanged, _this);
+            //
+            feng3d.feng3dDispatcher.on("assets.imageAssetsChanged", _this.onImageAssetsChanged, _this);
             return _this;
         }
         Object.defineProperty(Texture2D.prototype, "size", {
@@ -17120,18 +18181,19 @@ var feng3d;
          * 判断数据是否满足渲染需求
          */
         Texture2D.prototype.checkRenderData = function () {
-            if (!this._pixels)
-                return false;
-            if (!this._pixels.width || !this._pixels.height)
-                return false;
-            return true;
+            return !!this._pixels;
         };
         Texture2D.prototype.urlChanged = function () {
             var _this = this;
             var url = this.url;
             feng3d.assets.readFileAsImage(url, function (err, img) {
                 if (url == _this.url) {
-                    _this._pixels = img;
+                    if (err) {
+                        // error(err);
+                        _this._pixels = null;
+                    }
+                    else
+                        _this._pixels = img;
                     _this.invalidate();
                 }
             });
@@ -17157,81 +18219,67 @@ var feng3d;
      */
     var TextureCube = /** @class */ (function (_super) {
         __extends(TextureCube, _super);
-        function TextureCube(images) {
-            var _this = _super.call(this) || this;
-            _this._textureType = feng3d.TextureType.TEXTURE_CUBE_MAP;
-            _this.noPixels = [feng3d.imageDatas.white, feng3d.imageDatas.white, feng3d.imageDatas.white, feng3d.imageDatas.white, feng3d.imageDatas.white, feng3d.imageDatas.white];
+        function TextureCube(raw) {
+            var _this = _super.call(this, raw) || this;
             _this._pixels = [];
-            if (images) {
-                _this.positive_x_url = images[0];
-                _this.positive_y_url = images[1];
-                _this.positive_z_url = images[2];
-                _this.negative_x_url = images[3];
-                _this.negative_y_url = images[4];
-                _this.negative_z_url = images[5];
-                _this.urlChanged();
-            }
+            _this.noPixels = [feng3d.imageDatas.white, feng3d.imageDatas.white, feng3d.imageDatas.white, feng3d.imageDatas.white, feng3d.imageDatas.white, feng3d.imageDatas.white];
+            _this._textureType = feng3d.TextureType.TEXTURE_CUBE_MAP;
             return _this;
         }
         /**
          * 判断数据是否满足渲染需求
          */
         TextureCube.prototype.checkRenderData = function () {
-            if (!this._pixels)
-                return false;
             for (var i = 0; i < 6; i++) {
                 var element = this._pixels[i];
-                if (!element || !element.width || !element.height)
+                if (!element)
                     return false;
             }
             return true;
         };
-        TextureCube.prototype.urlChanged = function () {
-            var __this = this;
-            loadImage(this.positive_x_url, 0);
-            loadImage(this.positive_y_url, 1);
-            loadImage(this.positive_z_url, 2);
-            loadImage(this.negative_x_url, 3);
-            loadImage(this.negative_y_url, 4);
-            loadImage(this.negative_z_url, 5);
-            function loadImage(url, index) {
-                if (!url)
-                    return;
-                feng3d.assets.readFileAsImage(url, function (err, img) {
-                    __this._pixels[index] = img;
-                    __this.invalidate();
-                });
-            }
+        TextureCube.prototype.urlChanged = function (property, oldValue, newValue) {
+            var _this = this;
+            var index = ["positive_x_url", "positive_y_url", "positive_z_url", "negative_x_url", "negative_y_url", "negative_z_url"].indexOf(property);
+            feng3d.assert(index != -1);
+            feng3d.assets.readFileAsImage(newValue, function (err, img) {
+                if (err) {
+                    // error(err);
+                    _this._pixels[index] = null;
+                }
+                else
+                    _this._pixels[index] = img;
+                _this.invalidate();
+            });
         };
         __decorate([
             feng3d.serialize,
-            feng3d.oav(),
-            feng3d.watch("urlChanged")
+            feng3d.watch("urlChanged"),
+            feng3d.oav({ component: "OAVPick", componentParam: { accepttype: "image" } })
         ], TextureCube.prototype, "positive_x_url", void 0);
         __decorate([
             feng3d.serialize,
-            feng3d.oav(),
-            feng3d.watch("urlChanged")
+            feng3d.watch("urlChanged"),
+            feng3d.oav({ component: "OAVPick", componentParam: { accepttype: "image" } })
         ], TextureCube.prototype, "positive_y_url", void 0);
         __decorate([
             feng3d.serialize,
-            feng3d.oav(),
-            feng3d.watch("urlChanged")
+            feng3d.watch("urlChanged"),
+            feng3d.oav({ component: "OAVPick", componentParam: { accepttype: "image" } })
         ], TextureCube.prototype, "positive_z_url", void 0);
         __decorate([
             feng3d.serialize,
-            feng3d.oav(),
-            feng3d.watch("urlChanged")
+            feng3d.watch("urlChanged"),
+            feng3d.oav({ component: "OAVPick", componentParam: { accepttype: "image" } })
         ], TextureCube.prototype, "negative_x_url", void 0);
         __decorate([
             feng3d.serialize,
-            feng3d.oav(),
-            feng3d.watch("urlChanged")
+            feng3d.watch("urlChanged"),
+            feng3d.oav({ component: "OAVPick", componentParam: { accepttype: "image" } })
         ], TextureCube.prototype, "negative_y_url", void 0);
         __decorate([
             feng3d.serialize,
-            feng3d.oav(),
-            feng3d.watch("urlChanged")
+            feng3d.watch("urlChanged"),
+            feng3d.oav({ component: "OAVPick", componentParam: { accepttype: "image" } })
         ], TextureCube.prototype, "negative_z_url", void 0);
         return TextureCube;
     }(feng3d.TextureInfo));
@@ -17297,22 +18345,25 @@ var feng3d;
      * 材质
      * @author feng 2016-05-02
      */
-    var Material = /** @class */ (function () {
+    var Material = /** @class */ (function (_super) {
+        __extends(Material, _super);
         function Material(raw) {
+            var _this = _super.call(this) || this;
             /**
              * shader名称
              */
-            this.shaderName = "standard";
+            _this.shaderName = "standard";
             /**
              * Uniform数据
              */
-            this.uniforms = new feng3d.StandardUniforms();
+            _this.uniforms = new feng3d.StandardUniforms();
             /**
              * 渲染参数
              */
-            this.renderParams = new feng3d.RenderParams();
-            feng3d.serialization.setValue(this, raw);
-            feng3d.globalEvent.on("shaderChanged", this.onShaderChanged, this);
+            _this.renderParams = new feng3d.RenderParams();
+            feng3d.serialization.setValue(_this, raw);
+            feng3d.feng3dDispatcher.on("assets.shaderChanged", _this.onShaderChanged, _this);
+            return _this;
         }
         Material.prototype.preRender = function (renderAtomic) {
             for (var key in this.uniforms) {
@@ -17326,7 +18377,7 @@ var feng3d;
             if (cls) {
                 if (!(this.uniforms instanceof cls)) {
                     var newuniforms = new cls();
-                    // serialization.setValue(newuniforms, this.uniforms);
+                    feng3d.serialization.setValue(newuniforms, this.uniforms);
                     this.uniforms = newuniforms;
                 }
             }
@@ -17346,7 +18397,7 @@ var feng3d;
             feng3d.oav({ block: "渲染参数", component: "OAVObjectView" })
         ], Material.prototype, "renderParams", void 0);
         return Material;
-    }());
+    }(feng3d.Feng3dAssets));
     feng3d.Material = Material;
 })(feng3d || (feng3d = {}));
 var feng3d;
@@ -17559,7 +18610,7 @@ var feng3d;
         ], StandardUniforms.prototype, "u_ambient", void 0);
         __decorate([
             feng3d.serialize,
-            feng3d.oav({ block: "envMap" })
+            feng3d.oav({ component: "OAVPick", block: "envMap", componentParam: { accepttype: "texturecube", datatype: "texturecube" } })
         ], StandardUniforms.prototype, "s_envMap", void 0);
         __decorate([
             feng3d.serialize,
@@ -18323,6 +19374,463 @@ var feng3d;
         return false;
     }
 })(feng3d || (feng3d = {}));
+var feng3d;
+(function (feng3d) {
+    /**
+     * 声音监听器
+     */
+    var AudioListener = /** @class */ (function (_super) {
+        __extends(AudioListener, _super);
+        function AudioListener() {
+            var _this = _super.call(this) || this;
+            _this.enabled = true;
+            _this._volume = 1;
+            _this.gain = feng3d.audioCtx.createGain();
+            _this.gain.connect(feng3d.audioCtx.destination);
+            _this.enabledChanged();
+            return _this;
+        }
+        Object.defineProperty(AudioListener.prototype, "volume", {
+            /**
+             * 音量
+             */
+            get: function () {
+                return this._volume;
+            },
+            set: function (v) {
+                this._volume = v;
+                this.gain.gain.setTargetAtTime(v, feng3d.audioCtx.currentTime, 0.01);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        AudioListener.prototype.init = function (gameObject) {
+            _super.prototype.init.call(this, gameObject);
+            this.gameObject.on("scenetransformChanged", this.onScenetransformChanged, this);
+            this.onScenetransformChanged();
+        };
+        AudioListener.prototype.onScenetransformChanged = function () {
+            var scenePosition = this.transform.scenePosition;
+            //
+            var listener = feng3d.audioCtx.listener;
+            if (listener.positionX) {
+                listener.positionX.value = scenePosition.x;
+                listener.positionY.value = scenePosition.y;
+                listener.positionZ.value = scenePosition.z;
+            }
+            else {
+                listener.setPosition(scenePosition.x, scenePosition.y, scenePosition.z);
+            }
+        };
+        AudioListener.prototype.enabledChanged = function () {
+            if (!this.gain)
+                return;
+            if (this.enabled) {
+                feng3d.globalGain.connect(this.gain);
+            }
+            else {
+                feng3d.globalGain.disconnect(this.gain);
+            }
+        };
+        AudioListener.prototype.dispose = function () {
+            this.gameObject.off("scenetransformChanged", this.onScenetransformChanged, this);
+            _super.prototype.dispose.call(this);
+        };
+        __decorate([
+            feng3d.watch("enabledChanged")
+        ], AudioListener.prototype, "enabled", void 0);
+        __decorate([
+            feng3d.serialize,
+            feng3d.oav()
+        ], AudioListener.prototype, "volume", null);
+        return AudioListener;
+    }(feng3d.Behaviour));
+    feng3d.AudioListener = AudioListener;
+})(feng3d || (feng3d = {}));
+(function () {
+    window["AudioContext"] = window["AudioContext"] || window["webkitAudioContext"];
+    var audioCtx = feng3d.audioCtx = new AudioContext();
+    var globalGain = feng3d.globalGain = audioCtx.createGain();
+    // 新增无音Gain，避免没有AudioListener组件时暂停声音播放进度
+    var zeroGain = audioCtx.createGain();
+    zeroGain.connect(audioCtx.destination);
+    globalGain.connect(zeroGain);
+    zeroGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.01);
+    //
+    var listener = audioCtx.listener;
+    audioCtx.createGain();
+    if (listener.forwardX) {
+        listener.forwardX.value = 0;
+        listener.forwardY.value = 0;
+        listener.forwardZ.value = -1;
+        listener.upX.value = 0;
+        listener.upY.value = 1;
+        listener.upZ.value = 0;
+    }
+    else {
+        listener.setOrientation(0, 0, -1, 0, 1, 0);
+    }
+})();
+var feng3d;
+(function (feng3d) {
+    /**
+     * 音量与距离算法
+     * @see https://developer.mozilla.org/en-US/docs/Web/API/PannerNode/distanceModel
+     */
+    var DistanceModelType;
+    (function (DistanceModelType) {
+        /**
+         * 1 - rolloffFactor * (distance - refDistance) / (maxDistance - refDistance)
+         */
+        DistanceModelType["linear"] = "linear";
+        /**
+         * refDistance / (refDistance + rolloffFactor * (distance - refDistance))
+         */
+        DistanceModelType["inverse"] = "inverse";
+        /**
+         * pow(distance / refDistance, -rolloffFactor)
+         */
+        DistanceModelType["exponential"] = "exponential";
+    })(DistanceModelType = feng3d.DistanceModelType || (feng3d.DistanceModelType = {}));
+    /**
+     * 声源
+     * @see https://developer.mozilla.org/en-US/docs/Web/API/AudioContext
+     */
+    var AudioSource = /** @class */ (function (_super) {
+        __extends(AudioSource, _super);
+        function AudioSource() {
+            var _this = _super.call(this) || this;
+            _this.enabled = true;
+            /**
+             * 声音文件路径
+             */
+            _this.url = "";
+            _this._loop = true;
+            _this._enablePosition = true;
+            _this.panner = createPanner();
+            _this.panningModel = 'HRTF';
+            _this.distanceModel = DistanceModelType.inverse;
+            _this.refDistance = 1;
+            _this.maxDistance = 10000;
+            _this.rolloffFactor = 1;
+            _this.coneInnerAngle = 360;
+            _this.coneOuterAngle = 0;
+            _this.coneOuterGain = 0;
+            //
+            _this.gain = feng3d.audioCtx.createGain();
+            _this.volume = 1;
+            //
+            _this.enabledChanged();
+            _this.connect();
+            return _this;
+        }
+        Object.defineProperty(AudioSource.prototype, "loop", {
+            /**
+             * 是否循环播放
+             */
+            get: function () {
+                return this._loop;
+            },
+            set: function (v) {
+                this._loop = v;
+                if (this.source)
+                    this.source.loop = v;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(AudioSource.prototype, "volume", {
+            /**
+             * 音量
+             */
+            get: function () {
+                return this._volume;
+            },
+            set: function (v) {
+                this._volume = v;
+                this.gain.gain.setTargetAtTime(v, feng3d.audioCtx.currentTime, 0.01);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(AudioSource.prototype, "enablePosition", {
+            /**
+             * 是否启用位置影响声音
+             */
+            get: function () {
+                return this._enablePosition;
+            },
+            set: function (v) {
+                this.disconnect();
+                this._enablePosition = v;
+                this.connect();
+            },
+            enumerable: true,
+            configurable: true
+        });
+        ;
+        Object.defineProperty(AudioSource.prototype, "coneInnerAngle", {
+            // @serialize
+            // @oav()
+            get: function () {
+                return this._coneInnerAngle;
+            },
+            set: function (v) {
+                this._coneInnerAngle = v;
+                this.panner.coneInnerAngle = v;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(AudioSource.prototype, "coneOuterAngle", {
+            // @serialize
+            // @oav()
+            get: function () {
+                return this._coneOuterAngle;
+            },
+            set: function (v) {
+                this._coneOuterAngle = v;
+                this.panner.coneOuterAngle = v;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(AudioSource.prototype, "coneOuterGain", {
+            // @serialize
+            // @oav()
+            get: function () {
+                return this._coneOuterGain;
+            },
+            set: function (v) {
+                this._coneOuterGain = v;
+                this.panner.coneOuterGain = v;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(AudioSource.prototype, "distanceModel", {
+            /**
+             * 该接口的distanceModel属性PannerNode是一个枚举值，用于确定在音频源离开收听者时用于减少音频源音量的算法。
+             *
+             * 可能的值是：
+             * * linear：根据以下公式计算由距离引起的增益的线性距离模型：
+             *      1 - rolloffFactor * (distance - refDistance) / (maxDistance - refDistance)
+             * * inverse：根据以下公式计算由距离引起的增益的反距离模型：
+             *      refDistance / (refDistance + rolloffFactor * (distance - refDistance))
+             * * exponential：按照下式计算由距离引起的增益的指数距离模型
+             *      pow(distance / refDistance, -rolloffFactor)。
+             *
+             * inverse是的默认值distanceModel。
+             */
+            get: function () {
+                return this._distanceModel;
+            },
+            set: function (v) {
+                this._distanceModel = v;
+                this.panner.distanceModel = v;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(AudioSource.prototype, "maxDistance", {
+            /**
+             * 表示音频源和收听者之间的最大距离，之后音量不会再降低。该值仅由linear距离模型使用。默认值是10000。
+             */
+            get: function () {
+                return this._maxDistance;
+            },
+            set: function (v) {
+                this._maxDistance = v;
+                this.panner.maxDistance = v;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(AudioSource.prototype, "panningModel", {
+            // @serialize
+            // @oav()
+            get: function () {
+                return this._panningModel;
+            },
+            set: function (v) {
+                this._panningModel = v;
+                this.panner.panningModel = v;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(AudioSource.prototype, "refDistance", {
+            /**
+             * 表示随着音频源远离收听者而减小音量的参考距离。此值由所有距离模型使用。默认值是1。
+             */
+            get: function () {
+                return this._refDistance;
+            },
+            set: function (v) {
+                this._refDistance = v;
+                this.panner.refDistance = v;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(AudioSource.prototype, "rolloffFactor", {
+            /**
+             * 描述了音源离开收听者音量降低的速度。此值由所有距离模型使用。默认值是1。
+             */
+            get: function () {
+                return this._rolloffFactor;
+            },
+            set: function (v) {
+                this._rolloffFactor = v;
+                this.panner.rolloffFactor = v;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        AudioSource.prototype.init = function (gameObject) {
+            _super.prototype.init.call(this, gameObject);
+            this.gameObject.on("scenetransformChanged", this.onScenetransformChanged, this);
+        };
+        AudioSource.prototype.onScenetransformChanged = function () {
+            var scenePosition = this.transform.scenePosition;
+            //
+            var panner = this.panner;
+            if (panner.positionX) {
+                panner.positionX.value = scenePosition.x;
+                panner.positionY.value = scenePosition.y;
+                panner.positionZ.value = scenePosition.z;
+            }
+            else {
+                panner.setPosition(scenePosition.x, scenePosition.y, scenePosition.z);
+            }
+        };
+        AudioSource.prototype.onUrlChanged = function () {
+            var _this = this;
+            this.stop();
+            if (this.url) {
+                var url = this.url;
+                feng3d.assets.readFile(this.url, function (err, data) {
+                    if (err) {
+                        feng3d.warn(err);
+                        return;
+                    }
+                    if (url != _this.url)
+                        return;
+                    feng3d.audioCtx.decodeAudioData(data, function (buffer) {
+                        _this.buffer = buffer;
+                    });
+                });
+            }
+        };
+        AudioSource.prototype.play = function () {
+            this.stop();
+            if (this.buffer) {
+                this.source = feng3d.audioCtx.createBufferSource();
+                this.source.buffer = this.buffer;
+                this.connect();
+                this.source.loop = this.loop;
+                this.source.start(0);
+            }
+        };
+        AudioSource.prototype.stop = function () {
+            if (this.source) {
+                this.source.stop(0);
+                this.disconnect();
+                this.source = null;
+            }
+        };
+        AudioSource.prototype.connect = function () {
+            var arr = this.getAudioNodes();
+            for (var i = 0; i < arr.length - 1; i++) {
+                arr[i + 1].connect(arr[i]);
+            }
+        };
+        AudioSource.prototype.disconnect = function () {
+            var arr = this.getAudioNodes();
+            for (var i = 0; i < arr.length - 1; i++) {
+                arr[i + 1].disconnect(arr[i]);
+            }
+        };
+        AudioSource.prototype.getAudioNodes = function () {
+            var arr = [];
+            arr.push(this.gain);
+            if (this._enablePosition)
+                arr.push(this.panner);
+            if (this.source)
+                arr.push(this.source);
+            return arr;
+        };
+        AudioSource.prototype.enabledChanged = function () {
+            if (!this.gain)
+                return;
+            if (this.enabled)
+                this.gain.connect(feng3d.globalGain);
+            else
+                this.gain.disconnect(feng3d.globalGain);
+        };
+        AudioSource.prototype.dispose = function () {
+            this.gameObject.off("scenetransformChanged", this.onScenetransformChanged, this);
+            this.disconnect();
+            _super.prototype.dispose.call(this);
+        };
+        __decorate([
+            feng3d.watch("enabledChanged")
+        ], AudioSource.prototype, "enabled", void 0);
+        __decorate([
+            feng3d.serialize,
+            feng3d.oav({ component: "OAVPick", componentParam: { accepttype: "audio" } }),
+            feng3d.watch("onUrlChanged")
+        ], AudioSource.prototype, "url", void 0);
+        __decorate([
+            feng3d.serialize,
+            feng3d.oav()
+        ], AudioSource.prototype, "loop", null);
+        __decorate([
+            feng3d.serialize,
+            feng3d.oav()
+        ], AudioSource.prototype, "volume", null);
+        __decorate([
+            feng3d.serialize,
+            feng3d.oav()
+        ], AudioSource.prototype, "enablePosition", null);
+        __decorate([
+            feng3d.serialize,
+            feng3d.oav({ component: "OAVEnum", componentParam: { enumClass: DistanceModelType } })
+        ], AudioSource.prototype, "distanceModel", null);
+        __decorate([
+            feng3d.serialize,
+            feng3d.oav()
+        ], AudioSource.prototype, "maxDistance", null);
+        __decorate([
+            feng3d.serialize,
+            feng3d.oav()
+        ], AudioSource.prototype, "refDistance", null);
+        __decorate([
+            feng3d.serialize,
+            feng3d.oav()
+        ], AudioSource.prototype, "rolloffFactor", null);
+        __decorate([
+            feng3d.oav()
+        ], AudioSource.prototype, "play", null);
+        __decorate([
+            feng3d.oav()
+        ], AudioSource.prototype, "stop", null);
+        return AudioSource;
+    }(feng3d.Behaviour));
+    feng3d.AudioSource = AudioSource;
+})(feng3d || (feng3d = {}));
+function createPanner() {
+    var panner = this.panner = feng3d.audioCtx.createPanner();
+    if (panner.orientationX) {
+        panner.orientationX.value = 1;
+        panner.orientationY.value = 0;
+        panner.orientationZ.value = 0;
+    }
+    else {
+        panner.setOrientation(1, 0, 0);
+    }
+    return panner;
+}
 var feng3d;
 (function (feng3d) {
     /**
@@ -19840,715 +21348,6 @@ var feng3d;
         PropertyClipPathItemType[PropertyClipPathItemType["GameObject"] = 0] = "GameObject";
         PropertyClipPathItemType[PropertyClipPathItemType["Component"] = 1] = "Component";
     })(PropertyClipPathItemType = feng3d.PropertyClipPathItemType || (feng3d.PropertyClipPathItemType = {}));
-})(feng3d || (feng3d = {}));
-var feng3d;
-(function (feng3d) {
-    var databases = {};
-    /**
-     *
-     */
-    var Storage = /** @class */ (function () {
-        function Storage() {
-        }
-        /**
-         * 是否支持 indexedDB
-         */
-        Storage.prototype.support = function () {
-            if (typeof indexedDB == "undefined") {
-                indexedDB = window.indexedDB || window["mozIndexedDB"] || window["webkitIndexedDB"] || window["msIndexedDB"];
-                if (indexedDB == undefined) {
-                    return false;
-                }
-            }
-            return true;
-        };
-        Storage.prototype.getDatabase = function (dbname, callback) {
-            if (databases[dbname]) {
-                callback(null, databases[dbname]);
-                return;
-            }
-            var request = indexedDB.open(dbname);
-            request.onsuccess = function (event) {
-                databases[dbname] = event.target["result"];
-                callback(null, databases[dbname]);
-                request.onsuccess = null;
-            };
-            request.onerror = function (event) {
-                callback(event, null);
-                request.onerror = null;
-            };
-        };
-        Storage.prototype.deleteDatabase = function (dbname, callback) {
-            var request = indexedDB.deleteDatabase(dbname);
-            request.onsuccess = function (event) {
-                delete databases[dbname];
-                callback && callback(null);
-                request.onsuccess = null;
-            };
-            request.onerror = function (event) {
-                callback && callback(event);
-                request.onerror = null;
-            };
-        };
-        Storage.prototype.hasObjectStore = function (dbname, objectStroreName, callback) {
-            this.getDatabase(dbname, function (err, database) {
-                callback(database.objectStoreNames.contains(objectStroreName));
-            });
-        };
-        Storage.prototype.getObjectStoreNames = function (dbname, callback) {
-            this.getDatabase(dbname, function (err, database) {
-                var objectStoreNames = [];
-                for (var i = 0; i < database.objectStoreNames.length; i++) {
-                    objectStoreNames.push(database.objectStoreNames.item(i));
-                }
-                callback(null, objectStoreNames);
-            });
-        };
-        Storage.prototype.createObjectStore = function (dbname, objectStroreName, callback) {
-            this.getDatabase(dbname, function (err, database) {
-                if (database.objectStoreNames.contains(objectStroreName)) {
-                    callback && callback(null);
-                    return;
-                }
-                database.close();
-                var request = indexedDB.open(database.name, database.version + 1);
-                request.onupgradeneeded = function (event) {
-                    var newdatabase = event.target["result"];
-                    newdatabase.createObjectStore(objectStroreName);
-                    callback && callback(null);
-                    request.onupgradeneeded = null;
-                };
-                request.onsuccess = function (event) {
-                    var newdatabase = event.target["result"];
-                    databases[newdatabase.name] = newdatabase;
-                    request.onsuccess = null;
-                };
-                request.onerror = function (event) {
-                    callback && callback(event);
-                    request.onerror = null;
-                };
-            });
-        };
-        Storage.prototype.deleteObjectStore = function (dbname, objectStroreName, callback) {
-            this.getDatabase(dbname, function (err, database) {
-                if (!database.objectStoreNames.contains(objectStroreName)) {
-                    callback && callback(null);
-                    return;
-                }
-                database.close();
-                var request = indexedDB.open(database.name, database.version + 1);
-                request.onupgradeneeded = function (event) {
-                    var newdatabase = event.target["result"];
-                    newdatabase.deleteObjectStore(objectStroreName);
-                    callback && callback(null);
-                    request.onupgradeneeded = null;
-                };
-                request.onsuccess = function (event) {
-                    var newdatabase = event.target["result"];
-                    databases[newdatabase.name] = newdatabase;
-                    request.onsuccess = null;
-                };
-                request.onerror = function (event) {
-                    callback && callback(event);
-                    request.onerror = null;
-                };
-            });
-        };
-        Storage.prototype.getAllKeys = function (dbname, objectStroreName, callback) {
-            this.getDatabase(dbname, function (err, database) {
-                try {
-                    var transaction = database.transaction([objectStroreName], 'readwrite');
-                    var objectStore = transaction.objectStore(objectStroreName);
-                    var request = objectStore.getAllKeys();
-                    request.onsuccess = function (event) {
-                        callback && callback(null, event.target["result"]);
-                        request.onsuccess = null;
-                    };
-                }
-                catch (error) {
-                    callback && callback(error, null);
-                }
-            });
-        };
-        Storage.prototype.get = function (dbname, objectStroreName, key, callback) {
-            this.getDatabase(dbname, function (err, database) {
-                var transaction = database.transaction([objectStroreName], 'readwrite');
-                var objectStore = transaction.objectStore(objectStroreName);
-                var request = objectStore.get(key);
-                request.onsuccess = function (event) {
-                    var result = event.target["result"];
-                    callback && callback(result ? null : new Error("\u6CA1\u6709\u627E\u5230\u8D44\u6E90 " + key), result);
-                    request.onsuccess = null;
-                };
-            });
-        };
-        Storage.prototype.set = function (dbname, objectStroreName, key, data, callback) {
-            this.getDatabase(dbname, function (err, database) {
-                try {
-                    var transaction = database.transaction([objectStroreName], 'readwrite');
-                    var objectStore = transaction.objectStore(objectStroreName);
-                    var request = objectStore.put(data, key);
-                    request.onsuccess = function (event) {
-                        callback && callback(null);
-                        request.onsuccess = null;
-                    };
-                }
-                catch (error) {
-                    callback && callback(error);
-                }
-            });
-        };
-        Storage.prototype.delete = function (dbname, objectStroreName, key, callback) {
-            this.getDatabase(dbname, function (err, database) {
-                try {
-                    var transaction = database.transaction([objectStroreName], 'readwrite');
-                    var objectStore = transaction.objectStore(objectStroreName);
-                    var request = objectStore.delete(key);
-                    request.onsuccess = function (event) {
-                        callback && callback();
-                        request.onsuccess = null;
-                    };
-                }
-                catch (error) {
-                    callback && callback(error);
-                }
-            });
-        };
-        Storage.prototype.clear = function (dbname, objectStroreName, callback) {
-            this.getDatabase(dbname, function (err, database) {
-                try {
-                    var transaction = database.transaction([objectStroreName], 'readwrite');
-                    var objectStore = transaction.objectStore(objectStroreName);
-                    var request = objectStore.clear();
-                    request.onsuccess = function (event) {
-                        callback && callback();
-                        request.onsuccess = null;
-                    };
-                }
-                catch (error) {
-                    callback && callback(error);
-                }
-            });
-        };
-        return Storage;
-    }());
-    feng3d.Storage = Storage;
-    feng3d.storage = new Storage();
-})(feng3d || (feng3d = {}));
-var feng3d;
-(function (feng3d) {
-    /**
-     * 索引数据文件系统
-     */
-    var IndexedDBfs = /** @class */ (function () {
-        function IndexedDBfs(DBname, projectname) {
-            if (DBname === void 0) { DBname = "feng3d-editor"; }
-            if (projectname === void 0) { projectname = "testproject"; }
-            this.DBname = DBname;
-            this.projectname = projectname;
-        }
-        Object.defineProperty(IndexedDBfs.prototype, "type", {
-            get: function () {
-                return feng3d.FSType.indexedDB;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        /**
-         * 读取文件
-         * @param path 路径
-         * @param callback 读取完成回调 当err不为null时表示读取失败
-         */
-        IndexedDBfs.prototype.readFile = function (path, callback) {
-            feng3d.storage.get(this.DBname, this.projectname, path, function (err, data) {
-                callback(null, data ? data.data : null);
-            });
-        };
-        /**
-         * 获取文件绝对路径
-         * @param path （相对）路径
-         * @param callback 回调函数
-         */
-        IndexedDBfs.prototype.getAbsolutePath = function (path, callback) {
-            callback(null, path);
-        };
-        /**
-         * 获取文件信息
-         * @param path 文件路径
-         * @param callback 回调函数
-         */
-        IndexedDBfs.prototype.stat = function (path, callback) {
-            feng3d.storage.get(this.DBname, this.projectname, path, function (err, data) {
-                if (data) {
-                    callback(null, {
-                        path: path,
-                        birthtime: data.birthtime.getTime(),
-                        mtime: data.birthtime.getTime(),
-                        isDirectory: data.isDirectory,
-                        size: 0
-                    });
-                }
-                else {
-                    callback(new Error(path + " 不存在"), null);
-                }
-            });
-        };
-        /**
-         * 读取文件夹中文件列表
-         * @param path 路径
-         * @param callback 回调函数
-         */
-        IndexedDBfs.prototype.readdir = function (path, callback) {
-            feng3d.storage.getAllKeys(this.DBname, this.projectname, function (err, allfilepaths) {
-                if (!allfilepaths) {
-                    callback(err, null);
-                    return;
-                }
-                var subfilemap = {};
-                allfilepaths.forEach(function (element) {
-                    if (element.substr(0, path.length) == path && element != path) {
-                        var result = element.substr(path.length);
-                        var index = result.indexOf("/");
-                        if (index != -1)
-                            result = result.substring(0, index + 1);
-                        subfilemap[result] = 1;
-                    }
-                });
-                var files = Object.keys(subfilemap);
-                callback(null, files);
-            });
-        };
-        /**
-         * 新建文件夹
-         * @param path 文件夹路径
-         * @param callback 回调函数
-         */
-        IndexedDBfs.prototype.mkdir = function (path, callback) {
-            feng3d.storage.set(this.DBname, this.projectname, path, { isDirectory: true, birthtime: new Date() }, callback);
-        };
-        /**
-         * 删除文件
-         * @param path 文件路径
-         * @param callback 回调函数
-         */
-        IndexedDBfs.prototype.deleteFile = function (path, callback) {
-            feng3d.storage.delete(this.DBname, this.projectname, path, callback);
-        };
-        /**
-         * 写文件
-         * @param path 文件路径
-         * @param data 文件数据
-         * @param callback 回调函数
-         */
-        IndexedDBfs.prototype.writeFile = function (path, data, callback) {
-            feng3d.storage.set(this.DBname, this.projectname, path, { isDirectory: false, birthtime: new Date(), data: data }, callback);
-        };
-        /**
-         * 获取所有文件路径
-         * @param callback 回调函数
-         */
-        IndexedDBfs.prototype.getAllPaths = function (callback) {
-            feng3d.storage.getAllKeys(this.DBname, this.projectname, callback);
-        };
-        return IndexedDBfs;
-    }());
-    feng3d.IndexedDBfs = IndexedDBfs;
-    feng3d.indexedDBfs = new IndexedDBfs();
-})(feng3d || (feng3d = {}));
-var feng3d;
-(function (feng3d) {
-    /**
-     * Http可读文件系统
-     */
-    var HttpReadFS = /** @class */ (function () {
-        function HttpReadFS() {
-            /**
-             * 根路径
-             */
-            this.rootPath = "";
-            this.rootPath = document.URL.substring(0, document.URL.lastIndexOf("/") + 1);
-        }
-        Object.defineProperty(HttpReadFS.prototype, "type", {
-            get: function () {
-                return feng3d.FSType.http;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        /**
-         * 读取文件
-         * @param path 路径
-         * @param callback 读取完成回调 当err不为null时表示读取失败
-         */
-        HttpReadFS.prototype.readFile = function (path, callback) {
-            // rootPath
-            feng3d.Loader.loadBinary(path, function (content) {
-                callback(null, content);
-            }, null, function (e) {
-                callback(e, null);
-            });
-        };
-        /**
-         * 获取文件绝对路径
-         * @param path （相对）路径
-         * @param callback 回调函数
-         */
-        HttpReadFS.prototype.getAbsolutePath = function (path, callback) {
-            callback(null, this.rootPath + path);
-        };
-        return HttpReadFS;
-    }());
-    feng3d.HttpReadFS = HttpReadFS;
-    feng3d.httpReadFS = new HttpReadFS();
-})(feng3d || (feng3d = {}));
-var feng3d;
-(function (feng3d) {
-    /**
-     * 文件系统类型
-     */
-    var FSType;
-    (function (FSType) {
-        FSType["http"] = "http";
-        FSType["native"] = "native";
-        FSType["indexedDB"] = "indexedDB";
-    })(FSType = feng3d.FSType || (feng3d.FSType = {}));
-    /**
-     * 资源
-     * 在可读文件系统上进行加工，比如把读取数据转换为图片或者文本
-     */
-    var ReadAssets = /** @class */ (function () {
-        function ReadAssets() {
-            /**
-             * 可读文件系统
-             */
-            this.fs = feng3d.httpReadFS;
-        }
-        Object.defineProperty(ReadAssets.prototype, "type", {
-            get: function () {
-                return this.fs.type;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        /**
-         * 读取文件
-         * @param path 路径
-         * @param callback 读取完成回调 当err不为null时表示读取失败
-         */
-        ReadAssets.prototype.readFile = function (path, callback) {
-            var readFS = this.fs;
-            if (path.indexOf("http://") != -1
-                || path.indexOf("https://") != -1)
-                readFS = feng3d.httpReadFS;
-            readFS.readFile(path, callback);
-        };
-        /**
-         * 获取文件绝对路径
-         * @param path （相对）路径
-         * @param callback 回调函数
-         */
-        ReadAssets.prototype.getAbsolutePath = function (path, callback) {
-            this.fs.getAbsolutePath(path, callback);
-        };
-        /**
-         * 读取文件为字符串
-         */
-        ReadAssets.prototype.readFileAsString = function (path, callback) {
-            this.readFile(path, function (err, data) {
-                if (err) {
-                    callback(err, null);
-                    return;
-                }
-                feng3d.dataTransform.arrayBufferToString(data, function (content) {
-                    callback(null, content);
-                });
-            });
-        };
-        /**
-         * 加载图片
-         * @param path 图片路径
-         * @param callback 加载完成回调
-         */
-        ReadAssets.prototype.readFileAsImage = function (path, callback) {
-            if (path == "" || path == null) {
-                callback(new Error("无效路径!"), null);
-                return;
-            }
-            this.readFile(path, function (err, data) {
-                if (err) {
-                    callback(err, null);
-                    return;
-                }
-                feng3d.dataTransform.arrayBufferToImage(data, function (img) {
-                    callback(null, img);
-                });
-            });
-        };
-        return ReadAssets;
-    }());
-    feng3d.ReadAssets = ReadAssets;
-    feng3d.assets = new ReadAssets();
-    var ReadWriteAssets = /** @class */ (function (_super) {
-        __extends(ReadWriteAssets, _super);
-        function ReadWriteAssets(readWriteFS) {
-            var _this = _super.call(this) || this;
-            /**
-             * 可读写文件系统
-             */
-            // fs: ReadWriteFS = indexedDBfs;
-            _this.fs = feng3d.indexedDBfs;
-            if (readWriteFS)
-                _this.fs = readWriteFS;
-            return _this;
-        }
-        /**
-         * 获取文件信息
-         * @param path 文件路径
-         * @param callback 回调函数
-         */
-        ReadWriteAssets.prototype.stat = function (path, callback) {
-            this.fs.stat(path, callback);
-        };
-        /**
-         * 读取文件夹中文件列表
-         * @param path 路径
-         * @param callback 回调函数
-         */
-        ReadWriteAssets.prototype.readdir = function (path, callback) {
-            feng3d.assert(this.isDir(path), "\u6587\u4EF6\u5939\u8DEF\u5F84\u5FC5\u987B\u4EE5 / \u7ED3\u5C3E\uFF01");
-            this.fs.readdir(path, callback);
-        };
-        /**
-         * 新建文件夹
-         * @param path 文件夹路径
-         * @param callback 回调函数
-         */
-        ReadWriteAssets.prototype.mkdir = function (path, callback) {
-            feng3d.assert(this.isDir(path), "\u6587\u4EF6\u5939\u8DEF\u5F84\u5FC5\u987B\u4EE5 / \u7ED3\u5C3E\uFF01");
-            this.fs.mkdir(path, callback);
-        };
-        /**
-         * 删除文件
-         * @param path 文件路径
-         * @param callback 回调函数
-         */
-        ReadWriteAssets.prototype.deleteFile = function (path, callback) {
-            this.fs.deleteFile(path, callback);
-        };
-        /**
-         * 写文件
-         * @param path 文件路径
-         * @param data 文件数据
-         * @param callback 回调函数
-         */
-        ReadWriteAssets.prototype.writeFile = function (path, data, callback) {
-            if (this.isDir(path)) {
-                this.fs.mkdir(path, callback);
-            }
-            else {
-                this.fs.writeFile(path, data, callback);
-            }
-        };
-        ///--------------------------
-        /**
-         * 获取所有文件路径
-         * @param callback 回调函数
-         */
-        ReadWriteAssets.prototype.getAllPaths = function (callback) {
-            this.getAllfilepathInFolder("", callback);
-        };
-        /**
-         * 获取指定文件下所有文件路径列表
-         */
-        ReadWriteAssets.prototype.getAllfilepathInFolder = function (dirpath, callback) {
-            var _this = this;
-            feng3d.assert(this.isDir(dirpath), "\u6587\u4EF6\u5939\u8DEF\u5F84\u5FC5\u987B\u4EE5 / \u7ED3\u5C3E\uFF01");
-            var dirs = [dirpath];
-            var result = [];
-            var currentdir = "";
-            // 递归获取文件
-            var handle = function () {
-                if (dirs.length > 0) {
-                    currentdir = dirs.shift();
-                    _this.readdir(currentdir, function (err, files) {
-                        files.forEach(function (element) {
-                            var childpath = currentdir + element;
-                            result.push(childpath);
-                            if (_this.isDir(childpath))
-                                dirs.push(childpath);
-                        });
-                        handle();
-                    });
-                }
-                else {
-                    callback(null, result);
-                }
-            };
-            handle();
-        };
-        /**
-         * 复制文件
-         * @param src    源路径
-         * @param dest    目标路径
-         * @param callback 回调函数
-         */
-        ReadWriteAssets.prototype.copyFile = function (src, dest, callback) {
-            var _this = this;
-            this.readFile(src, function (err, data) {
-                if (err) {
-                    callback && callback(err);
-                    return;
-                }
-                _this.writeFile(dest, data, callback);
-            });
-        };
-        /**
-         * 移动文件
-         * @param src 源路径
-         * @param dest 目标路径
-         * @param callback 回调函数
-         */
-        ReadWriteAssets.prototype.moveFile = function (src, dest, callback) {
-            var _this = this;
-            this.copyFile(src, dest, function (err) {
-                if (err) {
-                    callback && callback(err);
-                    return;
-                }
-                _this.deleteFile(src, callback);
-            });
-        };
-        /**
-         * 重命名文件
-         * @param oldPath 老路径
-         * @param newPath 新路径
-         * @param callback 回调函数
-         */
-        ReadWriteAssets.prototype.renameFile = function (oldPath, newPath, callback) {
-            this.moveFile(oldPath, newPath, callback);
-        };
-        /**
-         * 移动一组文件
-         * @param movelists 移动列表
-         * @param callback 回调函数
-         */
-        ReadWriteAssets.prototype.moveFiles = function (movelists, callback) {
-            var _this = this;
-            this.copyFiles(movelists.concat(), function (err) {
-                if (err) {
-                    callback(err);
-                    return;
-                }
-                var deletelists = movelists.reduce(function (value, current) { value.push(current[0]); return value; }, []);
-                _this.deleteFiles(deletelists, callback);
-            });
-        };
-        /**
-         * 复制一组文件
-         * @param copylists 复制列表
-         * @param callback 回调函数
-         */
-        ReadWriteAssets.prototype.copyFiles = function (copylists, callback) {
-            var _this = this;
-            if (copylists.length > 0) {
-                var copyitem = copylists.shift();
-                this.copyFile(copyitem[0], copyitem[1], function (err) {
-                    if (err) {
-                        callback(err);
-                        return;
-                    }
-                    _this.copyFiles(copylists, callback);
-                });
-                return;
-            }
-            callback(null);
-        };
-        /**
-         * 删除一组文件
-         * @param deletelists 删除列表
-         * @param callback 回调函数
-         */
-        ReadWriteAssets.prototype.deleteFiles = function (deletelists, callback) {
-            var _this = this;
-            if (deletelists.length > 0) {
-                this.deleteFile(deletelists.shift(), function (err) {
-                    if (err) {
-                        callback(err);
-                        return;
-                    }
-                    _this.deleteFiles(deletelists, callback);
-                });
-                return;
-            }
-            callback(null);
-        };
-        /**
-         * 重命名文件(夹)
-         * @param oldPath 老路径
-         * @param newPath 新路径
-         * @param callback 回调函数
-         */
-        ReadWriteAssets.prototype.rename = function (oldPath, newPath, callback) {
-            var _this = this;
-            if (this.isDir(oldPath)) {
-                this.getAllfilepathInFolder(oldPath, function (err, filepaths) {
-                    if (err) {
-                        callback(err);
-                        return;
-                    }
-                    var renamelists = [[oldPath, newPath]];
-                    filepaths.forEach(function (element) {
-                        renamelists.push([element, element.replace(oldPath, newPath)]);
-                    });
-                    _this.moveFiles(renamelists, callback);
-                });
-            }
-            else {
-                this.renameFile(oldPath, newPath, callback);
-            }
-        };
-        /**
-         * 移动文件(夹)
-         * @param src 源路径
-         * @param dest 目标路径
-         * @param callback 回调函数
-         */
-        ReadWriteAssets.prototype.move = function (src, dest, callback) {
-            this.rename(src, dest, callback);
-        };
-        /**
-         * 删除文件(夹)
-         * @param path 路径
-         * @param callback 回调函数
-         */
-        ReadWriteAssets.prototype.delete = function (path, callback) {
-            var _this = this;
-            if (this.isDir(path)) {
-                this.getAllfilepathInFolder(path, function (err, filepaths) {
-                    if (err) {
-                        callback && callback(err);
-                        return;
-                    }
-                    var removelists = filepaths.concat(path);
-                    _this.deleteFiles(removelists, callback);
-                });
-            }
-            else {
-                this.deleteFile(path, callback);
-            }
-        };
-        /**
-         * 是否为文件夹
-         * @param path 文件路径
-         */
-        ReadWriteAssets.prototype.isDir = function (path) {
-            if (path == "")
-                return true;
-            return path.charAt(path.length - 1) == "/";
-        };
-        return ReadWriteAssets;
-    }(ReadAssets));
-    feng3d.ReadWriteAssets = ReadWriteAssets;
 })(feng3d || (feng3d = {}));
 var feng3d;
 (function (feng3d) {
@@ -23495,170 +24294,213 @@ var feng3d;
 var feng3d;
 (function (feng3d) {
     /**
+     * 鼠标事件输入
+     */
+    var MouseInput = /** @class */ (function (_super) {
+        __extends(MouseInput, _super);
+        function MouseInput() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            /**
+             * 是否启动
+             */
+            _this.enable = true;
+            /**
+             * 是否捕获鼠标移动
+             */
+            _this.catchMouseMove = false;
+            return _this;
+        }
+        /**
+         * 派发事件
+         * @param event   事件对象
+         */
+        MouseInput.prototype.dispatchEvent = function (event) {
+            if (!this.enable)
+                return;
+            if (!this.catchMouseMove && event.type == "mousemove")
+                return;
+            _super.prototype.dispatchEvent.call(this, event);
+        };
+        return MouseInput;
+    }(feng3d.EventDispatcher));
+    feng3d.MouseInput = MouseInput;
+    /**
+     * 鼠标事件列表
+     */
+    var mouseEventTypes = [
+        "mouseout",
+        "mouseover",
+        "mousemove",
+        "mousedown",
+        "mouseup",
+        "click",
+        "middlemousedown",
+        "middlemouseup",
+        "middleclick",
+        "rightmousedown",
+        "rightmouseup",
+        "rightclick",
+        "dblclick",
+    ];
+    /**
+     * Window鼠标事件输入
+     */
+    var WindowMouseInput = /** @class */ (function (_super) {
+        __extends(WindowMouseInput, _super);
+        function WindowMouseInput() {
+            var _this = _super.call(this) || this;
+            feng3d.windowEventProxy.on("click", _this.onMouseEvent, _this);
+            feng3d.windowEventProxy.on("dblclick", _this.onMouseEvent, _this);
+            feng3d.windowEventProxy.on("mousedown", _this.onMouseEvent, _this);
+            feng3d.windowEventProxy.on("mouseup", _this.onMouseEvent, _this);
+            feng3d.windowEventProxy.on("mousemove", _this.onMouseEvent, _this);
+            return _this;
+        }
+        /**
+         * 监听鼠标事件收集事件类型
+         */
+        WindowMouseInput.prototype.onMouseEvent = function (event) {
+            var type = event.type;
+            // 处理鼠标中键与右键
+            if (event instanceof MouseEvent) {
+                if (["click", "mousedown", "mouseup"].indexOf(event.type) != -1) {
+                    type = ["", "middle", "right"][event.button] + event.type;
+                }
+            }
+            this.dispatch(type, { mouseX: event.clientX, mouseY: event.clientY });
+        };
+        return WindowMouseInput;
+    }(MouseInput));
+    feng3d.WindowMouseInput = WindowMouseInput;
+    /**
      * 鼠标事件管理
      * @author feng 2014-4-29
      */
     var Mouse3DManager = /** @class */ (function () {
-        function Mouse3DManager(canvas) {
+        function Mouse3DManager(mouseInput, viewport) {
+            this.mouseEventTypes = [];
             //
-            var mouseX = 0;
-            var mouseY = 0;
-            var selectedGameObject;
-            var mouseEventTypes = [];
-            /**
-             * 鼠标按下时的对象，用于与鼠标弹起时对象做对比，如果相同触发click
-             */
-            var preMouseDownGameObject;
-            /**
-             * 统计处理click次数，判断是否达到dblclick
-             */
-            var gameObjectClickNum;
-            var _catchMouseMove = false;
-            var enable = false;
-            this.draw = draw;
-            this.catchMouseMove = catchMouseMove;
-            this.getSelectedGameObject = getSelectedGameObject;
-            this.setEnable = setEnable;
-            this.getEnable = getEnable;
-            //
-            setEnable(true);
-            function setEnable(value) {
-                if (enable) {
-                    feng3d.windowEventProxy.off("click", onMouseEvent, null);
-                    feng3d.windowEventProxy.off("dblclick", onMouseEvent, null);
-                    feng3d.windowEventProxy.off("mousedown", onMouseEvent, null);
-                    feng3d.windowEventProxy.off("mouseup", onMouseEvent, null);
-                }
-                enable = value;
-                if (enable) {
-                    feng3d.windowEventProxy.on("click", onMouseEvent, null);
-                    feng3d.windowEventProxy.on("dblclick", onMouseEvent, null);
-                    feng3d.windowEventProxy.on("mousedown", onMouseEvent, null);
-                    feng3d.windowEventProxy.on("mouseup", onMouseEvent, null);
-                }
+            this.mouseInput = mouseInput;
+            this.viewport = viewport;
+        }
+        Object.defineProperty(Mouse3DManager.prototype, "selectedGameObject", {
+            get: function () {
+                return this._selectedGameObject;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Mouse3DManager.prototype.mouseInputChanged = function (property, oldValue, newValue) {
+            var _this = this;
+            if (oldValue) {
+                mouseEventTypes.forEach(function (element) {
+                    oldValue.off(element, _this.onMouseEvent, _this);
+                });
             }
-            function getEnable() {
-                return enable;
+            if (newValue) {
+                mouseEventTypes.forEach(function (element) {
+                    newValue.on(element, _this.onMouseEvent, _this);
+                });
             }
-            /**
-             * 是否捕捉鼠标移动，默认false。
-             */
-            function catchMouseMove(value) {
-                if (_catchMouseMove == value)
-                    return;
-                if (_catchMouseMove) {
-                    feng3d.windowEventProxy.off("mousemove", onMouseEvent, null);
-                }
-                _catchMouseMove = value;
-                if (_catchMouseMove) {
-                    feng3d.windowEventProxy.on("mousemove", onMouseEvent, null);
-                }
-            }
-            /**
-             * 监听鼠标事件收集事件类型
-             */
-            function onMouseEvent(event) {
-                var canvasRect = canvas.getBoundingClientRect();
-                var bound = new feng3d.Rectangle(canvasRect.left, canvasRect.top, canvasRect.width, canvasRect.height);
+        };
+        /**
+         * 渲染
+         */
+        Mouse3DManager.prototype.draw = function (scene3d, camera) {
+            if (this.mouseEventTypes.length == 0)
+                return;
+            var mouseCollisionEntitys = scene3d.mouseCheckObjects;
+            if (mouseCollisionEntitys.length == 0)
+                return;
+            this.pick(scene3d, camera);
+        };
+        Mouse3DManager.prototype.dispatch = function (type) {
+            if (this.viewport) {
+                var bound = feng3d.lazy.getvalue(this.viewport);
                 if (!bound.contains(feng3d.windowEventProxy.clientX, feng3d.windowEventProxy.clientY))
                     return;
-                var type = event.type;
-                // 处理鼠标中键与右键
-                if (event instanceof MouseEvent) {
-                    if (["click", "mousedown", "mouseup"].indexOf(event.type) != -1) {
-                        type = ["", "middle", "right"][event.button] + event.type;
+            }
+            if (this.mouseEventTypes.indexOf(type) == -1)
+                this.mouseEventTypes.push(type);
+        };
+        /**
+         * 监听鼠标事件收集事件类型
+         */
+        Mouse3DManager.prototype.onMouseEvent = function (event) {
+            this.dispatch(event.type);
+        };
+        Mouse3DManager.prototype.pick = function (scene3d, camera) {
+            var mouseRay3D = camera.getMouseRay3D();
+            //计算得到鼠标射线相交的物体
+            var mouseCollisionEntitys = scene3d.mouseCheckObjects;
+            var pickingCollisionVO = null;
+            for (var i = 0; i < mouseCollisionEntitys.length; i++) {
+                var entitys = mouseCollisionEntitys[i].objects;
+                pickingCollisionVO = feng3d.raycaster.pick(mouseRay3D, entitys);
+                if (pickingCollisionVO)
+                    break;
+            }
+            var gameobject = pickingCollisionVO && pickingCollisionVO.gameObject;
+            if (gameobject)
+                this.setSelectedGameObject(gameobject);
+            else
+                this.setSelectedGameObject(scene3d.gameObject);
+        };
+        /**
+         * 设置选中对象
+         */
+        Mouse3DManager.prototype.setSelectedGameObject = function (value) {
+            var _this = this;
+            if (this._selectedGameObject != value) {
+                if (this._selectedGameObject)
+                    this._selectedGameObject.dispatch("mouseout", null, true);
+                if (value)
+                    value.dispatch("mouseover", null, true);
+            }
+            this._selectedGameObject = value;
+            if (this._selectedGameObject) {
+                this.mouseEventTypes.forEach(function (element) {
+                    switch (element) {
+                        case "mousedown":
+                            if (_this.preMouseDownGameObject != _this._selectedGameObject) {
+                                _this.gameObjectClickNum = 0;
+                                _this.preMouseDownGameObject = _this._selectedGameObject;
+                            }
+                            _this._selectedGameObject.dispatch(element, null, true);
+                            break;
+                        case "mouseup":
+                            if (_this._selectedGameObject == _this.preMouseDownGameObject) {
+                                _this.gameObjectClickNum++;
+                            }
+                            else {
+                                _this.gameObjectClickNum = 0;
+                                _this.preMouseDownGameObject = null;
+                            }
+                            _this._selectedGameObject.dispatch(element, null, true);
+                            break;
+                        case "mousemove":
+                            _this._selectedGameObject.dispatch(element, null, true);
+                            break;
+                        case "click":
+                            if (_this.gameObjectClickNum > 0)
+                                _this._selectedGameObject.dispatch(element, null, true);
+                            break;
+                        case "dblclick":
+                            if (_this.gameObjectClickNum > 1)
+                                _this._selectedGameObject.dispatch(element, null, true);
+                            break;
                     }
-                }
-                if (mouseEventTypes.indexOf(type) == -1)
-                    mouseEventTypes.push(type);
-                mouseX = event.clientX;
-                mouseY = event.clientY;
+                });
             }
-            /**
-             * 渲染
-             */
-            function draw(scene3d, camera, viewRect) {
-                if (!viewRect.contains(mouseX, mouseY))
-                    return;
-                if (mouseEventTypes.length == 0)
-                    return;
-                var mouseCollisionEntitys = scene3d.mouseCheckObjects;
-                if (mouseCollisionEntitys.length == 0)
-                    return;
-                pick(scene3d, camera);
+            else {
+                this.gameObjectClickNum = 0;
+                this.preMouseDownGameObject = null;
             }
-            function pick(scene3d, camera) {
-                var mouseRay3D = camera.getMouseRay3D();
-                //计算得到鼠标射线相交的物体
-                var mouseCollisionEntitys = scene3d.mouseCheckObjects;
-                var pickingCollisionVO = null;
-                for (var i = 0; i < mouseCollisionEntitys.length; i++) {
-                    var entitys = mouseCollisionEntitys[i].objects;
-                    pickingCollisionVO = feng3d.raycaster.pick(mouseRay3D, entitys);
-                    if (pickingCollisionVO)
-                        break;
-                }
-                var gameobject = pickingCollisionVO && pickingCollisionVO.gameObject;
-                if (gameobject)
-                    setSelectedGameObject(gameobject);
-                else
-                    setSelectedGameObject(scene3d.gameObject);
-            }
-            /**
-             * 设置选中对象
-             */
-            function setSelectedGameObject(value) {
-                if (selectedGameObject != value) {
-                    if (selectedGameObject)
-                        selectedGameObject.dispatch("mouseout", null, true);
-                    if (value)
-                        value.dispatch("mouseover", null, true);
-                }
-                selectedGameObject = value;
-                if (selectedGameObject) {
-                    mouseEventTypes.forEach(function (element) {
-                        switch (element) {
-                            case "mousedown":
-                                if (preMouseDownGameObject != selectedGameObject) {
-                                    gameObjectClickNum = 0;
-                                    preMouseDownGameObject = selectedGameObject;
-                                }
-                                selectedGameObject.dispatch(element, null, true);
-                                break;
-                            case "mouseup":
-                                if (selectedGameObject == preMouseDownGameObject) {
-                                    gameObjectClickNum++;
-                                }
-                                else {
-                                    gameObjectClickNum = 0;
-                                    preMouseDownGameObject = null;
-                                }
-                                selectedGameObject.dispatch(element, null, true);
-                                break;
-                            case "mousemove":
-                                selectedGameObject.dispatch(element, null, true);
-                                break;
-                            case "click":
-                                if (gameObjectClickNum > 0)
-                                    selectedGameObject.dispatch(element, null, true);
-                                break;
-                            case "dblclick":
-                                if (gameObjectClickNum > 1)
-                                    selectedGameObject.dispatch(element, null, true);
-                                break;
-                        }
-                    });
-                }
-                else {
-                    gameObjectClickNum = 0;
-                    preMouseDownGameObject = null;
-                }
-                mouseEventTypes.length = 0;
-            }
-            function getSelectedGameObject() {
-                return selectedGameObject;
-            }
-        }
+            this.mouseEventTypes.length = 0;
+        };
+        __decorate([
+            feng3d.watch("mouseInputChanged")
+        ], Mouse3DManager.prototype, "mouseInput", void 0);
         return Mouse3DManager;
     }());
     feng3d.Mouse3DManager = Mouse3DManager;
