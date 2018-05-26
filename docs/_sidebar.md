@@ -7,6 +7,9 @@
   * [介绍编辑器](editor.md)
   * [菜单和工具栏](menus-and-toolbar.md)
 
+* 组件
+  * [声音](audio.md)
+
 * 资源
   * [脚本](script.md)
   * [着色器](shader.md)
