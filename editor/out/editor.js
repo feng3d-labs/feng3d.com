@@ -10598,6 +10598,12 @@ var editor;
                 ]
             },
             {
+                label: "Graphics",
+                submenu: [
+                    { label: "Water", click: function () { gameobject.addComponent(feng3d.Water); } },
+                ]
+            },
+            {
                 label: "Script",
                 submenu: [
                     { label: "Script", click: function () { gameobject.addComponent(feng3d.ScriptComponent); } },

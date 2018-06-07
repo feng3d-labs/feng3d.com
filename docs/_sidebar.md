@@ -10,6 +10,9 @@
 * 组件
   * [声音](audio.md)
 
+* 图形
+  * [水](water.md)
+
 * 资源
   * [脚本](script.md)
   * [着色器](shader.md)
