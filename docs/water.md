@@ -25,3 +25,13 @@
 ![](_images/waterproject.png)
 
 在点击feng3d图标打开菜单中下载水项目
+
+#### 相关代码
+
+https://github.com/feng3d-labs/feng3d/blob/master/src/water/Water.ts
+
+https://github.com/feng3d-labs/feng3d/blob/master/src/water/WaterMaterial.ts
+
+https://github.com/feng3d-labs/feng3d/blob/master/shaders/water.vertex.glsl
+
+https://github.com/feng3d-labs/feng3d/blob/master/shaders/water.fragment.glsl
