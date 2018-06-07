@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <e:Skin class="OAVEnum" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing" xmlns:ns1="*">
 	<e:Group width="100%" height="20">
-		<e:Label id="label" text="label" size="12" width="80" y="0" x="0" textColor="0x000000" verticalAlign="middle" multiline="false"/>
+		<e:Label id="labelLab" text="label" size="12" width="80" y="0" x="0" textColor="0x000000" verticalAlign="middle" multiline="false"/>
 		<ns1:ComboBox id="combobox" width="100%" x="184" y="109"/>
 
 		<e:layout>

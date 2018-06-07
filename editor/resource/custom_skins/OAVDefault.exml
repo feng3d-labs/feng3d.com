@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <e:Skin class="OAVDefault" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing">
 	<e:Group width="100%" height="20">
-		<e:Label id="label" text="" size="12" width="80" y="0" x="0" textColor="0x000000" verticalAlign="middle" multiline="false"/>
+		<e:Label id="labelLab" text="" size="12" width="80" y="0" x="0" textColor="0x000000" verticalAlign="middle" multiline="false"/>
 		<e:TextInput id="text" width="100%" scaleX="1" scaleY="1"/>
 
 		<e:layout>

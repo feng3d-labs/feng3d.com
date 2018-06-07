@@ -14,7 +14,7 @@
 			</e:Skin>
 			</e:skinName>
 		</e:Button>
-		<e:Label id="label" text="Albedo" size="12" width="80" y="0" x="0" textColor="0x000000" verticalAlign="middle" multiline="false" scaleX="1" scaleY="1"/>
+		<e:Label id="labelLab" text="Albedo" size="12" width="80" y="0" x="0" textColor="0x000000" verticalAlign="middle" multiline="false" scaleX="1" scaleY="1"/>
 		<e:layout>
 			<e:HorizontalLayout verticalAlign="middle" gap="0"/>
 		</e:layout>

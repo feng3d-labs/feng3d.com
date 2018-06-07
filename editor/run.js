@@ -1,4 +1,4 @@
-/// <reference path="libs/feng3d.d.ts" />
+/// <reference path="../feng3d/out/feng3d.d.ts" />
 
 var view3D = new feng3d.Engine();
 

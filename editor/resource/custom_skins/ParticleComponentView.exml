@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="ParticleComponentView" xmlns:e="http://ns.egret.com/eui" xmlns:editor="editor.*">
+	<editor:Accordion id="accordion" width="100%" x="0" y="0" skinName="ParticleComponentAccordion"/>
+</e:Skin>

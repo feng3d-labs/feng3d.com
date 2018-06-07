@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="ParticleComponentAccordion" states="show,hide" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing" width="200">
+	<w:Config id="15a7457514f"></w:Config>
+	<e:Rect width="100%" height="100%" fillColor="0x747474" fillAlpha="0" strokeAlpha="1" strokeWeight="1" strokeColor="0x747474"/>
+	<e:Group scaleX="1" scaleY="1" width="100%" height="100%">
+		<e:layout>
+			<e:VerticalLayout horizontalAlign="justify" gap="0" paddingLeft="2" paddingRight="2"  paddingBottom="2" paddingTop="2"/>
+		</e:layout>
+		<e:Group y="0" left="0" width="100%">
+			<e:Group id="titleGroup" width="100%" x="0" y="0" scaleX="1" scaleY="1" height="100%">
+				<e:Label id="titleLabel" size="12" bold="true" textColor="0x000000" touchEnabled="false" verticalCenter="0" text="标题" y="3" scaleX="1" scaleY="1" right="2" left="16"/>
+			</e:Group>
+			<e:CheckBox id="enabledCB" label="" x="2" y="0" scaleX="1" scaleY="1"/>
+		</e:Group>
+		<e:Group id="contentGroup" includeIn="show" y="10" left="0" width="100%" x="10">
+			<e:layout>
+				<e:VerticalLayout  paddingLeft="18" gap="-1" horizontalAlign="justify"/>
+			</e:layout>
+		</e:Group>
+	</e:Group>
+</e:Skin>

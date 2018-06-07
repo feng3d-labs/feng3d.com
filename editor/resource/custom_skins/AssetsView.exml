@@ -10,7 +10,7 @@
 			</e:Group>
 			<e:Rect width="5" height="100%" x="598" y="94" scaleX="1" scaleY="1" fillColor="0xa2a2a2" />
 			<e:Group width="100%" height="100%" x="607" y="227">
-				<e:Group width="100%" height="20">
+				<e:Group height="20" left="0" right="0">
 					<e:Rect width="100%" height="100%" scaleX="1" scaleY="1" fillAlpha="1" fillColor="0xDDDDDD"/>
 					<e:Label id="floderpathTxt" scaleX="1" scaleY="1" size="12" verticalCenter="0" text="文件夹路径" bold="true" x="0" y="0" textColor="0x000000"/>
 
@@ -25,8 +25,9 @@
 					</e:Group>
 				</e:Group>
 
-				<e:Group id="filelistgroup" width="100%" height="100%" y="20">
-					<e:List id="filelist" scaleX="1" scaleY="1" width="100%" height="100%">
+				<e:Group id="filelistgroup" bottom="20" right="0" top="20" left="0">
+					<e:Rect width="100%" height="100%" fillAlpha="0"/>
+					<e:List id="filelist" scaleX="1" scaleY="1" y="0" width="100%" height="100%">
 						<e:layout>
 						<e:TileLayout horizontalGap="0" verticalGap="0"/>
 						</e:layout>
@@ -35,13 +36,14 @@
 
 
 				</e:Group>
-				<e:Group width="100%" height="20" x="436" y="372">
+				<e:Group height="20" bottom="0" left="0" right="0">
 					<e:Rect width="100%" height="100%" scaleX="1" scaleY="1" fillAlpha="1" fillColor="0xdddddd"/>
 					<e:Label id="filepathLabel" x="0" scaleX="1" scaleY="1" size="12" verticalCenter="0" y="26" textColor="0x000000" text="选中的文件名称"/>
 				</e:Group>
 				<e:layout>
-					<e:VerticalLayout gap="0"/>
+					<e:BasicLayout/>
 				</e:layout>
+
 			</e:Group>
 			<e:layout>
 				<e:HorizontalLayout gap="0" />

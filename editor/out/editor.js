@@ -1987,7 +1987,11 @@ var editor;
                 return this._vm;
             },
             set: function (v) {
-                this._vm.copy(v);
+                if (v)
+                    this._vm = v;
+                else
+                    this._vm = new feng3d.Vector3(1, 2, 3);
+                this.showw = v instanceof feng3d.Vector4;
                 this.updateView();
             },
             enumerable: true,
@@ -2049,7 +2053,8 @@ var editor;
             this.xTextInput.text = "" + this.vm.x;
             this.yTextInput.text = "" + this.vm.y;
             this.zTextInput.text = "" + this.vm.z;
-            // this.wTextInput.text = "" + this.vm.w;
+            if (this.vm instanceof feng3d.Vector4)
+                this.wTextInput.text = "" + this.vm.w;
         };
         Vector3DView.prototype.onTextChange = function (event) {
             if (!this._textfocusintxt)
@@ -2065,7 +2070,8 @@ var editor;
                     this.vm.z = Number(this.zTextInput.text);
                     break;
                 case this.wTextInput:
-                    // this.vm.w = Number(this.wTextInput.text);
+                    if (this.vm instanceof feng3d.Vector4)
+                        this.wTextInput.text = "" + this.vm.w;
                     break;
             }
         };
@@ -2202,6 +2208,60 @@ var editor;
         return ComponentView;
     }(eui.Component));
     editor.ComponentView = ComponentView;
+})(editor || (editor = {}));
+var editor;
+(function (editor) {
+    var ParticleComponentView = /** @class */ (function (_super) {
+        __extends(ParticleComponentView, _super);
+        /**
+         * 对象界面数据
+         */
+        function ParticleComponentView(component) {
+            var _this = _super.call(this) || this;
+            _this.component = component;
+            _this.once(eui.UIEvent.COMPLETE, _this.onComplete, _this);
+            _this.skinName = "ParticleComponentView";
+            return _this;
+        }
+        /**
+         * 更新界面
+         */
+        ParticleComponentView.prototype.updateView = function () {
+            this.updateEnableCB();
+            if (this.componentView)
+                this.componentView.updateView();
+        };
+        ParticleComponentView.prototype.onComplete = function () {
+            var componentName = feng3d.classUtils.getQualifiedClassName(this.component).split(".").pop();
+            this.accordion.titleName = componentName;
+            this.componentView = feng3d.objectview.getObjectView(this.component, false, ["enabled"]);
+            this.accordion.addContent(this.componentView);
+            this.enabledCB = this.accordion["enabledCB"];
+            this.addEventListener(egret.Event.ADDED_TO_STAGE, this.onAddToStage, this);
+            this.addEventListener(egret.Event.REMOVED_FROM_STAGE, this.onRemovedFromStage, this);
+            if (this.stage)
+                this.onAddToStage();
+        };
+        ParticleComponentView.prototype.onAddToStage = function () {
+            this.updateView();
+            this.enabledCB.addEventListener(egret.Event.CHANGE, this.onEnableCBChange, this);
+            if (this.component instanceof feng3d.Behaviour)
+                feng3d.watcher.watch(this.component, "enabled", this.updateEnableCB, this);
+        };
+        ParticleComponentView.prototype.onRemovedFromStage = function () {
+            this.enabledCB.removeEventListener(egret.Event.CHANGE, this.onEnableCBChange, this);
+            if (this.component instanceof feng3d.Behaviour)
+                feng3d.watcher.unwatch(this.component, "enabled", this.updateEnableCB, this);
+        };
+        ParticleComponentView.prototype.updateEnableCB = function () {
+            this.enabledCB.selected = this.component.enabled;
+        };
+        ParticleComponentView.prototype.onEnableCBChange = function () {
+            this.component.enabled = this.enabledCB.selected;
+        };
+        return ParticleComponentView;
+    }(eui.Component));
+    editor.ParticleComponentView = ParticleComponentView;
 })(editor || (editor = {}));
 var editor;
 (function (editor) {
@@ -2430,6 +2490,123 @@ var editor;
     //         }
     //     }]
     // }]
+})(editor || (editor = {}));
+var editor;
+(function (editor) {
+    var ToolTip = /** @class */ (function () {
+        function ToolTip() {
+            /**
+             * 默认 提示界面
+             */
+            this.defaultTipview = function () { return editor.TipString; };
+            /**
+             * tip界面映射表，{key:数据类定义,value:界面类定义}，例如 {key:String,value:TipString}
+             */
+            this.tipviewmap = new Map();
+            this.tipmap = new Map();
+            this._ischeck = false;
+        }
+        ToolTip.prototype.register = function (displayObject, tip) {
+            if (!displayObject)
+                return;
+            this.tipmap.set(displayObject, tip);
+            this.ischeck = !!this.tipmap.size;
+        };
+        ToolTip.prototype.unregister = function (displayObject) {
+            if (!displayObject)
+                return;
+            this.tipmap.delete(displayObject);
+            this.ischeck = !!this.tipmap.size;
+        };
+        Object.defineProperty(ToolTip.prototype, "ischeck", {
+            get: function () {
+                return this._ischeck;
+            },
+            set: function (v) {
+                if (this._ischeck == v)
+                    return;
+                this._ischeck = v;
+                if (this._ischeck) {
+                    feng3d.windowEventProxy.on("mousemove", this.onMouseMove, this);
+                }
+                else {
+                    feng3d.windowEventProxy.off("mousemove", this.onMouseMove, this);
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+        ToolTip.prototype.onMouseMove = function (event) {
+            var displayObjects = this.tipmap.getKeys().filter(function (item) {
+                if (!item.stage)
+                    return false;
+                return item.getTransformedBounds(item.stage).contains(event.clientX, event.clientY);
+            });
+            var displayObject = displayObjects[0];
+            if (displayObject) {
+                var tip = this.tipmap.get(displayObject);
+                var tipviewcls = this.tipviewmap.get(tip.constructor);
+                if (!tipviewcls)
+                    tipviewcls = this.defaultTipview();
+                if (this.tipView) {
+                    if (!(this.tipView instanceof tipviewcls)) {
+                        this.removeTipview();
+                    }
+                }
+                if (!this.tipView) {
+                    this.tipView = new tipviewcls();
+                }
+                editor.editorui.tooltipLayer.addChild(this.tipView);
+                this.tipView.value = tip;
+                this.tipView.x = event.clientX;
+                this.tipView.y = event.clientY - this.tipView.height;
+            }
+            else {
+                this.removeTipview();
+            }
+        };
+        ToolTip.prototype.removeTipview = function () {
+            if (this.tipView) {
+                this.tipView.parent.removeChild(this.tipView);
+                this.tipView = null;
+            }
+        };
+        return ToolTip;
+    }());
+    editor.ToolTip = ToolTip;
+    editor.toolTip = new ToolTip();
+})(editor || (editor = {}));
+var editor;
+(function (editor) {
+    /**
+     * String 提示框
+     */
+    var TipString = /** @class */ (function (_super) {
+        __extends(TipString, _super);
+        function TipString() {
+            var _this = _super.call(this) || this;
+            _this.value = "";
+            _this.skinName = "TipString";
+            return _this;
+        }
+        TipString.prototype.$onAddToStage = function (stage, nestLevel) {
+            _super.prototype.$onAddToStage.call(this, stage, nestLevel);
+            this.txtLab.text = String(this.value);
+        };
+        TipString.prototype.$onRemoveFromStage = function () {
+            _super.prototype.$onRemoveFromStage.call(this);
+        };
+        TipString.prototype.valuechanged = function () {
+            if (this.txtLab) {
+                this.txtLab.text = String(this.value);
+            }
+        };
+        __decorate([
+            feng3d.watch("valuechanged")
+        ], TipString.prototype, "value", void 0);
+        return TipString;
+    }(eui.Component));
+    editor.TipString = TipString;
 })(editor || (editor = {}));
 var editor;
 (function (editor) {
@@ -2850,6 +3027,8 @@ var editor;
         __extends(OAVBase, _super);
         function OAVBase(attributeViewInfo) {
             var _this = _super.call(this) || this;
+            // 占用，避免出现label命名的组件
+            _this.label = "";
             _this._space = attributeViewInfo.owner;
             _this._attributeName = attributeViewInfo.name;
             _this._attributeType = attributeViewInfo.type;
@@ -2871,19 +3050,27 @@ var editor;
         });
         OAVBase.prototype.$onAddToStage = function (stage, nestLevel) {
             _super.prototype.$onAddToStage.call(this, stage, nestLevel);
-            if (this.attributeViewInfo.componentParam) {
-                for (var key in this.attributeViewInfo.componentParam) {
-                    if (this.attributeViewInfo.componentParam.hasOwnProperty(key)) {
-                        this[key] = this.attributeViewInfo.componentParam[key];
+            var componentParam = this.attributeViewInfo.componentParam;
+            if (componentParam) {
+                for (var key in componentParam) {
+                    if (componentParam.hasOwnProperty(key)) {
+                        this[key] = componentParam[key];
                     }
                 }
             }
-            if (this.label)
-                this.label.text = this._attributeName;
+            if (this.labelLab) {
+                if (this.label)
+                    this.labelLab.text = this.label;
+                else
+                    this.labelLab.text = this._attributeName;
+            }
+            if (componentParam && componentParam.tooltip)
+                editor.toolTip.register(this.labelLab, componentParam.tooltip);
             this.initView();
             this.updateView();
         };
         OAVBase.prototype.$onRemoveFromStage = function () {
+            editor.toolTip.unregister(this.labelLab);
             _super.prototype.$onRemoveFromStage.call(this);
             this.dispose();
         };
@@ -2971,7 +3158,6 @@ var editor;
         });
         OAVDefault.prototype.initView = function () {
             this.text.percentWidth = 100;
-            this.label.text = this._attributeName;
             this.text.addEventListener(egret.FocusEvent.FOCUS_IN, this.ontxtfocusin, this);
             this.text.addEventListener(egret.FocusEvent.FOCUS_OUT, this.ontxtfocusout, this);
             this.text.addEventListener(egret.Event.CHANGE, this.onTextChange, this);
@@ -3078,16 +3264,69 @@ var editor;
         __extends(OAVNumber, _super);
         function OAVNumber() {
             var _this = _super !== null && _super.apply(this, arguments) || this;
-            _this.fractionDigits = 3;
+            /**
+             * 步长，精度
+             */
+            _this.step = 0.001;
+            /**
+             * 键盘上下方向键步长
+             */
+            _this.stepDownup = 0.001;
+            /**
+             * 移动一个像素时增加的步长数量
+             */
+            _this.stepScale = 1;
+            _this.mouseDownPosition = new feng3d.Vector2();
+            _this.mouseDownValue = 0;
             return _this;
         }
+        OAVNumber.prototype.initView = function () {
+            _super.prototype.initView.call(this);
+            this.addEventListener(egret.MouseEvent.MOUSE_DOWN, this.onMouseDown, this);
+        };
+        OAVNumber.prototype.dispose = function () {
+            this.removeEventListener(egret.MouseEvent.MOUSE_DOWN, this.onMouseDown, this);
+            _super.prototype.dispose.call(this);
+        };
         /**
          * 更新界面
          */
         OAVNumber.prototype.updateView = function () {
-            var pow = Math.pow(10, 3);
-            var value = Math.round(this.attributeValue * pow) / pow;
-            this.text.text = String(value);
+            // 消除数字显示为类似 0.0000000001 的问题
+            var fractionDigits = 1;
+            while (fractionDigits * this.step < 1) {
+                fractionDigits *= 10;
+            }
+            this.text.text = String(Math.round(fractionDigits * (Math.round(this.attributeValue / this.step) * this.step)) / fractionDigits);
+        };
+        OAVNumber.prototype.onMouseDown = function (e) {
+            this.mouseDownPosition.init(e.stageX, e.stageY);
+            this.mouseDownValue = this.attributeValue;
+            editor.editorui.stage.addEventListener(egret.MouseEvent.MOUSE_MOVE, this.onStageMouseMove, this);
+            editor.editorui.stage.addEventListener(egret.MouseEvent.MOUSE_UP, this.onStageMouseUp, this);
+        };
+        OAVNumber.prototype.onStageMouseMove = function (e) {
+            this.attributeValue = this.mouseDownValue + ((e.stageX - this.mouseDownPosition.x) + (this.mouseDownPosition.y - e.stageY)) * this.step * this.stepScale;
+        };
+        OAVNumber.prototype.onStageMouseUp = function () {
+            editor.editorui.stage.removeEventListener(egret.MouseEvent.MOUSE_MOVE, this.onStageMouseMove, this);
+            editor.editorui.stage.removeEventListener(egret.MouseEvent.MOUSE_UP, this.onStageMouseUp, this);
+        };
+        OAVNumber.prototype.ontxtfocusin = function () {
+            _super.prototype.ontxtfocusin.call(this);
+            feng3d.windowEventProxy.on("keydown", this.onWindowKeyDown, this);
+        };
+        OAVNumber.prototype.ontxtfocusout = function () {
+            _super.prototype.ontxtfocusout.call(this);
+            feng3d.windowEventProxy.off("keydown", this.onWindowKeyDown, this);
+        };
+        OAVNumber.prototype.onWindowKeyDown = function (event) {
+            if (event.key == "ArrowUp") {
+                this.attributeValue += this.step;
+            }
+            else if (event.key == "ArrowDown") {
+                this.attributeValue -= this.step;
+            }
         };
         OAVNumber = __decorate([
             feng3d.OAVComponent()
@@ -3231,7 +3470,7 @@ var editor;
         }
         OAVArrayItem.prototype.initView = function () {
             _super.prototype.initView.call(this);
-            this.label.width = 60;
+            this.labelLab.width = 60;
         };
         return OAVArrayItem;
     }(editor.OAVDefault));
@@ -3294,13 +3533,11 @@ var editor;
         __extends(OAVComponentList, _super);
         function OAVComponentList(attributeViewInfo) {
             var _this = _super.call(this, attributeViewInfo) || this;
-            _this.accordions = [];
             _this.skinName = "OAVComponentListSkin";
             return _this;
         }
         OAVComponentList.prototype.onAddComponentButtonClick = function () {
-            editor.needcreateComponentGameObject = this.space;
-            editor.menu.popup(editor.createComponentConfig);
+            editor.menu.popup(editor.getCreateComponentMenu(this.space));
         };
         Object.defineProperty(OAVComponentList.prototype, "space", {
             get: function () {
@@ -3336,7 +3573,6 @@ var editor;
         });
         OAVComponentList.prototype.initView = function () {
             var _this = this;
-            this.accordions.length = 0;
             this.group.layout.gap = -1;
             var components = this.attributeValue;
             for (var i = 0; i < components.length; i++) {
@@ -3548,11 +3784,31 @@ var editor;
             return _this;
         }
         OAVObjectView.prototype.initView = function () {
-            this.view = feng3d.objectview.getObjectView(this.attributeValue);
-            this.view.percentWidth = 100;
-            this.group.addChild(this.view);
+            var _this = this;
+            var arr = [];
+            if (this.attributeValue instanceof Array)
+                arr = this.attributeValue;
+            else
+                arr.push(this.attributeValue);
+            this.views = [];
+            arr.forEach(function (element) {
+                var view = feng3d.objectview.getObjectView(element);
+                view.percentWidth = 100;
+                _this.group.addChild(view);
+                _this.views.push(view);
+            });
         };
         OAVObjectView.prototype.updateView = function () {
+        };
+        /**
+         * 销毁
+         */
+        OAVObjectView.prototype.dispose = function () {
+            var _this = this;
+            this.views.forEach(function (element) {
+                _this.group.removeChild(element);
+            });
+            this.views = null;
         };
         OAVObjectView = __decorate([
             feng3d.OAVComponent()
@@ -3628,7 +3884,6 @@ var editor;
         }
         OAVPick.prototype.initView = function () {
             var _this = this;
-            this.label.text = this._attributeName;
             this.addEventListener(egret.MouseEvent.DOUBLE_CLICK, this.onDoubleClick, this);
             this.pickBtn.addEventListener(egret.MouseEvent.CLICK, this.ontxtClick, this);
             feng3d.watcher.watch(this.space, this.attributeName, this.updateView, this);
@@ -3795,7 +4050,6 @@ var editor;
             return _this;
         }
         OAVTexture2D.prototype.initView = function () {
-            this.label.text = this._attributeName;
             this.addEventListener(egret.MouseEvent.DOUBLE_CLICK, this.onDoubleClick, this);
             this.pickBtn.addEventListener(egret.MouseEvent.CLICK, this.ontxtClick, this);
             feng3d.watcher.watch(this.space, this.attributeName, this.updateView, this);
@@ -3864,6 +4118,96 @@ var editor;
 })(editor || (editor = {}));
 var editor;
 (function (editor) {
+    var OAVParticleComponentList = /** @class */ (function (_super) {
+        __extends(OAVParticleComponentList, _super);
+        function OAVParticleComponentList(attributeViewInfo) {
+            var _this = _super.call(this, attributeViewInfo) || this;
+            _this.skinName = "OAVParticleComponentList";
+            return _this;
+        }
+        OAVParticleComponentList.prototype.onAddComponentButtonClick = function () {
+            editor.menu.popup(editor.getCreateParticleComponentMenu(this.space));
+        };
+        Object.defineProperty(OAVParticleComponentList.prototype, "space", {
+            get: function () {
+                return this._space;
+            },
+            set: function (value) {
+                this._space = value;
+                this.dispose();
+                this.initView();
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(OAVParticleComponentList.prototype, "attributeName", {
+            get: function () {
+                return this._attributeName;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(OAVParticleComponentList.prototype, "attributeValue", {
+            get: function () {
+                return this._space[this._attributeName];
+            },
+            set: function (value) {
+                if (this._space[this._attributeName] != value) {
+                    this._space[this._attributeName] = value;
+                }
+                this.updateView();
+            },
+            enumerable: true,
+            configurable: true
+        });
+        OAVParticleComponentList.prototype.initView = function () {
+            this.group.layout.gap = -1;
+            var components = this.attributeValue;
+            for (var i = 0; i < components.length; i++) {
+                this.addComponentView(components[i]);
+            }
+            this.addComponentButton.addEventListener(egret.MouseEvent.CLICK, this.onAddComponentButtonClick, this);
+        };
+        OAVParticleComponentList.prototype.dispose = function () {
+            var components = this.attributeValue;
+            for (var i = 0; i < components.length; i++) {
+                this.removedComponentView(components[i]);
+            }
+            this.addComponentButton.removeEventListener(egret.MouseEvent.CLICK, this.onAddComponentButtonClick, this);
+        };
+        OAVParticleComponentList.prototype.addComponentView = function (component) {
+            var o;
+            var displayObject = new editor.ParticleComponentView(component);
+            displayObject.percentWidth = 100;
+            this.group.addChild(displayObject);
+        };
+        /**
+         * 更新界面
+         */
+        OAVParticleComponentList.prototype.updateView = function () {
+            for (var i = 0, n = this.group.numChildren; i < n; i++) {
+                var child = this.group.getChildAt(i);
+                if (child instanceof editor.ParticleComponentView)
+                    child.updateView();
+            }
+        };
+        OAVParticleComponentList.prototype.removedComponentView = function (component) {
+            for (var i = this.group.numChildren - 1; i >= 0; i--) {
+                var displayObject = this.group.getChildAt(i);
+                if (displayObject instanceof editor.ParticleComponentView && displayObject.component == component) {
+                    this.group.removeChild(displayObject);
+                }
+            }
+        };
+        OAVParticleComponentList = __decorate([
+            feng3d.OAVComponent()
+        ], OAVParticleComponentList);
+        return OAVParticleComponentList;
+    }(editor.OAVBase));
+    editor.OAVParticleComponentList = OAVParticleComponentList;
+})(editor || (editor = {}));
+var editor;
+(function (editor) {
     /**
      * 属性面板（检查器）
      * @author feng     2017-03-20
@@ -3912,6 +4256,9 @@ var editor;
                     var viewData = this.viewData;
                     viewData.showInspectorData(function (showdata) {
                         if (viewData == _this.viewData) {
+                            if (_this.view && _this.view.parent) {
+                                _this.view.parent.removeChild(_this.view);
+                            }
                             _this.view = feng3d.objectview.getObjectView(showdata);
                             _this.view.percentWidth = 100;
                             _this.group.addChild(_this.view);
@@ -4149,7 +4496,7 @@ var editor;
                             feng3d.feng3dDispatcher.dispatch("assets.deletefile", { path: element });
                         }
                     });
-                    if (editor.editorAssets.showFloder == path) {
+                    if (editor.editorAssets.showFloder == path && path != editor.editorAssets.assetsPath) {
                         editor.editorAssets.showFloder = feng3d.pathUtils.getParentPath(path);
                     }
                 }
@@ -9152,6 +9499,28 @@ var egret;
             feng3d.shortcut.enable = !this._isFocus;
         };
     })();
+    (function () {
+        // 扩展 TextInput , 焦点在文本中时，延缓外部通过text属性赋值到失去焦点时生效
+        var descriptor = Object.getOwnPropertyDescriptor(eui.TextInput.prototype, "text");
+        var oldTextSet = descriptor.set;
+        descriptor.set = function (value) {
+            if (this["isFocus"]) {
+                this["__temp_value__"] = value;
+            }
+            else {
+                oldTextSet.call(this, value);
+            }
+        };
+        Object.defineProperty(eui.TextInput.prototype, "text", descriptor);
+        var oldFocusOutHandler = eui.TextInput.prototype["focusOutHandler"];
+        eui.TextInput.prototype["focusOutHandler"] = function (event) {
+            oldFocusOutHandler.call(this, event);
+            if (this["__temp_value__"] != undefined) {
+                this["text"] = this["__temp_value__"];
+                delete this["__temp_value__"];
+            }
+        };
+    })();
     egret.MouseEvent = egret.TouchEvent;
     (function () {
         //映射事件名称
@@ -9785,7 +10154,10 @@ var editor;
             propertyClip.propertyValues = [];
             var propertyValues = propertyClip.propertyValues;
             var times = keyframeTrack.times;
-            var values = Array.from(keyframeTrack.values, usenumberfixed ? function (v) { return Number(v.toFixed(6)); } : null);
+            var values = ds.utils.arrayFrom(keyframeTrack.values);
+            if (usenumberfixed) {
+                values = values.map(function (v) { return Number(v.toFixed(6)); });
+            }
             var len = times.length;
             switch (keyframeTrack.ValueTypeName) {
                 case "vector":
@@ -9858,7 +10230,10 @@ var editor;
         for (var key in attributes) {
             if (attributes.hasOwnProperty(key)) {
                 var element = attributes[key];
-                var array = Array.from(element.array, usenumberfixed ? function (v) { return Number(v.toFixed(6)); } : null);
+                var array = ds.utils.arrayFrom(element.array);
+                if (usenumberfixed) {
+                    array = array.map(function (v) { return Number(v.toFixed(6)); });
+                }
                 switch (key) {
                     case "position":
                         geo.positions = array;
@@ -10021,6 +10396,11 @@ var editor;
                         openDownloadProject("customshader.feng3d.zip");
                     },
                 },
+                {
+                    label: "水", click: function () {
+                        openDownloadProject("water.feng3d.zip");
+                    },
+                },
             ],
         },
         {
@@ -10034,6 +10414,11 @@ var editor;
                 {
                     label: "自定义材质", click: function () {
                         downloadProject("customshader.feng3d.zip");
+                    },
+                },
+                {
+                    label: "水", click: function () {
+                        downloadProject("water.feng3d.zip");
                     },
                 },
             ],
@@ -10115,6 +10500,11 @@ var editor;
                         addToHierarchy(feng3d.gameObjectFactory.createTerrain());
                     }
                 },
+                {
+                    label: "水", click: function () {
+                        addToHierarchy(feng3d.gameObjectFactory.createWater());
+                    }
+                },
             ],
         },
         {
@@ -10154,64 +10544,78 @@ var editor;
         editor.editorData.selectObject(gameobject);
     }
     /**
-     * 层级界面创建3D对象列表数据
+     * 获取创建游戏对象组件菜单
+     * @param gameobject 游戏对象
      */
-    editor.createComponentConfig = [
-        //label:显示在创建列表中的名称 className:3d对象的类全路径，将通过classUtils.getDefinitionByName获取定义
-        {
-            label: "SkyBox",
-            click: function () { editor.needcreateComponentGameObject.addComponent(feng3d.SkyBox); }
-        },
-        {
-            label: "Animator",
-            submenu: [
-                { label: "ParticleSystem", click: function () { editor.needcreateComponentGameObject.addComponent(feng3d.ParticleSystem); } },
-                { label: "Animation", click: function () { editor.needcreateComponentGameObject.addComponent(feng3d.Animation); } },
-            ]
-        },
-        {
-            label: "Rendering",
-            submenu: [
-                { label: "Camera", click: function () { editor.needcreateComponentGameObject.addComponent(feng3d.Camera); } },
-                { label: "PointLight", click: function () { editor.needcreateComponentGameObject.addComponent(feng3d.PointLight); } },
-                { label: "DirectionalLight", click: function () { editor.needcreateComponentGameObject.addComponent(feng3d.DirectionalLight); } },
-                { label: "OutLineComponent", click: function () { editor.needcreateComponentGameObject.addComponent(feng3d.OutLineComponent); } },
-                { label: "CartoonComponent", click: function () { editor.needcreateComponentGameObject.addComponent(feng3d.CartoonComponent); } },
-            ]
-        },
-        {
-            label: "Controller",
-            submenu: [
-                { label: "FPSController", click: function () { editor.needcreateComponentGameObject.addComponent(feng3d.FPSController); } },
-            ]
-        },
-        {
-            label: "Layout",
-            submenu: [
-                { label: "HoldSizeComponent", click: function () { editor.needcreateComponentGameObject.addComponent(feng3d.HoldSizeComponent); } },
-                { label: "BillboardComponent", click: function () { editor.needcreateComponentGameObject.addComponent(feng3d.BillboardComponent); } },
-            ]
-        },
-        {
-            label: "Audio",
-            submenu: [
-                { label: "AudioListener", click: function () { editor.needcreateComponentGameObject.addComponent(feng3d.AudioListener); } },
-                { label: "AudioSource", click: function () { editor.needcreateComponentGameObject.addComponent(feng3d.AudioSource); } },
-            ]
-        },
-        {
-            label: "Navigation",
-            submenu: [
-                { label: "Navigation", click: function () { editor.needcreateComponentGameObject.addComponent(editor.Navigation); } },
-            ]
-        },
-        {
-            label: "Script",
-            submenu: [
-                { label: "Script", click: function () { editor.needcreateComponentGameObject.addComponent(feng3d.ScriptComponent); } },
-            ]
-        },
-    ];
+    function getCreateComponentMenu(gameobject) {
+        var menu = [
+            //label:显示在创建列表中的名称 className:3d对象的类全路径，将通过classUtils.getDefinitionByName获取定义
+            {
+                label: "SkyBox",
+                click: function () { gameobject.addComponent(feng3d.SkyBox); }
+            },
+            {
+                label: "Animator",
+                submenu: [
+                    { label: "ParticleSystem", click: function () { gameobject.addComponent(feng3d.ParticleSystem); } },
+                    { label: "Animation", click: function () { gameobject.addComponent(feng3d.Animation); } },
+                ]
+            },
+            {
+                label: "Rendering",
+                submenu: [
+                    { label: "Camera", click: function () { gameobject.addComponent(feng3d.Camera); } },
+                    { label: "PointLight", click: function () { gameobject.addComponent(feng3d.PointLight); } },
+                    { label: "DirectionalLight", click: function () { gameobject.addComponent(feng3d.DirectionalLight); } },
+                    { label: "OutLineComponent", click: function () { gameobject.addComponent(feng3d.OutLineComponent); } },
+                    { label: "CartoonComponent", click: function () { gameobject.addComponent(feng3d.CartoonComponent); } },
+                ]
+            },
+            {
+                label: "Controller",
+                submenu: [
+                    { label: "FPSController", click: function () { gameobject.addComponent(feng3d.FPSController); } },
+                ]
+            },
+            {
+                label: "Layout",
+                submenu: [
+                    { label: "HoldSizeComponent", click: function () { gameobject.addComponent(feng3d.HoldSizeComponent); } },
+                    { label: "BillboardComponent", click: function () { gameobject.addComponent(feng3d.BillboardComponent); } },
+                ]
+            },
+            {
+                label: "Audio",
+                submenu: [
+                    { label: "AudioListener", click: function () { gameobject.addComponent(feng3d.AudioListener); } },
+                    { label: "AudioSource", click: function () { gameobject.addComponent(feng3d.AudioSource); } },
+                ]
+            },
+            {
+                label: "Navigation",
+                submenu: [
+                    { label: "Navigation", click: function () { gameobject.addComponent(editor.Navigation); } },
+                ]
+            },
+            {
+                label: "Script",
+                submenu: [
+                    { label: "Script", click: function () { gameobject.addComponent(feng3d.ScriptComponent); } },
+                ]
+            },
+        ];
+        return menu;
+    }
+    editor.getCreateComponentMenu = getCreateComponentMenu;
+    /**
+     * 获取创建粒子系统组件菜单
+     * @param particleSystem 粒子系统
+     */
+    function getCreateParticleComponentMenu(particleSystem) {
+        var menu = [];
+        return menu;
+    }
+    editor.getCreateParticleComponentMenu = getCreateParticleComponentMenu;
     /**
      * 下载项目
      * @param projectname
@@ -10325,6 +10729,11 @@ var editor;
                 maskLayer.touchEnabled = false;
                 _this.stage.addChild(maskLayer);
                 editor.editorui.maskLayer = maskLayer;
+                //
+                var tooltipLayer = new eui.UILayer();
+                tooltipLayer.touchEnabled = false;
+                _this.stage.addChild(tooltipLayer);
+                editor.editorui.tooltipLayer = tooltipLayer;
                 //
                 var popupLayer = new eui.UILayer();
                 popupLayer.touchEnabled = false;

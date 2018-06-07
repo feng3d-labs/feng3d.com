@@ -192,6 +192,8 @@ declare namespace editor {
         private updateStats(path, callback, onComplete?, onError?);
     }
 }
+declare function require(module: string): any;
+declare var __dirname: string;
 declare namespace editor {
     var fs: EditorAssets1;
     class EditorAssets1 extends feng3d.ReadWriteAssets {
@@ -546,7 +548,7 @@ declare namespace editor {
         zTextInput: eui.TextInput;
         wGroup: eui.Group;
         wTextInput: eui.TextInput;
-        vm: feng3d.Vector3;
+        vm: feng3d.Vector3 | feng3d.Vector4;
         private _vm;
         constructor();
         showw: any;
@@ -595,6 +597,28 @@ declare namespace editor {
     }
 }
 declare namespace editor {
+    class ParticleComponentView extends eui.Component {
+        component: feng3d.ParticleComponent;
+        componentView: feng3d.IObjectView;
+        accordion: editor.Accordion;
+        enabledCB: eui.CheckBox;
+        scriptView: feng3d.IObjectView;
+        /**
+         * 对象界面数据
+         */
+        constructor(component: feng3d.ParticleComponent);
+        /**
+         * 更新界面
+         */
+        updateView(): void;
+        private onComplete();
+        private onAddToStage();
+        private onRemovedFromStage();
+        private updateEnableCB();
+        private onEnableCBChange();
+    }
+}
+declare namespace editor {
     /**
      * 菜单
      */
@@ -631,6 +655,43 @@ declare namespace editor {
         private onRemovedFromStage();
         private updateView();
         remove(): void;
+    }
+}
+declare namespace editor {
+    var toolTip: ToolTip;
+    interface ITipView extends egret.DisplayObject {
+        value: any;
+    }
+    class ToolTip {
+        /**
+         * 默认 提示界面
+         */
+        defaultTipview: () => typeof TipString;
+        /**
+         * tip界面映射表，{key:数据类定义,value:界面类定义}，例如 {key:String,value:TipString}
+         */
+        tipviewmap: Map<any, new () => ITipView>;
+        private tipmap;
+        private tipView;
+        register(displayObject: egret.DisplayObject, tip: any): void;
+        unregister(displayObject: egret.DisplayObject): void;
+        private ischeck;
+        private _ischeck;
+        private onMouseMove(event);
+        private removeTipview();
+    }
+}
+declare namespace editor {
+    /**
+     * String 提示框
+     */
+    class TipString extends eui.Component implements eui.UIComponent {
+        txtLab: eui.Label;
+        constructor();
+        value: string;
+        $onAddToStage(stage: egret.Stage, nestLevel: number): void;
+        $onRemoveFromStage(): void;
+        private valuechanged();
     }
 }
 declare namespace editor {
@@ -767,7 +828,7 @@ declare namespace editor {
         protected _attributeName: string;
         protected _attributeType: string;
         protected attributeViewInfo: feng3d.AttributeViewInfo;
-        label: eui.Label;
+        labelLab: eui.Label;
         /**
          * 对象属性界面
          */
@@ -778,6 +839,7 @@ declare namespace editor {
         objectBlockView: feng3d.IObjectBlockView;
         constructor(attributeViewInfo: feng3d.AttributeViewInfo);
         space: any;
+        private label;
         $onAddToStage(stage: egret.Stage, nestLevel: number): void;
         $onRemoveFromStage(): void;
         /**
@@ -802,7 +864,7 @@ declare namespace editor {
      * @author feng 2016-3-10
      */
     class OAVDefault extends OAVBase {
-        label: eui.Label;
+        labelLab: eui.Label;
         text: eui.TextInput;
         constructor(attributeViewInfo: feng3d.AttributeViewInfo);
         dragparam: {
@@ -814,8 +876,8 @@ declare namespace editor {
         initView(): void;
         dispose(): void;
         private _textfocusintxt;
-        private ontxtfocusin();
-        private ontxtfocusout();
+        protected ontxtfocusin(): void;
+        protected ontxtfocusout(): void;
         /**
          * 更新界面
          */
@@ -826,7 +888,6 @@ declare namespace editor {
 }
 declare namespace editor {
     class OAVBoolean extends OAVBase {
-        label: eui.Label;
         checkBox: eui.CheckBox;
         constructor(attributeViewInfo: feng3d.AttributeViewInfo);
         initView(): void;
@@ -841,17 +902,38 @@ declare namespace editor {
      * @author feng 2016-3-10
      */
     class OAVNumber extends OAVDefault {
-        fractionDigits: number;
+        /**
+         * 步长，精度
+         */
+        step: number;
+        /**
+         * 键盘上下方向键步长
+         */
+        stepDownup: number;
+        /**
+         * 移动一个像素时增加的步长数量
+         */
+        stepScale: number;
         attributeValue: number;
+        initView(): void;
+        dispose(): void;
         /**
          * 更新界面
          */
         updateView(): void;
+        private mouseDownPosition;
+        private mouseDownValue;
+        private onMouseDown(e);
+        private onStageMouseMove(e);
+        private onStageMouseUp();
+        protected ontxtfocusin(): void;
+        protected ontxtfocusout(): void;
+        private onWindowKeyDown(event);
     }
 }
 declare namespace editor {
     class OAVVector3D extends OAVBase {
-        label: eui.Label;
+        labelLab: eui.Label;
         vector3DView: editor.Vector3DView;
         constructor(attributeViewInfo: feng3d.AttributeViewInfo);
         initView(): void;
@@ -882,7 +964,7 @@ declare namespace editor {
 }
 declare namespace editor {
     class OAVEnum extends OAVBase {
-        label: eui.Label;
+        labelLab: eui.Label;
         combobox: ComboBox;
         private list;
         constructor(attributeViewInfo: feng3d.AttributeViewInfo);
@@ -895,7 +977,6 @@ declare namespace editor {
 }
 declare namespace editor {
     class OAVComponentList extends OAVBase {
-        private accordions;
         protected _space: feng3d.GameObject;
         group: eui.Group;
         addComponentButton: eui.Button;
@@ -918,7 +999,7 @@ declare namespace editor {
 }
 declare namespace editor {
     class OAVFunction extends OAVBase {
-        label: eui.Label;
+        labelLab: eui.Label;
         button: eui.Button;
         constructor(attributeViewInfo: feng3d.AttributeViewInfo);
         initView(): void;
@@ -929,7 +1010,7 @@ declare namespace editor {
 }
 declare namespace editor {
     class OAVColorPicker extends OAVBase {
-        label: eui.Label;
+        labelLab: eui.Label;
         colorPicker: editor.ColorPicker;
         input: eui.TextInput;
         attributeValue: feng3d.Color3 | feng3d.Color4;
@@ -963,10 +1044,14 @@ declare namespace editor {
 declare namespace editor {
     class OAVObjectView extends OAVBase {
         group: eui.Group;
-        view: eui.Component;
+        views: feng3d.IObjectView[];
         constructor(attributeViewInfo: feng3d.AttributeViewInfo);
         initView(): void;
         updateView(): void;
+        /**
+         * 销毁
+         */
+        dispose(): void;
     }
 }
 declare namespace editor {
@@ -993,7 +1078,7 @@ declare namespace editor {
      * @author feng 2016-3-10
      */
     class OAVPick extends OAVBase {
-        label: eui.Label;
+        labelLab: eui.Label;
         text: eui.Label;
         pickBtn: eui.Button;
         constructor(attributeViewInfo: feng3d.AttributeViewInfo);
@@ -1016,7 +1101,7 @@ declare namespace editor {
         image: eui.Image;
         img_border: eui.Image;
         pickBtn: eui.Button;
-        label: eui.Label;
+        labelLab: eui.Label;
         constructor(attributeViewInfo: feng3d.AttributeViewInfo);
         initView(): void;
         dispose(): void;
@@ -1026,6 +1111,26 @@ declare namespace editor {
          */
         updateView(): void;
         private onDoubleClick();
+    }
+}
+declare namespace editor {
+    class OAVParticleComponentList extends OAVBase {
+        protected _space: feng3d.ParticleSystem;
+        group: eui.Group;
+        addComponentButton: eui.Button;
+        constructor(attributeViewInfo: feng3d.AttributeViewInfo);
+        private onAddComponentButtonClick();
+        space: feng3d.ParticleSystem;
+        readonly attributeName: string;
+        attributeValue: Object;
+        initView(): void;
+        dispose(): void;
+        private addComponentView(component);
+        /**
+         * 更新界面
+         */
+        updateView(): void;
+        private removedComponentView(component);
     }
 }
 declare namespace editor {
@@ -1498,6 +1603,7 @@ declare namespace editor {
         stage: egret.Stage;
         assetsview: AssetsView;
         mainview: MainView;
+        tooltipLayer: eui.UILayer;
         maskLayer: eui.UILayer;
         popupLayer: eui.UILayer;
         /**
@@ -2319,11 +2425,16 @@ declare namespace editor {
      * 层级界面创建3D对象列表数据
      */
     var createObjectConfig: MenuItem[];
-    var needcreateComponentGameObject: feng3d.GameObject;
     /**
-     * 层级界面创建3D对象列表数据
+     * 获取创建游戏对象组件菜单
+     * @param gameobject 游戏对象
      */
-    var createComponentConfig: MenuItem[];
+    function getCreateComponentMenu(gameobject: feng3d.GameObject): MenuItem[];
+    /**
+     * 获取创建粒子系统组件菜单
+     * @param particleSystem 粒子系统
+     */
+    function getCreateParticleComponentMenu(particleSystem: feng3d.ParticleSystem): MenuItem[];
 }
 declare namespace editor {
 }

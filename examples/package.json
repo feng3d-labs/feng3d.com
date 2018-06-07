@@ -1,0 +1,23 @@
+{
+  "name": "examples",
+  "version": "1.0.0",
+  "description": "feng3d引擎示例",
+  "main": "out/examples.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.oschina.net/feng3d/examples.git"
+  },
+  "keywords": [
+    "feng3d",
+    "examples",
+    "webgl",
+    "3dEngine"
+  ],
+  "author": "feng",
+  "license": "ISC",
+  "devDependencies": {},
+  "dependencies": {}
+}
