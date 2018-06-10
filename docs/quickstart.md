@@ -5,23 +5,7 @@
 在html中添加了feng3d.js
     
 ```
-<!DOCTYPE html>
-<html>
-	<head>
-		<meta charset=utf-8>
-		<title>My first feng3d app</title>
-		<style>
-			body { margin: 0; }
-			canvas { width: 100%; height: 100% }
-		</style>
-	</head>
-	<body>
-		<script src="http://feng3d.gitee.io/out/feng3d.js"></script>
-		<script>
-			// Our Javascript will go here.
-		</script>
-	</body>
-</html>
+<script src="https://unpkg.com/feng3d"></script>
 ```
 
 ## 初始化feng3d
