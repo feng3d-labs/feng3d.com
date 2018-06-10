@@ -32,7 +32,7 @@
       },
       basePath: 'docs',
       // homepage: '../README.md',
-      homepage: '../feng3d/README.md',
+      // homepage: '../feng3d/README.md',
       auto2top: true,
       coverpage: true,
       executeScript: true,
@@ -56,7 +56,7 @@
         {
           hook.beforeEach(function (html)
           {
-            var url = 'https://github.com/feng3d-labs/feng3d.com/blob/master/docs/' + vm.route.file
+            var url = 'https://gitee.com/feng3d/feng3d.com/tree/master/docs/' + vm.route.file
             var editHtml = '[:memo: 编辑文档](' + url + ')\n'
 
             return editHtml + html
