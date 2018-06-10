@@ -9,5 +9,5 @@
 
 [Github](https://github.com/feng3d-labs/feng3d)
 [Gitee](https://gitee.com/feng3d/feng3d)
-[issues](https://github.com/feng3d-labs/feng3d/issues)
+[issues](https://gitee.com/feng3d/feng3d/issues)
 [Get Started](#feng3d)
