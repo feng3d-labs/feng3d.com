@@ -60,6 +60,7 @@
             var editHtml = '[:memo: 编辑文档](' + url + ')\n'
 
             return editHtml + html
+              + `<div id="SOHUCS" sid="${vm.route.file}"></div>`
               + '\n\n----\n\n'
               + '<a href="https://docsify.js.org" target="_blank" style="color: inherit; font-weight: normal; text-decoration: none;">Powered by docsify</a>';
           })
@@ -72,6 +73,14 @@
   <script src="//unpkg.com/prismjs/components/prism-bash.min.js"></script>
   <script src="//unpkg.com/prismjs/components/prism-markdown.min.js"></script>
   <script src="//unpkg.com/prismjs/components/prism-nginx.min.js"></script>
+  <!--PC版-->
+  <script charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/changyan.js"></script>
+  <script type="text/javascript">
+    window.changyan.api.config({
+      appid: 'cytAmrlAF',
+      conf: 'prod_bc2ed1231ce480eb244496c7bf4dabd9'
+    });
+  </script>
 </body>
 
 </html>
