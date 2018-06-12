@@ -59,8 +59,12 @@
             var url = 'https://gitee.com/feng3d/feng3d.com/tree/master/docs/' + vm.route.file
             var editHtml = '[:memo: 编辑文档](' + url + ')\n'
 
+            var sid = document.URL;
+            if (sid.indexOf("?"))
+              sid = sid.substr(0, sid.indexOf("?"));
+
             return editHtml + html
-              + `<div id="SOHUCS" sid="${vm.route.file}"></div>`
+              + `<div id="SOHUCS" sid="${sid}"></div>`
               + '\n\n----\n\n'
               + '<a href="https://docsify.js.org" target="_blank" style="color: inherit; font-weight: normal; text-decoration: none;">Powered by docsify</a>';
           })
