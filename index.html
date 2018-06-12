@@ -57,14 +57,10 @@
           hook.beforeEach(function (html)
           {
             var url = 'https://gitee.com/feng3d/feng3d.com/tree/master/docs/' + vm.route.file
-            var editHtml = '[:memo: 编辑文档](' + url + ')\n'
+            var editHtml = '[![](_images/memo.png) 编辑文档](' + url + ')' + '[![](_images/talk.png) 评论](' + url + '#comment-box)\n';
 
-            var sid = document.URL;
-            if (sid.indexOf("?"))
-              sid = sid.substr(0, sid.indexOf("?"));
-
-            return editHtml + html
-              + `<div id="SOHUCS" sid="${sid}"></div>`
+            return html + '\n\n'
+              + editHtml
               + '\n\n----\n\n'
               + '<a href="https://docsify.js.org" target="_blank" style="color: inherit; font-weight: normal; text-decoration: none;">Powered by docsify</a>';
           })
@@ -77,14 +73,6 @@
   <script src="//unpkg.com/prismjs/components/prism-bash.min.js"></script>
   <script src="//unpkg.com/prismjs/components/prism-markdown.min.js"></script>
   <script src="//unpkg.com/prismjs/components/prism-nginx.min.js"></script>
-  <!--PC版-->
-  <script charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/changyan.js"></script>
-  <script type="text/javascript">
-    window.changyan.api.config({
-      appid: 'cytAmrlAF',
-      conf: 'prod_bc2ed1231ce480eb244496c7bf4dabd9'
-    });
-  </script>
 </body>
 
 </html>
