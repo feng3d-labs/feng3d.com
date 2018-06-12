@@ -1,0 +1,15 @@
+{
+  "name": "feng3d.com",
+  "version": "1.0.0",
+  "description": "> feng3d是使用TypeScript进行编写基于WebGL的3D游戏引擎，致力于打造一个优秀的3d游戏引擎以及易用且可以快速开发项目的配套编辑器。",
+  "main": "",
+  "directories": {
+    "doc": "docs",
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
