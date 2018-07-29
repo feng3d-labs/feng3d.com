@@ -581,7 +581,7 @@ var MousePickTest = /** @class */ (function (_super) {
         cylinder.transform.position = new feng3d.Vector3(-3, 0, 0);
         cylinder.mouseEnabled = true;
         scene.gameObject.addChild(cylinder);
-        scene.gameObject.on("click", function (event) {
+        scene.on("click", function (event) {
             var transform = event.target;
             if (transform.getComponent(feng3d.MeshRenderer)) {
                 var material = transform.getComponent(feng3d.MeshRenderer).material = feng3d.materialFactory.create("color");
@@ -1433,7 +1433,7 @@ var webvr_cubes = /** @class */ (function (_super) {
             container.appendChild(info);
             scene.background.fromUnit(0x505050);
             var lens = camera.lens = new feng3d.PerspectiveLens(70);
-            lens.aspectRatio = window.innerWidth / window.innerHeight;
+            lens.aspect = window.innerWidth / window.innerHeight;
             lens.near = 0.1;
             lens.far = 10;
             camera.gameObject.addComponent(feng3d.FPSController);
@@ -1523,7 +1523,7 @@ var webvr_cubes = /** @class */ (function (_super) {
             }
         }
         function onWindowResize() {
-            camera.lens.aspectRatio = window.innerWidth / window.innerHeight;
+            camera.lens.aspect = window.innerWidth / window.innerHeight;
             // engine.setSize(window.innerWidth, window.innerHeight);
         }
         //

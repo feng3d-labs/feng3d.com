@@ -1,3 +1,6 @@
+declare module 'feng3d' {
+    export = feng3d;
+}
 interface ObjectConstructor {
     /**
      * Copy the values of all of the enumerable own properties from one or more source objects to a
@@ -52,16 +55,16 @@ interface ReadonlyMap<K, V> {
     has(key: K): boolean;
     readonly size: number;
 }
-interface WeakMap<K extends Object, V> {
+interface WeakMap<K extends object, V> {
     delete(key: K): boolean;
     get(key: K): V | undefined;
     has(key: K): boolean;
     set(key: K, value: V): this;
 }
 interface WeakMapConstructor {
-    new (): WeakMap<Object, any>;
-    new <K extends Object, V>(entries?: [K, V][]): WeakMap<K, V>;
-    readonly prototype: WeakMap<Object, any>;
+    new (): WeakMap<object, any>;
+    new <K extends object, V>(entries?: [K, V][]): WeakMap<K, V>;
+    readonly prototype: WeakMap<object, any>;
 }
 declare var WeakMap: WeakMapConstructor;
 interface Set<T> {
@@ -89,9 +92,9 @@ interface WeakSet<T> {
     has(value: T): boolean;
 }
 interface WeakSetConstructor {
-    new (): WeakSet<Object>;
-    new <T extends Object>(values?: T[]): WeakSet<T>;
-    readonly prototype: WeakSet<Object>;
+    new (): WeakSet<object>;
+    new <T extends object>(values?: T[]): WeakSet<T>;
+    readonly prototype: WeakSet<object>;
 }
 declare var WeakSet: WeakSetConstructor;
 interface Map<K, V> {
@@ -559,12 +562,12 @@ declare namespace feng3d {
          * @param f 函数
          * @param delta Δx，进过测试该值太小或者过大都会导致求导准确率降低（个人猜测是计算机计算精度问题导致）
          */
-        getDerivative(f: (x) => number, delta?: number): (x: any) => number;
+        getDerivative(f: (x: number) => number, delta?: number): (x: number) => number;
         /**
          * 函数是否连续
          * @param f 函数
          */
-        isContinuous(f: (x) => number): boolean;
+        isContinuous(f: (x: number) => number): boolean;
         /**
          * 方程 f(x) == 0 在 [a, b] 区间内是否有解
          *
@@ -577,7 +580,7 @@ declare namespace feng3d {
          *
          * @returns 是否有解
          */
-        hasSolution(f: (x) => number, a: number, b: number, errorcallback?: (err: Error) => void): boolean;
+        hasSolution(f: (x: number) => number, a: number, b: number, errorcallback?: (err: Error) => void): boolean;
         /**
          * 二分法 求解 f(x) == 0
          *
@@ -591,7 +594,7 @@ declare namespace feng3d {
          *
          * @returns 不存在解时返回 undefined ，存在时返回 解
          */
-        binary(f: (x) => number, a: number, b: number, precision?: number, errorcallback?: (err: Error) => void): number;
+        binary(f: (x: number) => number, a: number, b: number, precision?: number, errorcallback?: (err: Error) => void): number;
         /**
          * 连线法 求解 f(x) == 0
          *
@@ -611,7 +614,7 @@ declare namespace feng3d {
          *
          * @returns 不存在解时返回 undefined ，存在时返回 解
          */
-        line(f: (x) => number, a: number, b: number, precision?: number, errorcallback?: (err: Error) => void): number;
+        line(f: (x: number) => number, a: number, b: number, precision?: number, errorcallback?: (err: Error) => void): number;
         /**
          * 切线法 求解 f(x) == 0
          *
@@ -636,7 +639,7 @@ declare namespace feng3d {
          *
          * @returns 不存在解与无法使用该函数求解时返回 undefined ，否则返回 解
          */
-        tangent(f: (x) => number, f1: (x) => number, f2: (x) => number, a: number, b: number, precision?: number, errorcallback?: (err: Error) => void): number;
+        tangent(f: (x: number) => number, f1: (x: number) => number, f2: (x: number) => number, a: number, b: number, precision?: number, errorcallback?: (err: Error) => void): number;
         /**
          * 割线法（弦截法） 求解 f(x) == 0
          *
@@ -661,7 +664,7 @@ declare namespace feng3d {
          *
          * @returns 不存在解与无法使用该函数求解时返回 undefined ，否则返回 解
          */
-        secant(f: (x) => number, a: number, b: number, precision?: number, errorcallback?: (err: Error) => void): number;
+        secant(f: (x: number) => number, a: number, b: number, precision?: number, errorcallback?: (err: Error) => void): number;
     }
 }
 declare namespace feng3d {
@@ -814,27 +817,31 @@ declare namespace feng3d {
         /**
          * 表示事件是否为冒泡事件。如果事件可以冒泡，则此值为 true；否则为 false。
          */
-        bubbles?: boolean;
+        bubbles: boolean;
         /**
          * 事件目标。
          */
-        target?: any;
+        target: any;
         /**
          * 当前正在使用某个事件侦听器处理 Event 对象的对象。
          */
-        currentTarget?: any;
+        currentTarget: any;
         /**
          * 是否停止处理事件监听器
          */
-        isStop?: boolean;
+        isStop: boolean;
         /**
          * 是否停止冒泡
          */
-        isStopBubbles?: boolean;
+        isStopBubbles: boolean;
+        /**
+         * 事件流过的对象列表，事件路径
+         */
+        targets: any[];
     }
     interface IEventDispatcher<T> {
         once<K extends keyof T>(type: K, listener: (event: Event<T[K]>) => void, thisObject?: any, priority?: number): void;
-        dispatch<K extends keyof T>(type: K, data?: T[K], bubbles?: boolean): any;
+        dispatch<K extends keyof T>(type: K, data?: T[K], bubbles?: boolean): Event<T[K]>;
         has<K extends keyof T>(type: K): boolean;
         on<K extends keyof T>(type: K, listener: (event: Event<T[K]>) => any, thisObject?: any, priority?: number, once?: boolean): any;
         off<K extends keyof T>(type?: K, listener?: (event: Event<T[K]>) => any, thisObject?: any): any;
@@ -854,16 +861,30 @@ declare namespace feng3d {
         once(type: string, listener: (event: any) => void, thisObject?: any, priority?: number): void;
         /**
          * 派发事件
-         * @param event   事件对象
+         *
+         * 当事件重复流向一个对象时将不会被处理。
+         *
+         * @param e   事件对象
+         * @returns 返回事件是否被该对象处理
          */
-        dispatchEvent(event: Event<any>): void;
+        dispatchEvent(e: Event<any>): boolean;
+        /**
+         * 处理事件
+         * @param e 事件
+         */
+        protected handleEvent(e: Event<any>): void;
+        /**
+         * 处理事件冒泡
+         * @param e 事件
+         */
+        protected handelEventBubbles(e: Event<any>): void;
         /**
          * 将事件调度到事件流中. 事件目标是对其调用 dispatchEvent() 方法的 IEvent 对象。
          * @param type                      事件的类型。类型区分大小写。
          * @param data                      事件携带的自定义数据。
          * @param bubbles                   表示事件是否为冒泡事件。如果事件可以冒泡，则此值为 true；否则为 false。
          */
-        dispatch(type: string, data?: any, bubbles?: boolean): void;
+        dispatch(type: string, data?: any, bubbles?: boolean): Event<any>;
         /**
          * 检查 Event 对象是否为特定事件类型注册了任何侦听器.
          *
@@ -978,7 +999,7 @@ declare namespace feng3d {
     }
     interface Feng3dDispatcher {
         once<K extends keyof Feng3dEventMap>(type: K, listener: (event: Event<Feng3dEventMap[K]>) => void, thisObject?: any, priority?: number): void;
-        dispatch<K extends keyof Feng3dEventMap>(type: K, data?: Feng3dEventMap[K], bubbles?: boolean): any;
+        dispatch<K extends keyof Feng3dEventMap>(type: K, data?: Feng3dEventMap[K], bubbles?: boolean): Event<Feng3dEventMap[K]>;
         has<K extends keyof Feng3dEventMap>(type: K): boolean;
         on<K extends keyof Feng3dEventMap>(type: K, listener: (event: Event<Feng3dEventMap[K]>) => any, thisObject?: any, priority?: number, once?: boolean): any;
         off<K extends keyof Feng3dEventMap>(type?: K, listener?: (event: Event<Feng3dEventMap[K]>) => any, thisObject?: any): any;
@@ -1640,12 +1661,12 @@ declare namespace feng3d {
          */
         onframe(func: (interval: number) => void, thisObject?: Object, priority?: number): this;
         /**
-         * 注册帧函数（只执行一次）
+         * 下一帧执行方法
          * @param func  执行方法
          * @param thisObject    方法this指针
          * @param priority      执行优先级
          */
-        onceframe(func: (interval: number) => void, thisObject?: Object, priority?: number): this;
+        nextframe(func: (interval: number) => void, thisObject?: Object, priority?: number): this;
         /**
          * 注销帧函数（只执行一次）
          * @param func  执行方法
@@ -1936,6 +1957,25 @@ declare namespace feng3d {
         getDirDepth(path: string): number;
     }
 }
+declare namespace feng3d {
+    /**
+     * 着色器代码宏工具
+     */
+    var shaderMacroUtils: ShaderMacroUtils;
+    class ShaderMacroUtils {
+        /**
+         * 从着色器代码中获取宏变量列表
+         * @param vertex
+         * @param fragment
+         */
+        getMacroVariablesFromShaderCode(vertex: string, fragment: string): string[];
+        /**
+         * 从着色器代码中获取宏变量列表
+         * @param code
+         */
+        getMacroVariablesFromCode(code: string): string[];
+    }
+}
 interface IDBObjectStore {
     getAllKeys(): IDBRequest;
 }
@@ -1952,12 +1992,12 @@ declare namespace feng3d {
          * 是否支持 indexedDB
          */
         support(): boolean;
-        getDatabase(dbname: string, callback: (err, database: IDBDatabase) => void): void;
-        deleteDatabase(dbname: string, callback?: (err) => void): void;
+        getDatabase(dbname: string, callback: (err: any, database: IDBDatabase) => void): void;
+        deleteDatabase(dbname: string, callback?: (err: any) => void): void;
         hasObjectStore(dbname: string, objectStroreName: string, callback: (has: boolean) => void): void;
         getObjectStoreNames(dbname: string, callback: (err: Error | null, objectStoreNames: string[]) => void): void;
-        createObjectStore(dbname: string, objectStroreName: string, callback?: (err) => void): void;
-        deleteObjectStore(dbname: string, objectStroreName: string, callback?: (err) => void): void;
+        createObjectStore(dbname: string, objectStroreName: string, callback?: (err: any) => void): void;
+        deleteObjectStore(dbname: string, objectStroreName: string, callback?: (err: any) => void): void;
         getAllKeys(dbname: string, objectStroreName: string, callback?: (err: Error, keys: string[]) => void): void;
         get(dbname: string, objectStroreName: string, key: string | number, callback?: (err: Error, data: ArrayBuffer) => void): void;
         set(dbname: string, objectStroreName: string, key: string | number, data: ArrayBuffer, callback?: (err: Error) => void): void;
@@ -2054,7 +2094,7 @@ declare namespace feng3d {
          * @param path 路径
          * @param callback 读取完成回调 当err不为null时表示读取失败
          */
-        readFile(path: string, callback: (err, data: ArrayBuffer) => void): void;
+        readFile(path: string, callback: (err: Error, data: ArrayBuffer) => void): void;
         /**
          * 获取文件绝对路径
          * @param path （相对）路径
@@ -2091,7 +2131,7 @@ declare namespace feng3d {
          * @param path 路径
          * @param callback 读取完成回调 当err不为null时表示读取失败
          */
-        readFile(path: string, callback: (err, data: ArrayBuffer) => void): void;
+        readFile(path: string, callback: (err: Error, data: ArrayBuffer) => void): void;
         /**
          * 获取文件绝对路径
          * @param path （相对）路径
@@ -2234,7 +2274,7 @@ declare namespace feng3d {
          * @param path 路径
          * @param callback 读取完成回调 当err不为null时表示读取失败
          */
-        readFile(path: string, callback: (err, data: ArrayBuffer) => void): any;
+        readFile(path: string, callback: (err: Error, data: ArrayBuffer) => void): any;
         /**
          * 获取文件绝对路径
          * @param path （相对）路径
@@ -2273,7 +2313,7 @@ declare namespace feng3d {
          * @param path 文件路径
          * @param callback 回调函数
          */
-        deleteFile(path: string, callback: (err) => void): void;
+        deleteFile(path: string, callback: (err: Error) => void): void;
         /**
          * 写(新建)文件
          * @param path 文件路径
@@ -2519,6 +2559,17 @@ declare namespace feng3d {
          */
         subTo(v: Vector2, vout?: Vector2): Vector2;
         /**
+         * 乘以向量
+         * @param a 向量
+         */
+        multiply(a: Vector2): this;
+        /**
+         * 乘以向量
+         * @param a 向量
+         * @param vout 输出向量
+         */
+        multiplyTo(a: Vector2, vout?: Vector2): Vector2;
+        /**
          * 插值到指定向量
          * @param v 目标向量
          * @param alpha 插值系数
@@ -2558,13 +2609,6 @@ declare namespace feng3d {
     }
 }
 declare namespace feng3d {
-    interface Vector3Raw {
-        __class__?: "feng3d.Vector3";
-        x?: number;
-        y?: number;
-        z?: number;
-        w?: number;
-    }
     /**
      * Vector3 类使用笛卡尔坐标 x、y 和 z 表示三维空间中的点或位置
      * @author feng 2016-3-21
@@ -2853,7 +2897,6 @@ declare namespace feng3d {
          * @param mat 矩阵
          */
         applyMatrix4x4(mat: Matrix4x4): this;
-        applyMatrix41(m: Matrix4x4): this;
         /**
          * 应用四元素
          * @param q 四元素
@@ -2869,6 +2912,11 @@ declare namespace feng3d {
          * @param v 点
          */
         distance(v: Vector3): number;
+        /**
+         * 反射
+         * @param normal
+         */
+        reflect(normal: Vector3): this;
         /**
          * 向下取整
          */
@@ -3058,6 +3106,10 @@ declare namespace feng3d {
          */
         scaleTo(s: number): Vector4;
         /**
+         * 如果当前 Vector4 对象和作为参数指定的 Vector4 对象均为单位顶点，此方法将返回这两个顶点之间所成角的余弦值。
+         */
+        dot(a: Vector4): number;
+        /**
          * 获取到指定向量的插值
          * @param v 终点插值向量
          * @param alpha 插值系数
@@ -3179,7 +3231,7 @@ declare namespace feng3d {
          * @param width 矩形的宽度（以像素为单位）。
          * @param height 矩形的高度（以像素为单位）。
          */
-        setTo(x: number, y: number, width: number, height: number): Rectangle;
+        init(x: number, y: number, width: number, height: number): Rectangle;
         /**
          * 确定由此 Rectangle 对象定义的矩形区域内是否包含指定的点。
          * @param x 检测点的x轴
@@ -3918,6 +3970,44 @@ declare namespace feng3d {
          */
         getMaxScaleOnAxis(): number;
         /**
+         * 初始化正射投影矩阵
+         * @param left 可视空间左边界
+         * @param right 可视空间右边界
+         * @param top 可视空间上边界
+         * @param bottom 可视空间下边界
+         * @param near 可视空间近边界
+         * @param far 可视空间远边界
+         *
+         * 可视空间的八个顶点分别被投影到立方体 [(-1, -1, -1), (1, 1, 1)] 八个顶点上
+         *
+         * 将长方体 [(left, bottom, near), (right, top, far)] 投影至立方体 [(-1, -1, -1), (1, 1, 1)] 中
+         */
+        setOrtho(left: number, right: number, top: number, bottom: number, near: number, far: number): this;
+        /**
+         * 初始化透视投影矩阵
+         * @param fov 垂直视角，视锥体顶面和底面间的夹角，必须大于0 （角度）
+         * @param aspect 近裁剪面的宽高比
+         * @param near 视锥体近边界
+         * @param far 视锥体远边界
+         *
+         * 视锥体的八个顶点分别被投影到立方体 [(-1, -1, -1), (1, 1, 1)] 八个顶点上
+         */
+        setPerspectiveFromFOV(fov: number, aspect: number, near: number, far: number): this;
+        /**
+         * 初始化透视投影矩阵
+         * @param left 可视空间左边界
+         * @param right 可视空间右边界
+         * @param top 可视空间上边界
+         * @param bottom 可视空间下边界
+         * @param near 可视空间近边界
+         * @param far 可视空间远边界
+         *
+         * 可视空间的八个顶点分别被投影到立方体 [(-1, -1, -1), (1, 1, 1)] 八个顶点上
+         *
+         * 将长方体 [(left, bottom, near), (right, top, far)] 投影至立方体 [(-1, -1, -1), (1, 1, 1)] 中
+         */
+        setPerspective(left: number, right: number, top: number, bottom: number, near: number, far: number): this;
+        /**
          * 以字符串返回矩阵的值
          */
         toString(): string;
@@ -4108,6 +4198,13 @@ declare namespace feng3d {
          * @param length 与原点距离
          */
         getPoint(length?: number, vout?: Vector3): Vector3;
+        /**
+         * 获取指定z值的点
+         * @param z z值
+         * @param vout 目标点（输出）
+         * @returns 目标点
+         */
+        getPointWithZ(z: number, vout?: Vector3): Vector3;
         /**
          * 指定点到该直线距离
          * @param point 指定点
@@ -4877,12 +4974,6 @@ declare namespace feng3d {
     }
 }
 declare namespace feng3d {
-    interface Color3Raw {
-        __class__?: "feng3d.Color3";
-        b?: number;
-        g?: number;
-        r?: number;
-    }
     /**
      * 颜色
      * @author feng 2016-09-24
@@ -5094,13 +5185,6 @@ declare namespace feng3d {
     };
 }
 declare namespace feng3d {
-    interface Color4Raw {
-        __class__?: "feng3d.Color4";
-        a?: number;
-        b?: number;
-        g?: number;
-        r?: number;
-    }
     /**
      * 颜色（包含透明度）
      * @author feng 2016-09-24
@@ -7164,70 +7248,6 @@ declare var WebGL2RenderingContext: {
     readonly TIMEOUT_IGNORED: number;
     readonly MAX_CLIENT_WAIT_TIMEOUT_WEBGL: number;
 };
-/**
- * WebGL渲染程序
- */
-interface WebGLProgram {
-    /**
-     * WebGL渲染上下文
-     */
-    gl: WebGLRenderingContext;
-    /**
-     * 顶点shader
-     */
-    vertexShader: WebGLShader;
-    /**
-     * 片段shader
-     */
-    fragmentShader: WebGLShader;
-    /**
-     * 属性信息列表
-     */
-    attributes: {
-        [name: string]: WebGLActiveInfo;
-    };
-    /**
-     * uniform信息列表
-     */
-    uniforms: {
-        [name: string]: WebGLActiveInfo;
-    };
-    /**
-     * 销毁
-     */
-    destroy(): any;
-}
-/**
- * WebGL渲染程序有效信息
- */
-interface WebGLActiveInfo {
-    /**
-     * 属性地址
-     */
-    location: number;
-    /**
-     * uniform基础名称，例如 arr[10] 基础名称为 arr
-     */
-    uniformBaseName: string;
-    /**
-     * uniform地址
-     */
-    uniformLocation: WebGLUniformLocation | WebGLUniformLocation[];
-    /**
-     * texture索引
-     */
-    textureID: number;
-}
-interface WebGLRenderingContext {
-    /**
-     * Create the linked program object
-     * @param gl GL context
-     * @param vshader a vertex shader program (string)
-     * @param fshader a fragment shader program (string)
-     * @return created program object, or null if the creation has failed
-     */
-    createProgram(vshader: string, fshader: string): WebGLProgram;
-}
 declare namespace feng3d {
     interface GL extends WebGLRenderingContext {
         /**
@@ -7251,9 +7271,9 @@ declare namespace feng3d {
          */
         renderer: Renderer;
         /**
-         * WebWG2.0 或者 扩展功能
+         * 纹理各向异性过滤最大值
          */
-        advanced: GLAdvanced;
+        maxAnisotropy: number;
     }
     class GL {
         static glList: GL[];
@@ -7266,36 +7286,6 @@ declare namespace feng3d {
         private static _toolGL;
         static getToolGL(): GL;
     }
-}
-declare namespace feng3d {
-    /**
-     * WebWG2.0 或者 扩展功能
-     */
-    class GLAdvanced {
-        /**
-         * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext/drawElementsInstanced
-         */
-        drawElementsInstanced: (mode: GLenum, count: GLsizei, type: GLenum, offset: GLintptr, instanceCount: GLsizei) => void;
-        /**
-         * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext/vertexAttribDivisor
-         */
-        vertexAttribDivisor: (index: GLuint, divisor: GLuint) => void;
-        /**
-         * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext/drawArraysInstanced
-         */
-        drawArraysInstanced: (mode: GLenum, first: GLint, count: GLsizei, instanceCount: GLsizei) => void;
-        constructor(gl: GL);
-    }
-}
-interface EXTTextureFilterAnisotropic {
-    /**
-     * 纹理各向异性过滤最大值
-     */
-    maxAnisotropy: number;
-    /**
-     * 设置纹理各向异性 值
-     */
-    texParameterf(textureType: number, anisotropy: number): void;
 }
 declare namespace feng3d {
     /**
@@ -7335,14 +7325,6 @@ declare namespace feng3d {
         private cacheGLQuery(gl);
     }
 }
-declare namespace feng3d {
-    class GLProgramExtension {
-        constructor(gl: GL);
-    }
-}
-/**
- * @author mrdoob / http://mrdoob.com/
- */
 declare namespace feng3d {
     /**
      * WEBGL 功能
@@ -7494,38 +7476,47 @@ declare namespace feng3d {
          * lod0时在贴图中的uv缩放偏移向量
          */
         u_lod0vec: Vector4;
-        /******************************************************/
-        /******************************************************/
         /**
-         * 点光源位置数组
+         * 点光源
          */
-        u_pointLightPositions: Vector3[];
+        u_pointLights: PointLight[];
         /**
-         * 点光源颜色数组
+         * 生成投影的点光源
          */
-        u_pointLightColors: Color3[];
+        u_castShadowPointLights: PointLight[];
         /**
-         * 点光源光照强度数组
+         * 点光源阴影图
          */
-        u_pointLightIntensitys: number[];
+        u_pointShadowMaps: Texture2D[];
         /**
-         * 点光源光照范围数组
+         * 聚光灯光源
          */
-        u_pointLightRanges: number[];
-        /******************************************************/
-        /******************************************************/
+        u_spotLights: SpotLight[];
         /**
-         * 方向光源方向数组
+         * 生成投影的聚光灯光源
          */
-        u_directionalLightDirections: Vector3[];
+        u_castShadowSpotLights: SpotLight[];
+        u_spotShadowMatrix: Matrix4x4[];
         /**
-         * 方向光源颜色数组
+         * 点光源阴影图
          */
-        u_directionalLightColors: Color3[];
+        u_spotShadowMaps: Texture2D[];
         /**
-         * 方向光源光照强度数组
+         * 方向光源数组
          */
-        u_directionalLightIntensitys: number[];
+        u_directionalLights: DirectionalLight[];
+        /**
+         * 生成投影的方向光源
+         */
+        u_castShadowDirectionalLights: DirectionalLight[];
+        /**
+         * 方向光源投影矩阵列表
+         */
+        u_directionalShadowMatrixs: Matrix4x4[];
+        /**
+         * 方向光源阴影图
+         */
+        u_directionalShadowMaps: Texture2D[];
         /**
          * 场景环境光
          */
@@ -7610,6 +7601,10 @@ declare namespace feng3d {
          * 线框颜色
          */
         u_wireframeColor: Color4;
+        u_lightType: LightType;
+        u_lightPosition: Vector3;
+        u_shadowCameraNear: number;
+        u_shadowCameraFar: number;
     }
 }
 declare namespace feng3d {
@@ -7617,18 +7612,100 @@ declare namespace feng3d {
      * shader
      */
     class Shader {
-        private vertex;
-        private fragment;
-        constructor(vertex: string, fragment: string);
+        constructor(shaderName: string);
         /**
          * 激活渲染程序
          */
-        activeShaderProgram(gl: GL): WebGLProgram;
+        activeShaderProgram(gl: GL): {
+            program: WebGLProgram;
+            vertex: WebGLShader;
+            fragment: WebGLShader;
+            attributes: {
+                [name: string]: AttributeInfo;
+            };
+            uniforms: {
+                [name: string]: UniformInfo;
+            };
+        };
         /**
-         * 纹理缓冲
+         * 着色器名称
          */
-        protected _webGLProgramMap: Map<GL, WebGLProgram>;
+        private shaderName;
+        /**
+         * 顶点着色器代码
+         */
+        private vertex;
+        /**
+         * 片段着色器代码
+         */
+        private fragment;
+        private macroValues;
+        /**
+         * shader 中的 宏
+         */
+        shaderMacro: ShaderMacro;
+        macroInvalid: boolean;
+        private onShaderChanged();
+        /**
+         * 更新渲染代码
+         */
+        private updateShaderCode();
+        /**
+         * 编译着色器代码
+         * @param gl GL上下文
+         * @param type 着色器类型
+         * @param code 着色器代码
+         * @return 编译后的着色器对象
+         */
+        private compileShaderCode(gl, type, code);
+        private createLinkProgram(gl, vertexShader, fragmentShader);
+        /**
+         * Create the linked program object
+         * @param gl GL context
+         * @param vshader a vertex shader program (string)
+         * @param fshader a fragment shader program (string)
+         * @return created program object, or null if the creation has failed
+         */
+        private createProgram(gl, vshader, fshader);
+        private compileShaderProgram(gl, vshader, fshader);
+        private map;
+        private getMacroCode(variables, valueObj);
         private clear();
+    }
+    /**
+     * WebGL渲染程序有效信息
+     */
+    interface UniformInfo {
+        /**
+         * uniform名称
+         */
+        name: string;
+        size: number;
+        type: number;
+        /**
+         * uniform地址
+         */
+        location: WebGLUniformLocation;
+        /**
+         * texture索引
+         */
+        textureID: number;
+        /**
+         * Uniform数组索引，当Uniform数据为数组数据时生效
+         */
+        paths: string[];
+    }
+    interface AttributeInfo {
+        /**
+         * 名称
+         */
+        name: string;
+        size: number;
+        type: number;
+        /**
+         * 属性地址
+         */
+        location: number;
     }
 }
 declare namespace feng3d {
@@ -7693,6 +7770,10 @@ declare namespace feng3d {
      */
     class RenderAtomic {
         /**
+         * 下一个节点
+         */
+        next: RenderAtomic;
+        /**
          * 顶点索引缓冲
          */
         indexBuffer: Index;
@@ -7713,10 +7794,22 @@ declare namespace feng3d {
          */
         shader: Shader;
         /**
+         * shader 中的 宏
+         */
+        shaderMacro: ShaderMacro;
+        /**
          * 渲染参数
          */
         renderParams: RenderParams;
-        constructor();
+        getIndexBuffer(): Index;
+        getAttributes(attributes?: Attributes): Attributes;
+        getAttributeByKey(key: string): any;
+        getUniforms(uniforms?: LazyUniforms): LazyObject<Uniforms>;
+        getUniformByKey(key: string): any;
+        getInstanceCount(): number;
+        getShader(): Shader;
+        getRenderParams(renderParams?: RenderParams): RenderParams;
+        getShaderMacro(shaderMacro?: ShaderMacro): ShaderMacro;
     }
 }
 declare namespace feng3d {
@@ -7927,15 +8020,21 @@ declare namespace feng3d {
         /**
          * 需要使用的贴图数据
          */
-        protected _pixels: (ImageData | HTMLImageElement) | (ImageData | HTMLImageElement)[];
+        protected _pixels: (ImageData | HTMLImageElement | HTMLCanvasElement | HTMLVideoElement | ImageBitmap) | (ImageData | HTMLImageElement | HTMLCanvasElement | HTMLVideoElement | ImageBitmap)[];
         /**
          * 当贴图数据未加载好等情况时代替使用
          */
-        noPixels: (ImageData | HTMLImageElement) | (ImageData | HTMLImageElement)[];
+        protected noPixels: (ImageData | HTMLImageElement | HTMLCanvasElement | HTMLVideoElement | ImageBitmap) | (ImageData | HTMLImageElement | HTMLCanvasElement | HTMLVideoElement | ImageBitmap)[];
         /**
          * 当前使用的贴图数据
          */
-        protected _activePixels: (ImageData | HTMLImageElement) | (ImageData | HTMLImageElement)[];
+        protected _activePixels: (ImageData | HTMLImageElement | HTMLCanvasElement | HTMLVideoElement | ImageBitmap) | (ImageData | HTMLImageElement | HTMLCanvasElement | HTMLVideoElement | ImageBitmap)[];
+        /**
+         * 是否为渲染目标纹理
+         */
+        protected _isRenderTarget: boolean;
+        protected OFFSCREEN_WIDTH: number;
+        protected OFFSCREEN_HEIGHT: number;
         /**
          * 纹理缓冲
          */
@@ -7944,15 +8043,20 @@ declare namespace feng3d {
          * 是否失效
          */
         private _invalid;
+        private _isPowerOfTwo;
         /**
          * 是否为2的幂贴图
          */
-        readonly isPowerOfTwo: boolean;
+        private isPowerOfTwo(pixels);
+        /**
+         * 纹理尺寸
+         */
+        getSize(): Vector2;
         constructor(raw?: gPartial<TextureInfo>);
         /**
          * 判断数据是否满足渲染需求
          */
-        checkRenderData(): boolean;
+        private checkRenderData(pixels);
         /**
          * 使纹理失效
          */
@@ -7961,16 +8065,12 @@ declare namespace feng3d {
          * 激活纹理
          * @param gl
          */
-        active(gl: GL): void;
+        active(gl: GL): WebGLTexture;
         /**
          * 获取顶点属性缓冲
          * @param data  数据
          */
         getTexture(gl: GL): WebGLTexture;
-        /**
-         * 初始化纹理
-         */
-        private initTexture(gl);
         /**
          * 清理纹理
          */
@@ -7978,31 +8078,163 @@ declare namespace feng3d {
     }
 }
 declare namespace feng3d {
-}
-declare namespace feng3d {
+    class FrameBuffer {
+        protected _framebufferMap: Map<GL, WebGLFramebuffer>;
+        /**
+         * 是否失效
+         */
+        private _invalid;
+        active(gl: GL): WebGLFramebuffer;
+        /**
+         * 清理缓存
+         */
+        private clear();
+    }
 }
 declare namespace feng3d {
     /**
-     * 渲染环境
-     * @author feng 2017-01-04
+     * 帧缓冲对象
+     * @author feng 2017-02-18
      */
-    class RenderContext extends EventDispatcher {
+    class FrameBufferObject {
+        OFFSCREEN_WIDTH: number;
+        OFFSCREEN_HEIGHT: number;
+        frameBuffer: FrameBuffer;
+        texture: RenderTargetTexture2D;
+        depthBuffer: RenderBuffer;
+        constructor(width?: number, height?: number);
+        active(gl: GL): {
+            framebuffer: WebGLFramebuffer;
+            texture: WebGLTexture;
+            depthBuffer: WebGLRenderbuffer;
+        };
+        deactive(gl: GL): void;
+        /**
+         * 是否失效
+         */
+        private _invalid;
+        /**
+         * 使失效
+         */
+        protected invalidate(): void;
+        private _map;
+        private invalidateSize();
+        private clear();
+    }
+}
+declare namespace feng3d {
+    class RenderBuffer {
+        OFFSCREEN_WIDTH: number;
+        OFFSCREEN_HEIGHT: number;
+        protected _depthBufferMap: Map<GL, WebGLRenderbuffer>;
+        /**
+         * 是否失效
+         */
+        private _invalid;
+        /**
+         * 使失效
+         */
+        protected invalidate(): void;
+        /**
+         * 激活
+         * @param gl
+         */
+        active(gl: GL): WebGLRenderbuffer;
+        /**
+         * 清理纹理
+         */
+        private clear();
+    }
+}
+declare namespace feng3d {
+    /**
+     * 着色器宏定义
+     */
+    interface ShaderMacro {
+        /**
+         * 光源数量
+         */
+        NUM_LIGHT: number;
+        /**
+         * 点光源数量
+         */
         NUM_POINTLIGHT: number;
+        /**
+         * 方向光源数量
+         */
         NUM_DIRECTIONALLIGHT: number;
         /**
-         * 摄像机
+         * 生成投影的方向光源数量
          */
-        camera: Camera;
-        private _camera;
+        NUM_DIRECTIONALLIGHT_CASTSHADOW: number;
         /**
-         * 场景
+         * 生成投影的点光源数量
          */
-        scene3d: Scene3D;
+        NUM_POINTLIGHT_CASTSHADOW: number;
         /**
-         * WebGL实例
+         * 聚光灯光源数量
          */
-        gl: GL;
-        preRender(renderAtomic: RenderAtomic): void;
+        NUM_SPOT_LIGHTS: number;
+        /**
+         * 生成投影的聚光灯光源数量
+         */
+        NUM_SPOT_LIGHTS_CASTSHADOW: number;
+        /**
+         * 骨骼关节数量
+         */
+        NUM_SKELETONJOINT: number;
+        /**
+         * 是否有漫反射贴图
+         */
+        HAS_DIFFUSE_SAMPLER: boolean;
+        /**
+         * 是否有法线贴图
+         */
+        HAS_NORMAL_SAMPLER: boolean;
+        /**
+         * 是否有镜面反射光泽图
+         */
+        HAS_SPECULAR_SAMPLER: boolean;
+        /**
+         * 是否有环境贴图
+         */
+        HAS_AMBIENT_SAMPLER: boolean;
+        /**
+         * 是否有骨骼动画
+         */
+        HAS_SKELETON_ANIMATION: boolean;
+        /**
+         * 是否有粒子动画
+         */
+        HAS_PARTICLE_ANIMATOR: boolean;
+        /**
+         * 是否为点渲染模式
+         */
+        IS_POINTS_MODE: boolean;
+        /**
+         * 是否有地形方法
+         */
+        HAS_TERRAIN_METHOD: boolean;
+        /**
+         * 使用合并地形贴图
+         */
+        USE_TERRAIN_MERGE: boolean;
+        /**
+         * 雾函数
+         */
+        HAS_FOG_METHOD: boolean;
+        /**
+         * 环境映射函数
+         */
+        HAS_ENV_METHOD: boolean;
+        /**
+         * 是否卡通渲染
+         */
+        IS_CARTOON: Boolean;
+        /**
+         * 是否抗锯齿
+         */
+        cartoon_Anti_aliasing: Boolean;
     }
 }
 declare namespace feng3d {
@@ -8025,11 +8257,7 @@ declare namespace feng3d {
                  * 从glsl读取的fragment shader
                  */
                 fragment: string;
-                cls?: new (...arg) => any;
-                /**
-                 * 处理了 include 的 shader
-                 */
-                shader?: Shader;
+                cls?: new (...arg: any[]) => any;
             };
         };
         /**
@@ -8046,15 +8274,21 @@ declare namespace feng3d {
     class ShaderLib {
         shaderConfig: ShaderConfig;
         private _shaderConfig;
+        private _shaderCache;
         constructor();
         /**
          * 获取shaderCode
          */
-        getShader(shaderName: string): Shader;
+        getShader(shaderName: string): {
+            vertex: string;
+            fragment: string;
+            vertexMacroVariables: string[];
+            fragmentMacroVariables: string[];
+        };
         /**
          * 展开 include
          */
-        private uninclude(shaderCode);
+        uninclude(shaderCode: string): string;
         private onShaderChanged();
         /**
          * 获取shader列表
@@ -8162,6 +8396,13 @@ declare namespace feng3d {
     interface ComponentRawMap {
     }
     type ComponentRaw = ValueOf<ComponentRawMap>;
+    interface Component {
+        once<K extends keyof GameObjectEventMap>(type: K, listener: (event: Event<GameObjectEventMap[K]>) => void, thisObject?: any, priority?: number): void;
+        dispatch<K extends keyof GameObjectEventMap>(type: K, data?: GameObjectEventMap[K], bubbles?: boolean): Event<GameObjectEventMap[K]>;
+        has<K extends keyof GameObjectEventMap>(type: K): boolean;
+        on<K extends keyof GameObjectEventMap>(type: K, listener: (event: Event<GameObjectEventMap[K]>) => any, thisObject?: any, priority?: number, once?: boolean): any;
+        off<K extends keyof GameObjectEventMap>(type?: K, listener?: (event: Event<GameObjectEventMap[K]>) => any, thisObject?: any): any;
+    }
     /**
      * Base class for everything attached to GameObjects.
      *
@@ -8222,10 +8463,15 @@ declare namespace feng3d {
         private _gameObject;
         private _tag;
         /**
+         * 派发事件
+         * @param event   事件对象
+         */
+        dispatchEvent(event: Event<any>): boolean;
+        /**
          * 销毁
          */
         dispose(): void;
-        preRender(renderAtomic: RenderAtomic): void;
+        beforeRender(renderAtomic: RenderAtomic, scene3d: Scene3D, camera: Camera): void;
     }
 }
 declare namespace feng3d {
@@ -8278,20 +8524,18 @@ declare namespace feng3d {
      * 前向渲染器
      * @author feng 2017-02-20
      */
-    var forwardRenderer: {
-        draw: (renderContext: RenderContext, renderObjectflag: GameObjectFlag) => {
-            blenditems: {
-                depth: number;
-                item: MeshRenderer;
-                enableBlend: boolean;
-            }[];
-            unblenditems: {
-                depth: number;
-                item: MeshRenderer;
-                enableBlend: boolean;
-            }[];
-        };
-    };
+    var forwardRenderer: ForwardRenderer;
+    /**
+     * 前向渲染器
+     * @author feng 2017-02-20
+     */
+    class ForwardRenderer {
+        renderAtomic: RenderAtomic;
+        /**
+         * 渲染
+         */
+        draw(gl: GL, scene3d: Scene3D, camera: Camera): void;
+    }
 }
 declare namespace feng3d {
     /**
@@ -8299,10 +8543,14 @@ declare namespace feng3d {
      * @author  feng    2017-03-25
      */
     class DepthRenderer {
-        constructor();
+        /**
+         * 渲染
+         */
+        draw(gl: GL, scene3d: Scene3D, camera: Camera): void;
     }
 }
 declare namespace feng3d {
+    var mouseRenderer: MouseRenderer;
     /**
      * 鼠标拾取渲染器
      * @author feng 2017-02-06
@@ -8312,14 +8560,13 @@ declare namespace feng3d {
         /**
          * 渲染
          */
-        draw(renderContext: RenderContext, viewRect: Rectangle): GameObject;
-        protected drawRenderables(renderContext: RenderContext, meshRenderer: MeshRenderer): void;
+        draw(gl: GL, viewRect: Rectangle): GameObject;
+        protected drawRenderables(gl: GL, meshRenderer: MeshRenderer): void;
         /**
          * 绘制3D对象
          */
         protected drawGameObject(gl: GL, renderAtomic: RenderAtomic): void;
     }
-    var glMousePicker: MouseRenderer;
 }
 declare namespace feng3d {
     /**
@@ -8334,27 +8581,44 @@ declare namespace feng3d {
      * 阴影图渲染器
      * @author  feng    2017-03-25
      */
-    var shadowRenderer: {
-        draw: (renderContext: RenderContext) => void;
-    };
+    var shadowRenderer: ShadowRenderer;
+    class ShadowRenderer {
+        private renderAtomic;
+        private shader;
+        private skeleton_shader;
+        private init();
+        /**
+         * 渲染
+         */
+        draw(gl: GL, scene3d: Scene3D, camera: Camera): void;
+        private drawForSpotLight(gl, light, scene3d, camera);
+        private drawForPointLight(gl, light, scene3d, camera);
+        private drawForDirectionalLight(gl, light, scene3d, camera);
+        /**
+         * 绘制3D对象
+         */
+        drawGameObject(gl: GL, gameObject: GameObject, scene3d: Scene3D, camera: Camera): void;
+    }
 }
 declare namespace feng3d {
     /**
      * 轮廓渲染器
      */
-    var outlineRenderer: {
-        draw: (renderContext: RenderContext, unblenditems: {
-            depth: number;
-            item: MeshRenderer;
-            enableBlend: boolean;
-        }[]) => void;
-    };
+    var outlineRenderer: OutlineRenderer;
+    /**
+     * 轮廓渲染器
+     */
+    class OutlineRenderer {
+        renderAtomic: RenderAtomic;
+        init(): void;
+        draw(gl: GL, scene3d: Scene3D, camera: Camera): void;
+    }
     class OutLineComponent extends Component {
         size: number;
         color: Color4;
         outlineMorphFactor: number;
         init(gameobject: GameObject): void;
-        preRender(renderAtomic: RenderAtomic): void;
+        beforeRender(renderAtomic: RenderAtomic): void;
     }
     interface Uniforms {
         /**
@@ -8376,13 +8640,21 @@ declare namespace feng3d {
     /**
      * 线框渲染器
      */
-    var wireframeRenderer: {
-        draw: (renderContext: RenderContext, unblenditems: {
-            depth: number;
-            item: MeshRenderer;
-            enableBlend: boolean;
-        }[]) => void;
-    };
+    var wireframeRenderer: WireframeRenderer;
+    class WireframeRenderer {
+        renderAtomic: RenderAtomic;
+        private shader;
+        private skeleton_shader;
+        init(): void;
+        /**
+         * 渲染
+         */
+        draw(gl: GL, scene3d: Scene3D, camera: Camera): void;
+        /**
+         * 绘制3D对象
+         */
+        drawGameObject(gl: GL, gameObject: GameObject, scene3d: Scene3D, camera: Camera): void;
+    }
     interface RenderAtomic {
         /**
          * 顶点索引缓冲
@@ -8397,14 +8669,10 @@ declare namespace feng3d {
         showInInspector: boolean;
         color: Color4;
         init(gameobject: GameObject): void;
-        preRender(renderAtomic: RenderAtomic): void;
+        beforeRender(renderAtomic: RenderAtomic, scene3d: Scene3D, camera: Camera): void;
     }
 }
 declare namespace feng3d {
-    /**
-     * 卡通渲染
-     */
-    var cartoonRenderer: {};
     /**
      * 参考
      */
@@ -8424,7 +8692,7 @@ declare namespace feng3d {
         cartoon_Anti_aliasing: boolean;
         _cartoon_Anti_aliasing: boolean;
         init(gameObject: GameObject): void;
-        preRender(renderAtomic: RenderAtomic): void;
+        beforeRender(renderAtomic: RenderAtomic): void;
     }
     interface Uniforms {
         u_diffuseSegment: Vector4;
@@ -8440,7 +8708,7 @@ declare namespace feng3d {
         s_skyboxTexture: TextureCube;
         constructor();
         init(gameObject: GameObject): void;
-        preRender(renderAtomic: RenderAtomic): void;
+        beforeRender(renderAtomic: RenderAtomic): void;
     }
 }
 declare namespace feng3d {
@@ -8453,13 +8721,21 @@ declare namespace feng3d {
      */
     class SkyboxRenderer {
         private renderAtomic;
-        private renderParams;
-        private shader;
         init(): void;
         /**
-         * 渲染
+         * 绘制场景中天空盒
+         * @param gl
+         * @param scene3d 场景
+         * @param camera 摄像机
          */
-        draw(gl: GL, scene3d: Scene3D, camera: Camera, renderObjectflag: GameObjectFlag): void;
+        draw(gl: GL, scene3d: Scene3D, camera: Camera): void;
+        /**
+         * 绘制天空盒
+         * @param gl
+         * @param skybox 天空盒
+         * @param camera 摄像机
+         */
+        drawSkyBox(gl: GL, skybox: SkyBox, scene3d: Scene3D, camera: Camera): void;
     }
 }
 declare namespace feng3d {
@@ -8483,7 +8759,7 @@ declare namespace feng3d {
     }
 }
 declare namespace feng3d {
-    interface TransformEventMap {
+    interface GameObjectEventMap {
         /**
          * 变换矩阵变化
          */
@@ -8492,13 +8768,10 @@ declare namespace feng3d {
          *
          */
         updateLocalToWorldMatrix: any;
-    }
-    interface Transform {
-        once<K extends keyof TransformEventMap>(type: K, listener: (event: Event<TransformEventMap[K]>) => void, thisObject?: any, priority?: number): void;
-        dispatch<K extends keyof TransformEventMap>(type: K, data?: TransformEventMap[K], bubbles?: boolean): any;
-        has<K extends keyof TransformEventMap>(type: K): boolean;
-        on<K extends keyof TransformEventMap>(type: K, listener: (event: Event<TransformEventMap[K]>) => any, thisObject?: any, priority?: number, once?: boolean): any;
-        off<K extends keyof TransformEventMap>(type?: K, listener?: (event: Event<TransformEventMap[K]>) => any, thisObject?: any): any;
+        /**
+         * 场景矩阵变化
+         */
+        scenetransformChanged: Transform;
     }
     /**
      * Position, rotation and scale of an object.
@@ -8671,14 +8944,10 @@ declare namespace feng3d {
          * 包围盒失效
          */
         boundsInvalid: Geometry;
-        /**
-         * 场景矩阵变化
-         */
-        scenetransformChanged: Transform;
     }
     interface GameObject {
         once<K extends keyof GameObjectEventMap>(type: K, listener: (event: Event<GameObjectEventMap[K]>) => void, thisObject?: any, priority?: number): void;
-        dispatch<K extends keyof GameObjectEventMap>(type: K, data?: GameObjectEventMap[K], bubbles?: boolean): any;
+        dispatch<K extends keyof GameObjectEventMap>(type: K, data?: GameObjectEventMap[K], bubbles?: boolean): Event<GameObjectEventMap[K]>;
         has<K extends keyof GameObjectEventMap>(type: K): boolean;
         on<K extends keyof GameObjectEventMap>(type: K, listener: (event: Event<GameObjectEventMap[K]>) => any, thisObject?: any, priority?: number, once?: boolean): any;
         off<K extends keyof GameObjectEventMap>(type?: K, listener?: (event: Event<GameObjectEventMap[K]>) => any, thisObject?: any): any;
@@ -8689,10 +8958,6 @@ declare namespace feng3d {
     var mouselayer: {
         editor: number;
     };
-    enum GameObjectFlag {
-        feng3d = 1,
-        editor = 2,
-    }
     /**
      * Base class for all entities in feng3d scenes.
      */
@@ -8736,10 +9001,6 @@ declare namespace feng3d {
          */
         navigationArea: number;
         /**
-         * 标记
-         */
-        flag: GameObjectFlag;
-        /**
          * 用户自定义数据
          */
         userData: any;
@@ -8759,9 +9020,13 @@ declare namespace feng3d {
          */
         readonly numComponents: number;
         /**
+         * 全局是否可见
+         */
+        readonly globalVisible: any;
+        /**
          * 构建3D对象
          */
-        constructor(raw: gPartial<GameObject>);
+        constructor(raw?: gPartial<GameObject>);
         find(name: string): GameObject | null;
         contains(child: GameObject): boolean;
         addChild(child: GameObject): GameObject;
@@ -8888,18 +9153,27 @@ declare namespace feng3d {
          */
         private addComponentAt(component, index);
         /**
+         * 派发事件
+         *
+         * 当事件重复流向一个对象时将不会被处理。
+         *
+         * @param e   事件对象
+         * @returns 返回事件是否被该对象处理
+         */
+        dispatchEvent(e: Event<any>): boolean;
+        /**
          * 销毁
          */
         dispose(): void;
         disposeWithChildren(): void;
-        preRender(renderAtomic: RenderAtomic): void;
+        preRender(renderAtomic: RenderAtomic, scene3d: Scene3D, camera: Camera): void;
     }
 }
 declare namespace feng3d {
     /**
      * 包围盒组件
      */
-    class BoundingComponent extends Component {
+    class Bounding extends Component {
         readonly single: boolean;
         showInInspector: boolean;
         serializable: boolean;
@@ -8967,17 +9241,10 @@ declare namespace feng3d {
         readonly root: GameObject;
         readonly gl: GL;
         /**
-         * 渲染对象标记，用于过滤渲染对象
-         */
-        renderObjectflag: GameObjectFlag;
-        /**
-         * 渲染环境
-         */
-        private renderContext;
-        /**
          * 鼠标事件管理
          */
         mouse3DManager: Mouse3DManager;
+        protected selectedObject: GameObject;
         /**
          * 鼠标在3D视图中的位置
          */
@@ -9060,8 +9327,18 @@ declare namespace feng3d {
          * Returns the first instantiated Material assigned to the renderer.
          */
         material: Material;
+        /**
+         * 是否投射阴影
+         */
+        castShadows: boolean;
+        /**
+         * 是否接受阴影
+         */
+        receiveShadows: boolean;
+        lightPicker: LightPicker;
+        constructor();
         init(gameObject: GameObject): void;
-        preRender(renderAtomic: RenderAtomic): void;
+        beforeRender(renderAtomic: RenderAtomic, scene3d: Scene3D, camera: Camera): void;
         /**
          * 销毁
          */
@@ -9134,18 +9411,11 @@ declare namespace feng3d {
     /**
      * 组件事件
      */
-    interface Scene3DEventMap {
+    interface GameObjectEventMap {
         addToScene: GameObject;
         removeFromScene: GameObject;
         addComponentToScene: Component;
         removeComponentFromScene: Component;
-    }
-    interface Scene3D {
-        once<K extends keyof Scene3DEventMap>(type: K, listener: (event: Event<Scene3DEventMap[K]>) => void, thisObject?: any, priority?: number): void;
-        dispatch<K extends keyof Scene3DEventMap>(type: K, data?: Scene3DEventMap[K], bubbles?: boolean): any;
-        has<K extends keyof Scene3DEventMap>(type: K): boolean;
-        on<K extends keyof Scene3DEventMap>(type: K, listener: (event: Event<Scene3DEventMap[K]>) => any, thisObject?: any, priority?: number, once?: boolean): any;
-        off<K extends keyof Scene3DEventMap>(type?: K, listener?: (event: Event<Scene3DEventMap[K]>) => any, thisObject?: any): any;
     }
     /**
      * 3D场景
@@ -9153,10 +9423,6 @@ declare namespace feng3d {
      */
     class Scene3D extends Component {
         /**
-         * 是否编辑器模式
-         */
-        iseditor: boolean;
-        /**W
          * 背景颜色
          */
         background: Color4;
@@ -9168,43 +9434,21 @@ declare namespace feng3d {
          * 指定更新脚本标记，用于过滤需要调用update的脚本
          */
         updateScriptFlag: ScriptFlag;
-        /**
-         * 收集组件
-         */
-        collectComponents: {
-            cameras: {
-                cls: typeof Camera;
-                list: Camera[];
-            };
-            pointLights: {
-                cls: typeof PointLight;
-                list: PointLight[];
-            };
-            directionalLights: {
-                cls: typeof DirectionalLight;
-                list: DirectionalLight[];
-            };
-            skyboxs: {
-                cls: typeof SkyBox;
-                list: SkyBox[];
-            };
-            animations: {
-                cls: typeof Animation;
-                list: Animation[];
-            };
-            scripts: {
-                cls: typeof ScriptComponent;
-                list: ScriptComponent[];
-            };
-            behaviours: {
-                cls: typeof Behaviour;
-                list: Behaviour[];
-            };
-        };
-        _mouseCheckObjects: {
-            layer: number;
-            objects: GameObject[];
-        }[];
+        private _mouseCheckObjects;
+        private _meshRenderers;
+        private _visibleAndEnabledMeshRenderers;
+        private _skyBoxs;
+        private _activeSkyBoxs;
+        private _directionalLights;
+        private _activeDirectionalLights;
+        private _pointLights;
+        private _activePointLights;
+        private _spotLights;
+        private _activeSpotLights;
+        private _animations;
+        private _activeAnimations;
+        private _behaviours;
+        private _activeBehaviours;
         /**
          * 构造3D场景
          */
@@ -9213,6 +9457,29 @@ declare namespace feng3d {
         initCollectComponents(): void;
         private onEnterFrame(interval);
         update(): void;
+        /**
+         * 所有MeshRenderer
+         */
+        readonly meshRenderers: MeshRenderer[];
+        /**
+         * 所有 可见且开启的 MeshRenderer
+         */
+        readonly visibleAndEnabledMeshRenderers: MeshRenderer[];
+        /**
+         * 所有 SkyBox
+         */
+        readonly skyBoxs: SkyBox[];
+        readonly activeSkyBoxs: SkyBox[];
+        readonly directionalLights: DirectionalLight[];
+        readonly activeDirectionalLights: DirectionalLight[];
+        readonly pointLights: PointLight[];
+        readonly activePointLights: PointLight[];
+        readonly spotLights: SpotLight[];
+        readonly activeSpotLights: SpotLight[];
+        readonly animations: Animation[];
+        readonly activeAnimations: Animation[];
+        readonly behaviours: Behaviour[];
+        readonly activeBehaviours: Behaviour[];
         readonly mouseCheckObjects: {
             layer: number;
             objects: GameObject[];
@@ -9221,6 +9488,56 @@ declare namespace feng3d {
         _removeGameObject(gameobject: GameObject): void;
         _addComponent(component: Component): void;
         _removeComponent(component: Component): void;
+        private pickMap;
+        /**
+         * 获取拾取缓存
+         * @param camera
+         */
+        getPickCache(camera: Camera): ScenePickCache;
+        /**
+         * 获取接收光照渲染对象列表
+         * @param light
+         */
+        getPickByDirectionalLight(light: DirectionalLight): MeshRenderer[];
+        /**
+         * 获取 可被摄像机看见的 MeshRenderer列表
+         * @param camera
+         */
+        getMeshRenderersByCamera(camera: Camera): MeshRenderer[];
+    }
+}
+declare namespace feng3d {
+    /**
+     * 场景拾取缓存
+     */
+    class ScenePickCache {
+        private scene;
+        private camera;
+        private _activeMeshRenderers;
+        private _blenditems;
+        private _unblenditems;
+        constructor(scene: Scene3D, camera: Camera);
+        /**
+         * 获取需要渲染的对象
+         *
+         * #### 渲染需求条件
+         * 1. visible == true
+         * 1. 在摄像机视锥内
+         * 1. meshRenderer.enabled == true
+         *
+         * @param gameObject
+         * @param camera
+         */
+        readonly activeMeshRenderers: MeshRenderer[];
+        /**
+         * 半透明渲染对象
+         */
+        readonly blenditems: MeshRenderer[];
+        /**
+         * 半透明渲染对象
+         */
+        readonly unblenditems: MeshRenderer[];
+        clear(): void;
     }
 }
 declare namespace feng3d {
@@ -9235,7 +9552,7 @@ declare namespace feng3d {
     }
     interface Geometry {
         once<K extends keyof GeometryEventMap>(type: K, listener: (event: Event<GeometryEventMap[K]>) => void, thisObject?: any, priority?: number): void;
-        dispatch<K extends keyof GeometryEventMap>(type: K, data?: GeometryEventMap[K], bubbles?: boolean): any;
+        dispatch<K extends keyof GeometryEventMap>(type: K, data?: GeometryEventMap[K], bubbles?: boolean): Event<GeometryEventMap[K]>;
         has<K extends keyof GeometryEventMap>(type: K): boolean;
         on<K extends keyof GeometryEventMap>(type: K, listener: (event: Event<GeometryEventMap[K]>) => any, thisObject?: any, priority?: number, once?: boolean): any;
         off<K extends keyof GeometryEventMap>(type?: K, listener?: (event: Event<GeometryEventMap[K]>) => any, thisObject?: any): any;
@@ -9503,96 +9820,148 @@ declare namespace feng3d {
         matrixChanged: any;
     }
     interface LensBase {
-        once<K extends keyof LensEventMap>(type: K, listener: (event: LensEventMap[K]) => void, thisObject?: any, priority?: number): void;
-        dispatch<K extends keyof LensEventMap>(type: K, data?: LensEventMap[K], bubbles?: boolean): any;
+        once<K extends keyof LensEventMap>(type: K, listener: (event: Event<LensEventMap[K]>) => void, thisObject?: any, priority?: number): void;
+        dispatch<K extends keyof LensEventMap>(type: K, data?: LensEventMap[K], bubbles?: boolean): Event<LensEventMap[K]>;
         has<K extends keyof LensEventMap>(type: K): boolean;
-        on<K extends keyof LensEventMap>(type: K, listener: (event: LensEventMap[K]) => any, thisObject?: any, priority?: number, once?: boolean): any;
-        off<K extends keyof LensEventMap>(type?: K, listener?: (event: LensEventMap[K]) => any, thisObject?: any): any;
+        on<K extends keyof LensEventMap>(type: K, listener: (event: Event<LensEventMap[K]>) => any, thisObject?: any, priority?: number, once?: boolean): any;
+        off<K extends keyof LensEventMap>(type?: K, listener?: (event: Event<LensEventMap[K]>) => any, thisObject?: any): any;
     }
     /**
      * 摄像机镜头
+     *
+     * 镜头主要作用是投影以及逆投影。
+     * 投影指的是从摄像机空间可视区域内的坐标投影至GPU空间可视区域内的坐标。
+     *
+     * 摄像机可视区域：由近、远，上，下，左，右组成的四棱柱
+     * GPU空间可视区域：立方体 [(-1, -1, -1), (1, 1, 1)]
+     *
      * @author feng 2014-10-14
      */
     abstract class LensBase extends EventDispatcher {
         /**
          * 最近距离
          */
-        private _near;
         near: number;
         /**
          * 最远距离
          */
-        private _far;
         far: number;
         /**
          * 视窗缩放比例(width/height)，在渲染器中设置
          */
-        private _aspectRatio;
-        aspectRatio: number;
-        protected _matrix: Matrix4x4 | null;
-        protected _scissorRect: Rectangle;
-        protected _viewPort: Rectangle;
-        protected _frustumCorners: number[];
-        private _unprojection;
+        aspect: number;
+        protected _matrix: Matrix4x4;
+        private _matrixInvalid;
+        private _invertMatrixInvalid;
+        private _inverseMatrix;
+        protected _viewBox: Box;
+        private _viewBoxInvalid;
         /**
          * 创建一个摄像机镜头
          */
-        constructor();
-        /**
-         * Retrieves the corner points of the lens frustum.
-         */
-        frustumCorners: number[];
+        constructor(aspectRatio?: number, near?: number, far?: number);
         /**
          * 投影矩阵
          */
-        matrix: Matrix4x4;
+        readonly matrix: Matrix4x4;
         /**
-         * 场景坐标投影到屏幕坐标
-         * @param point3d 场景坐标
-         * @param v 屏幕坐标（输出）
-         * @return 屏幕坐标
+         * 逆矩阵
+         */
+        readonly inverseMatrix: Matrix4x4;
+        /**
+         * 可视包围盒
+         *
+         * 一个包含可视空间的最小包围盒
+         */
+        readonly viewBox: Box;
+        /**
+         * 摄像机空间坐标投影到GPU空间坐标
+         * @param point3d 摄像机空间坐标
+         * @param v GPU空间坐标
+         * @return GPU空间坐标
          */
         project(point3d: Vector3, v?: Vector3): Vector3;
         /**
-         * 投影逆矩阵
+         * GPU空间坐标投影到摄像机空间坐标
+         * @param point3d GPU空间坐标
+         * @param v 摄像机空间坐标（输出）
+         * @returns 摄像机空间坐标
          */
-        readonly unprojectionMatrix: Matrix4x4;
+        unproject(point3d: Vector3, v?: Vector3): Vector3;
         /**
-         * 屏幕坐标投影到摄像机空间坐标
-         * @param nX 屏幕坐标X -1（左） -> 1（右）
-         * @param nY 屏幕坐标Y -1（上） -> 1（下）
-         * @param sZ 到屏幕的距离
-         * @param v 场景坐标（输出）
-         * @return 场景坐标
+         * 逆投影求射线
+         *
+         * 通过GPU空间坐标x与y值求出摄像机空间坐标的射线
+         *
+         * @param x GPU空间坐标x值
+         * @param y GPU空间坐标y值
          */
-        abstract unproject(nX: number, nY: number, sZ: number, v?: Vector3): Vector3;
+        unprojectRay(x: number, y: number, ray?: Ray3D): Ray3D;
+        /**
+         * 指定深度逆投影
+         *
+         * 获取投影在指定GPU坐标且摄像机前方（深度）sZ处的点的3D坐标
+         *
+         * @param nX GPU空间坐标X
+         * @param nY GPU空间坐标Y
+         * @param sZ 到摄像机的距离
+         * @param v 摄像机空间坐标（输出）
+         * @return 摄像机空间坐标
+         */
+        unprojectWithDepth(nX: number, nY: number, sZ: number, v?: Vector3): Vector3;
         /**
          * 投影矩阵失效
          */
-        protected invalidateMatrix(): void;
+        protected invalidate(): void;
         /**
          * 更新投影矩阵
          */
-        protected abstract updateMatrix(): Matrix4x4;
+        protected abstract updateMatrix(): void;
+        /**
+         * 更新最小包围盒
+         */
+        protected abstract updateViewBox(): void;
     }
 }
 declare namespace feng3d {
     /**
-     *
-     * @author feng 2015-5-28
+     * 正射投影镜头
      */
-    class FreeMatrixLens extends LensBase {
-        constructor();
-        protected updateMatrix(): Matrix4x4;
+    class OrthographicLens extends LensBase {
+        isOrthographicCamera: boolean;
         /**
-         * 屏幕坐标投影到摄像机空间坐标
-         * @param nX 屏幕坐标X -1（左） -> 1（右）
-         * @param nY 屏幕坐标Y -1（上） -> 1（下）
-         * @param sZ 到屏幕的距离
-         * @param v 场景坐标（输出）
-         * @return 场景坐标
+         * 可视空间左边界
          */
-        unproject(nX: number, nY: number, sZ: number, v: Vector3): Vector3;
+        left: number;
+        /**
+         * 可视空间右边界
+         */
+        right: number;
+        /**
+         * 可视空间上边界
+         */
+        top: number;
+        /**
+         * 可视空间下边界
+         */
+        bottom: number;
+        /**
+         * 视窗缩放比例(width/height)，在渲染器中设置
+         */
+        aspect: number;
+        /**
+         * 构建正射投影镜头
+         * @param left 可视空间左边界
+         * @param right 可视空间右边界
+         * @param top 可视空间上边界
+         * @param bottom 可视空间下边界
+         * @param near 可视空间近边界
+         * @param far 可视空间远边界
+         */
+        constructor(left: number, right: number, top: number, bottom: number, near?: number, far?: number);
+        protected updateMatrix(): void;
+        protected updateViewBox(): void;
+        private aspectRatioChanged();
     }
 }
 declare namespace feng3d {
@@ -9602,45 +9971,50 @@ declare namespace feng3d {
      */
     class PerspectiveLens extends LensBase {
         /**
-         * 视野
+         * 垂直视角，视锥体顶面和底面间的夹角；单位为角度，取值范围 [1,179]
          */
-        fieldOfView: number;
+        fov: number;
         /**
-         * 坐标系类型
+         * 视窗缩放比例(width/height)，在渲染器中设置
          */
-        coordinateSystem: number;
-        _focalLength: number;
-        private _yMax;
-        private _xMax;
+        aspect: number;
         /**
          * 创建一个透视摄像机镜头
-         * @param fieldOfView 视野
-         * @param coordinateSystem 坐标系统类型
+         * @param fov 垂直视角，视锥体顶面和底面间的夹角；单位为角度，取值范围 [1,179]
+         *
          */
-        constructor(fieldOfView?: number, coordinateSystem?: number);
-        private fieldOfViewChange();
-        private coordinateSystemChange();
+        constructor(fov?: number, aspectRatio?: number, near?: number, far?: number);
         /**
          * 焦距
          */
         focalLength: number;
-        unproject(nX: number, nY: number, sZ: number, v?: Vector3): Vector3;
-        protected updateMatrix(): Matrix4x4;
+        /**
+         * 投影
+         *
+         * 摄像机空间坐标投影到GPU空间坐标
+         *
+         * @param point3d 摄像机空间坐标
+         * @param v GPU空间坐标
+         * @return GPU空间坐标
+         */
+        project(point3d: Vector3, v?: Vector3): Vector3;
+        /**
+         * 逆投影
+         *
+         * GPU空间坐标投影到摄像机空间坐标
+         *
+         * @param point3d GPU空间坐标
+         * @param v 摄像机空间坐标（输出）
+         * @returns 摄像机空间坐标
+         */
+        unproject(point3d: Vector3, v?: Vector3): Vector3;
+        protected updateMatrix(): void;
+        protected updateViewBox(): void;
     }
 }
 declare namespace feng3d {
-    /**
-     * @author feng 2014-10-14
-     */
-    interface CameraEventMap {
+    interface GameObjectEventMap {
         lensChanged: any;
-    }
-    interface Camera {
-        once<K extends keyof CameraEventMap>(type: K, listener: (event: Event<CameraEventMap[K]>) => void, thisObject?: any, priority?: number): void;
-        dispatch<K extends keyof CameraEventMap>(type: K, data?: CameraEventMap[K], bubbles?: boolean): any;
-        has<K extends keyof CameraEventMap>(type: K): boolean;
-        on<K extends keyof CameraEventMap>(type: K, listener: (event: Event<CameraEventMap[K]>) => any, thisObject?: any, priority?: number, once?: boolean): any;
-        off<K extends keyof CameraEventMap>(type?: K, listener?: (event: Event<CameraEventMap[K]>) => any, thisObject?: any): any;
     }
     /**
      * 摄像机
@@ -9649,9 +10023,11 @@ declare namespace feng3d {
     class Camera extends Component {
         private _lens;
         private _viewProjection;
-        private _viewProjectionDirty;
+        private _viewProjectionInvalid;
         private _frustum;
-        private _frustumDirty;
+        private _frustumInvalid;
+        private _viewBox;
+        private _viewBoxInvalid;
         private _viewRect;
         /**
          * 视窗矩形
@@ -9706,8 +10082,8 @@ declare namespace feng3d {
         unproject(sX: number, sY: number, sZ: number, v?: Vector3): Vector3;
         /**
          * 屏幕坐标转GPU坐标
-         * @param screenPos 屏幕坐标 (x:[0-width],y:[0-height])
-         * @return GPU坐标 (x:[-1,1],y:[-1-1])
+         * @param screenPos 屏幕坐标 (x: [0-width], y: [0 - height])
+         * @return GPU坐标 (x: [-1, 1], y: [-1, 1])
          */
         screenToGpuPosition(screenPos: Vector2): Vector2;
         /**
@@ -9719,7 +10095,14 @@ declare namespace feng3d {
          * 视锥体
          */
         readonly frustum: Frustum;
-        preRender(renderAtomic: RenderAtomic): void;
+        /**
+         * 可视包围盒
+         */
+        readonly viewBox: Box;
+        /**
+         * 更新可视区域顶点
+         */
+        private updateViewBox();
     }
 }
 declare namespace feng3d {
@@ -9796,7 +10179,7 @@ declare namespace feng3d {
 }
 declare namespace feng3d {
     /**
-     * 立方体几何体
+     * 立（长）方体几何体
      * @author feng 2016-09-12
      */
     class CubeGeometry extends Geometry {
@@ -10145,22 +10528,62 @@ declare namespace feng3d {
      * 2D纹理
      * @author feng 2016-12-20
      */
-    class Texture2D extends TextureInfo {
-        protected _pixels: ImageData | HTMLImageElement;
+    abstract class Texture2D extends TextureInfo {
+        /**
+         * 当贴图数据未加载好等情况时代替使用
+         */
         noPixels: ImageData;
-        url: string;
-        protected _textureType: TextureType;
-        /**
-         * 纹理尺寸
-         */
-        readonly size: Vector2;
         constructor(raw?: gPartial<Texture2D>);
-        /**
-         * 判断数据是否满足渲染需求
-         */
-        checkRenderData(): boolean;
+    }
+}
+declare namespace feng3d {
+    /**
+     * 2D纹理
+     * @author feng 2016-12-20
+     */
+    class ImageTexture2D extends Texture2D {
+        image: HTMLImageElement;
+        constructor(raw?: gPartial<ImageTexture2D>);
+        private imageChanged();
+    }
+}
+declare namespace feng3d {
+    class UrlImageTexture2D extends ImageTexture2D {
+        url: string;
+        constructor(raw?: gPartial<UrlImageTexture2D>);
         private urlChanged();
         private onImageAssetsChanged(e);
+    }
+}
+declare namespace feng3d {
+    class ImageDataTexture2D extends Texture2D {
+        imageData: ImageData;
+        constructor(raw?: gPartial<ImageDataTexture2D>);
+        private imageDataChanged();
+    }
+}
+declare namespace feng3d {
+    class CanvasTexture2D extends Texture2D {
+        canvas: HTMLCanvasElement;
+        constructor(raw?: gPartial<CanvasTexture2D>);
+        private canvasChanged();
+    }
+}
+declare namespace feng3d {
+    class VideoTexture2D extends Texture2D {
+        video: HTMLVideoElement;
+        constructor(raw?: gPartial<VideoTexture2D>);
+        private videoChanged();
+    }
+}
+declare namespace feng3d {
+    /**
+     * 渲染目标纹理
+     */
+    class RenderTargetTexture2D extends Texture2D {
+        OFFSCREEN_WIDTH: number;
+        OFFSCREEN_HEIGHT: number;
+        constructor(raw?: gPartial<RenderTargetTexture2D>);
     }
 }
 declare namespace feng3d {
@@ -10175,29 +10598,9 @@ declare namespace feng3d {
         negative_x_url: string;
         negative_y_url: string;
         negative_z_url: string;
-        protected _pixels: (HTMLImageElement | ImageData)[];
-        noPixels: ImageData[];
-        protected _textureType: TextureType;
         constructor(raw?: gPartial<TextureCube>);
-        /**
-         * 判断数据是否满足渲染需求
-         */
-        checkRenderData(): boolean;
         private urlChanged(property, oldValue, newValue);
     }
-}
-declare namespace feng3d {
-    class ImageDataTexture extends TextureInfo {
-        pixels: ImageData;
-        protected _pixels: ImageData;
-        constructor();
-        /**
-         * 判断数据是否满足渲染需求
-         */
-        checkRenderData(): boolean;
-    }
-}
-declare namespace feng3d {
 }
 declare namespace feng3d {
     /**
@@ -10218,7 +10621,7 @@ declare namespace feng3d {
         /**
          * Uniform数据
          */
-        uniforms: StandardUniforms;
+        uniforms: Object;
         /**
          * 渲染参数
          */
@@ -10322,7 +10725,7 @@ declare namespace feng3d {
         /**
          * 纹理数据
          */
-        s_texture: Texture2D;
+        s_texture: UrlImageTexture2D;
     }
 }
 interface Object {
@@ -10355,7 +10758,7 @@ declare namespace feng3d {
         /**
          * 漫反射纹理
          */
-        s_diffuse: Texture2D;
+        s_diffuse: UrlImageTexture2D;
         /**
          * 基本颜色
          */
@@ -10367,11 +10770,11 @@ declare namespace feng3d {
         /**
          * 漫反射纹理
          */
-        s_normal: Texture2D;
+        s_normal: UrlImageTexture2D;
         /**
          * 镜面反射光泽图
          */
-        s_specular: Texture2D;
+        s_specular: UrlImageTexture2D;
         /**
          * 镜面反射颜色
          */
@@ -10383,7 +10786,7 @@ declare namespace feng3d {
         /**
          * 环境纹理
          */
-        s_ambient: Texture2D;
+        s_ambient: UrlImageTexture2D;
         /**
          * 颜色
          */
@@ -10417,18 +10820,41 @@ declare namespace feng3d {
 }
 declare namespace feng3d {
     /**
+     * 阴影类型
+     */
+    enum ShadowType {
+        /**
+         * 没有阴影
+         */
+        No_Shadows = 0,
+        /**
+         * 硬阴影
+         */
+        Hard_Shadows = 1,
+        /**
+         * PCF 阴影
+         */
+        PCF_Shadows = 2,
+        /**
+         * PCF 软阴影
+         */
+        PCF_Soft_Shadows = 3,
+    }
+}
+declare namespace feng3d {
+    /**
      * 灯光类型
      * @author feng 2016-12-12
      */
     enum LightType {
         /**
-         * 点光
-         */
-        Point = 0,
-        /**
          * 方向光
          */
-        Directional = 1,
+        Directional = 0,
+        /**
+         * 点光
+         */
+        Point = 1,
         /**
          * 聚光灯
          */
@@ -10436,24 +10862,6 @@ declare namespace feng3d {
     }
 }
 declare namespace feng3d {
-    interface LightRaw {
-        /**
-         * 灯光类型
-         */
-        lightType?: LightType;
-        /**
-         * 颜色
-         */
-        color?: Color3 | Color3Raw;
-        /**
-         * 光照强度
-         */
-        intensity?: number;
-        /**
-         * 是否生成阴影（未实现）
-         */
-        castsShadows?: boolean;
-    }
     /**
      * 灯光
      * @author feng 2016-12-12
@@ -10472,30 +10880,70 @@ declare namespace feng3d {
          */
         intensity: number;
         /**
-         * 是否生成阴影（未实现）
+         * 阴影类型
          */
-        castsShadows: boolean;
-        private _shadowMap;
-        readonly shadowMap: Texture2D;
+        shadowType: ShadowType;
+        /**
+         * 光源位置
+         */
+        readonly position: Vector3;
+        /**
+         * 光照方向
+         */
+        readonly direction: Vector3;
+        /**
+         * 阴影偏差，用来解决判断是否为阴影时精度问题
+         */
+        shadowBias: number;
+        /**
+         * 阴影半径，边缘宽度
+         */
+        shadowRadius: number;
+        /**
+         * 阴影近平面距离
+         */
+        readonly shadowCameraNear: number;
+        /**
+         * 阴影近平面距离
+         */
+        readonly shadowCameraFar: number;
+        /**
+         * 投影摄像机
+         */
+        shadowCamera: Camera;
+        /**
+         * 阴影图尺寸
+         */
+        readonly shadowMapSize: Vector2;
+        readonly shadowMap: RenderTargetTexture2D;
+        /**
+         * 帧缓冲对象，用于处理光照阴影贴图渲染
+         */
+        frameBufferObject: FrameBufferObject;
+        debugShadowMap: boolean;
+        private debugShadowMapObject;
+        constructor();
         init(gameObject: GameObject): void;
+        updateDebugShadowMap(scene3d: Scene3D, viewCamera: Camera): void;
     }
 }
 declare namespace feng3d {
-    interface ComponentRawMap {
-        DirectionalLight: DirectionalLightRaw;
-    }
-    interface DirectionalLightRaw extends LightRaw {
-        __class__?: "feng3d.DirectionalLight";
-    }
     /**
      * 方向光源
      * @author feng 2016-12-13
      */
     class DirectionalLight extends Light {
+        lightType: LightType;
         /**
-         * 构建
+         * 光源位置
          */
-        init(gameObject: GameObject): void;
+        readonly position: Vector3;
+        constructor();
+        /**
+         * 通过视窗摄像机进行更新
+         * @param viewCamera 视窗摄像机
+         */
+        updateShadowByCamera(scene3d: Scene3D, viewCamera: Camera, meshRenderers: MeshRenderer[]): void;
     }
 }
 declare namespace feng3d {
@@ -10504,14 +10952,54 @@ declare namespace feng3d {
      * @author feng 2016-12-13
      */
     class PointLight extends Light {
+        lightType: LightType;
         /**
          * 光照范围
          */
         range: number;
         /**
-         * 构建
+         * 阴影图尺寸
          */
-        init(gameObject: GameObject): void;
+        readonly shadowMapSize: Vector2;
+        constructor();
+        private invalidRange();
+    }
+}
+declare namespace feng3d {
+    /**
+     * 聚光灯光源
+     * @author feng 2016-12-13
+     */
+    class SpotLight extends Light {
+        lightType: LightType;
+        /**
+         * 光照范围
+         */
+        range: number;
+        /**
+         *
+         */
+        angle: number;
+        /**
+         * 半影.
+         */
+        penumbra: number;
+        /**
+         * 椎体cos值
+         */
+        readonly coneCos: number;
+        readonly penumbraCos: number;
+        private perspectiveLens;
+        constructor();
+        private invalidRange();
+        private invalidAngle();
+    }
+}
+declare namespace feng3d {
+    class LightPicker {
+        private _meshRenderer;
+        constructor(meshRenderer: MeshRenderer);
+        preRender(renderAtomic: RenderAtomic): void;
     }
 }
 declare namespace feng3d {
@@ -10869,7 +11357,7 @@ declare namespace feng3d {
     class Water extends MeshRenderer {
         geometry: PlaneGeometry;
         material: WaterMaterial;
-        preRender(renderAtomic: RenderAtomic): void;
+        beforeRender(renderAtomic: RenderAtomic, scene3d: Scene3D, camera: Camera): void;
     }
 }
 declare namespace feng3d {
@@ -10885,11 +11373,11 @@ declare namespace feng3d {
         u_size: number;
         u_distortionScale: number;
         u_waterColor: Color3;
-        s_normalSampler: Texture2D;
+        s_normalSampler: UrlImageTexture2D;
         /**
          * 镜面反射贴图
          */
-        s_mirrorSampler: Texture2D;
+        s_mirrorSampler: UrlImageTexture2D;
         u_textureMatrix: Matrix4x4;
         u_sunColor: Color3;
         u_sunDirection: Vector3;
@@ -10984,10 +11472,10 @@ declare namespace feng3d {
         create(shader: "terrain", raw?: gPartial<TerrainMaterial>): TerrainMaterial;
     }
     class TerrainUniforms extends StandardUniforms {
-        s_splatTexture1: Texture2D;
-        s_splatTexture2: Texture2D;
-        s_splatTexture3: Texture2D;
-        s_blendTexture: Texture2D;
+        s_splatTexture1: UrlImageTexture2D;
+        s_splatTexture2: UrlImageTexture2D;
+        s_splatTexture3: UrlImageTexture2D;
+        s_blendTexture: UrlImageTexture2D;
         u_splatRepeats: Vector4;
     }
 }
@@ -10997,8 +11485,8 @@ declare namespace feng3d {
      * @author feng 2016-04-28
      */
     class TerrainMergeMethod extends EventDispatcher {
-        splatMergeTexture: Texture2D;
-        blendTexture: Texture2D;
+        splatMergeTexture: UrlImageTexture2D;
+        blendTexture: UrlImageTexture2D;
         splatRepeats: Vector4;
         /**
          * 构建材质
@@ -11146,7 +11634,7 @@ declare namespace feng3d {
         /**
          * 数据是否变脏
          */
-        isDirty: boolean;
+        isInvalid: boolean;
         invalidate(): void;
         /**
          * 创建粒子属性
@@ -11173,7 +11661,7 @@ declare namespace feng3d {
             time: number;
             num: number;
         }[];
-        isDirty: boolean;
+        isInvalid: boolean;
         private _numParticles;
         private _birthTimes;
         /**
@@ -11318,7 +11806,7 @@ declare namespace feng3d {
          * 属性数据列表
          */
         private _attributes;
-        private _isDirty;
+        private _isInvalid;
         readonly single: boolean;
         init(gameObject: GameObject): void;
         update(interval: number): void;
@@ -11340,7 +11828,7 @@ declare namespace feng3d {
          * @param data              属性数据
          */
         private collectionParticleAttribute(attribute, particle);
-        preRender(renderAtomic: RenderAtomic): void;
+        beforeRender(renderAtomic: RenderAtomic, scene3d: Scene3D, camera: Camera): void;
     }
 }
 declare namespace feng3d {
@@ -11458,7 +11946,7 @@ declare namespace feng3d {
         private readonly u_modelMatrix;
         private readonly u_ITModelMatrix;
         private readonly u_skeletonGlobalMatriices;
-        preRender(renderAtomic: RenderAtomic): void;
+        beforeRender(renderAtomic: RenderAtomic): void;
         /**
          * 销毁
          */
@@ -11498,7 +11986,7 @@ declare namespace feng3d {
     }
 }
 declare namespace feng3d {
-    class Animation extends Component {
+    class Animation extends Behaviour {
         animation: AnimationClip;
         private _animation;
         animations: AnimationClip[];
@@ -12113,6 +12601,40 @@ declare namespace feng3d {
     }
 }
 declare namespace feng3d {
+    /**
+     * 鼠标事件管理
+     * @author feng 2014-4-29
+     */
+    class Mouse3DManager {
+        mouseInput: MouseInput;
+        selectedGameObject: GameObject;
+        private _selectedGameObject;
+        private mouseEventTypes;
+        /**
+         * 鼠标按下时的对象，用于与鼠标弹起时对象做对比，如果相同触发click
+         */
+        private preMouseDownGameObject;
+        /**
+         * 统计处理click次数，判断是否达到dblclick
+         */
+        private gameObjectClickNum;
+        /**
+         * 视窗，鼠标在该矩形内时为有效事件
+         */
+        viewport: Lazy<Rectangle>;
+        constructor(mouseInput: MouseInput, viewport?: Lazy<Rectangle>);
+        pick(scene3d: Scene3D, camera: Camera): GameObject;
+        private mouseInputChanged(property, oldValue, newValue);
+        private dispatch(type);
+        /**
+         * 监听鼠标事件收集事件类型
+         */
+        private onMouseEvent(event);
+        /**
+         * 设置选中对象
+         */
+        private setSelectedGameObject(value);
+    }
     interface MouseInput {
         once<K extends keyof MouseEventMap>(type: K, listener: (event: Event<MouseEventMap[K]>) => void, thisObject?: any, priority?: number): void;
         has<K extends keyof MouseEventMap>(type: K): boolean;
@@ -12135,7 +12657,7 @@ declare namespace feng3d {
          * 派发事件
          * @param event   事件对象
          */
-        dispatchEvent(event: Event<any>): void;
+        dispatchEvent(event: Event<any>): boolean;
     }
     /**
      * Window鼠标事件输入
@@ -12146,44 +12668,6 @@ declare namespace feng3d {
          * 监听鼠标事件收集事件类型
          */
         private onMouseEvent(event);
-    }
-    /**
-     * 鼠标事件管理
-     * @author feng 2014-4-29
-     */
-    class Mouse3DManager {
-        mouseInput: MouseInput;
-        readonly selectedGameObject: GameObject;
-        private _selectedGameObject;
-        private mouseEventTypes;
-        /**
-         * 鼠标按下时的对象，用于与鼠标弹起时对象做对比，如果相同触发click
-         */
-        private preMouseDownGameObject;
-        /**
-         * 统计处理click次数，判断是否达到dblclick
-         */
-        private gameObjectClickNum;
-        /**
-         * 视窗，鼠标在该矩形内时为有效事件
-         */
-        viewport: Lazy<Rectangle>;
-        constructor(mouseInput: MouseInput, viewport?: Lazy<Rectangle>);
-        private mouseInputChanged(property, oldValue, newValue);
-        /**
-         * 渲染
-         */
-        draw(scene3d: Scene3D, camera: Camera): void;
-        dispatch(type: any): void;
-        /**
-         * 监听鼠标事件收集事件类型
-         */
-        private onMouseEvent(event);
-        private pick(scene3d, camera);
-        /**
-         * 设置选中对象
-         */
-        private setSelectedGameObject(value);
     }
     interface MouseEventMap {
         /**

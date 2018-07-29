@@ -113,6 +113,224 @@ var feng3d;
 })(feng3d || (feng3d = {}));
 var feng3d;
 (function (feng3d) {
+    var NUM = 10;
+    QUnit.module("OrthographicLens", function () {
+        QUnit.test("project", function (assert) {
+            // 生成随机正交矩阵
+            var left = Math.random();
+            var right = Math.random() + left;
+            var top = Math.random();
+            var bottom = Math.random() + top;
+            var near = Math.random();
+            var far = Math.random() + near;
+            var orthographicLens = new feng3d.OrthographicLens(left, right, top, bottom, near, far);
+            // 测试可视空间的8个顶点是否被正确投影
+            var lbn = new feng3d.Vector3(left, bottom, near);
+            var tv = orthographicLens.project(lbn);
+            assert.ok(new feng3d.Vector3(-1, -1, -1).equals(tv));
+            var lbf = new feng3d.Vector3(left, bottom, far);
+            var tv = orthographicLens.project(lbf);
+            assert.ok(new feng3d.Vector3(-1, -1, 1).equals(tv));
+            var ltn = new feng3d.Vector3(left, top, near);
+            var tv = orthographicLens.project(ltn);
+            assert.ok(new feng3d.Vector3(-1, 1, -1).equals(tv));
+            var ltf = new feng3d.Vector3(left, top, far);
+            var tv = orthographicLens.project(ltf);
+            assert.ok(new feng3d.Vector3(-1, 1, 1).equals(tv));
+            var rbn = new feng3d.Vector3(right, bottom, near);
+            var tv = orthographicLens.project(rbn);
+            assert.ok(new feng3d.Vector3(1, -1, -1).equals(tv));
+            var rbf = new feng3d.Vector3(right, bottom, far);
+            var tv = orthographicLens.project(rbf);
+            assert.ok(new feng3d.Vector3(1, -1, 1).equals(tv));
+            var rtn = new feng3d.Vector3(right, top, near);
+            var tv = orthographicLens.project(rtn);
+            assert.ok(new feng3d.Vector3(1, 1, -1).equals(tv));
+            var rtf = new feng3d.Vector3(right, top, far);
+            var tv = orthographicLens.project(rtf);
+            assert.ok(new feng3d.Vector3(1, 1, 1).equals(tv));
+        });
+        QUnit.test("unproject", function (assert) {
+            // 生成随机正交矩阵
+            var left = Math.random();
+            var right = Math.random() + left;
+            var top = Math.random();
+            var bottom = Math.random() + top;
+            var near = Math.random();
+            var far = Math.random() + near;
+            var orthographicLens = new feng3d.OrthographicLens(left, right, top, bottom, near, far);
+            // 测试可视空间的8个顶点是否被正确投影
+            var lbn = new feng3d.Vector3(-1, -1, -1);
+            var tv = orthographicLens.unproject(lbn);
+            assert.ok(new feng3d.Vector3(left, bottom, near).equals(tv));
+            var lbf = new feng3d.Vector3(-1, -1, 1);
+            var tv = orthographicLens.unproject(lbf);
+            assert.ok(new feng3d.Vector3(left, bottom, far).equals(tv));
+            var ltn = new feng3d.Vector3(-1, 1, -1);
+            var tv = orthographicLens.unproject(ltn);
+            assert.ok(new feng3d.Vector3(left, top, near).equals(tv));
+            var ltf = new feng3d.Vector3(-1, 1, 1);
+            var tv = orthographicLens.unproject(ltf);
+            assert.ok(new feng3d.Vector3(left, top, far).equals(tv));
+            var rbn = new feng3d.Vector3(1, -1, -1);
+            var tv = orthographicLens.unproject(rbn);
+            assert.ok(new feng3d.Vector3(right, bottom, near).equals(tv));
+            var rbf = new feng3d.Vector3(1, -1, 1);
+            var tv = orthographicLens.unproject(rbf);
+            assert.ok(new feng3d.Vector3(right, bottom, far).equals(tv));
+            var rtn = new feng3d.Vector3(1, 1, -1);
+            var tv = orthographicLens.unproject(rtn);
+            assert.ok(new feng3d.Vector3(right, top, near).equals(tv));
+            var rtf = new feng3d.Vector3(1, 1, 1);
+            var tv = orthographicLens.unproject(rtf);
+            assert.ok(new feng3d.Vector3(right, top, far).equals(tv));
+        });
+        QUnit.test("unprojectRay", function (assert) {
+            var left = Math.random();
+            var right = Math.random() + left;
+            var top = Math.random();
+            var bottom = Math.random() + top;
+            var near = Math.random();
+            var far = Math.random() + near;
+            var orthographicLens = new feng3d.OrthographicLens(left, right, top, bottom, near, far);
+            var x = Math.random();
+            var y = Math.random();
+            for (var i = 0; i < NUM; i++) {
+                var ray = orthographicLens.unprojectRay(x, y);
+                var p = ray.getPointWithZ(feng3d.FMath.lerp(near, far, Math.random()));
+                var pp = orthographicLens.project(p);
+                assert.ok(feng3d.FMath.equals(x, pp.x));
+                assert.ok(feng3d.FMath.equals(y, pp.y));
+            }
+        });
+        QUnit.test("unprojectWithDepth", function (assert) {
+            var left = Math.random();
+            var right = Math.random() + left;
+            var top = Math.random();
+            var bottom = Math.random() + top;
+            var near = Math.random();
+            var far = Math.random() + near;
+            var orthographicLens = new feng3d.OrthographicLens(left, right, top, bottom, near, far);
+            var x = Math.random();
+            var y = Math.random();
+            for (var i = 0; i < NUM; i++) {
+                var sZ = feng3d.FMath.lerp(near, far, Math.random());
+                var p = orthographicLens.unprojectWithDepth(x, y, sZ);
+                assert.ok(feng3d.FMath.equals(sZ, p.z));
+                var pp = orthographicLens.project(p);
+                assert.ok(feng3d.FMath.equals(x, pp.x));
+                assert.ok(feng3d.FMath.equals(y, pp.y));
+            }
+        });
+    });
+})(feng3d || (feng3d = {}));
+var feng3d;
+(function (feng3d) {
+    var NUM = 10;
+    QUnit.module("PerspectiveLens", function () {
+        QUnit.test("project", function (assert) {
+            var fov = Math.random() * 360;
+            var aspect = Math.random();
+            var near = Math.random();
+            var far = Math.random();
+            var perspectiveLens = new feng3d.PerspectiveLens(fov, aspect, near, far);
+            var tan = Math.tan(fov * Math.PI / 360);
+            // 测试可视空间的8个顶点是否被正确投影
+            var lbn = new feng3d.Vector3(-tan * near * aspect, -tan * near, near);
+            var tv = perspectiveLens.project(lbn);
+            assert.ok(new feng3d.Vector3(-1, -1, -1).equals(tv));
+            var lbf = new feng3d.Vector3(-tan * far * aspect, -tan * far, far);
+            var tv = perspectiveLens.project(lbf);
+            assert.ok(new feng3d.Vector3(-1, -1, 1).equals(tv));
+            var ltn = new feng3d.Vector3(-tan * near * aspect, tan * near, near);
+            var tv = perspectiveLens.project(ltn);
+            assert.ok(new feng3d.Vector3(-1, 1, -1).equals(tv));
+            var ltf = new feng3d.Vector3(-tan * far * aspect, tan * far, far);
+            var tv = perspectiveLens.project(ltf);
+            assert.ok(new feng3d.Vector3(-1, 1, 1).equals(tv));
+            var rbn = new feng3d.Vector3(tan * near * aspect, -tan * near, near);
+            var tv = perspectiveLens.project(rbn);
+            assert.ok(new feng3d.Vector3(1, -1, -1).equals(tv));
+            var rbf = new feng3d.Vector3(tan * far * aspect, -tan * far, far);
+            var tv = perspectiveLens.project(rbf);
+            assert.ok(new feng3d.Vector3(1, -1, 1).equals(tv));
+            var rtn = new feng3d.Vector3(tan * near * aspect, tan * near, near);
+            var tv = perspectiveLens.project(rtn);
+            assert.ok(new feng3d.Vector3(1, 1, -1).equals(tv));
+            var rtf = new feng3d.Vector3(tan * far * aspect, tan * far, far);
+            var tv = perspectiveLens.project(rtf);
+            assert.ok(new feng3d.Vector3(1, 1, 1).equals(tv));
+        });
+        QUnit.test("unproject", function (assert) {
+            var fov = Math.random() * 360;
+            var aspect = Math.random();
+            var near = Math.random();
+            var far = Math.random();
+            var perspectiveLens = new feng3d.PerspectiveLens(fov, aspect, near, far);
+            var tan = Math.tan(fov * Math.PI / 360);
+            // 测试可视空间的8个顶点是否被正确投影
+            var lbn = new feng3d.Vector3(-1, -1, -1);
+            var tv = perspectiveLens.unproject(lbn);
+            assert.ok(new feng3d.Vector3(-tan * near * aspect, -tan * near, near).equals(tv));
+            var lbf = new feng3d.Vector3(-1, -1, 1);
+            var tv = perspectiveLens.unproject(lbf);
+            assert.ok(new feng3d.Vector3(-tan * far * aspect, -tan * far, far).equals(tv));
+            var ltn = new feng3d.Vector3(-1, 1, -1);
+            var tv = perspectiveLens.unproject(ltn);
+            assert.ok(new feng3d.Vector3(-tan * near * aspect, tan * near, near).equals(tv));
+            var ltf = new feng3d.Vector3(-1, 1, 1);
+            var tv = perspectiveLens.unproject(ltf);
+            assert.ok(new feng3d.Vector3(-tan * far * aspect, tan * far, far).equals(tv));
+            var rbn = new feng3d.Vector3(1, -1, -1);
+            var tv = perspectiveLens.unproject(rbn);
+            assert.ok(new feng3d.Vector3(tan * near * aspect, -tan * near, near).equals(tv));
+            var rbf = new feng3d.Vector3(1, -1, 1);
+            var tv = perspectiveLens.unproject(rbf);
+            assert.ok(new feng3d.Vector3(tan * far * aspect, -tan * far, far).equals(tv));
+            var rtn = new feng3d.Vector3(1, 1, -1);
+            var tv = perspectiveLens.unproject(rtn);
+            assert.ok(new feng3d.Vector3(tan * near * aspect, tan * near, near).equals(tv));
+            var rtf = new feng3d.Vector3(1, 1, 1);
+            var tv = perspectiveLens.unproject(rtf);
+            assert.ok(new feng3d.Vector3(tan * far * aspect, tan * far, far).equals(tv));
+        });
+        QUnit.test("unprojectRay", function (assert) {
+            var fov = Math.random() * 360;
+            var aspect = Math.random();
+            var near = Math.random();
+            var far = Math.random();
+            var perspectiveLens = new feng3d.PerspectiveLens(fov, aspect, near, far);
+            var x = Math.random();
+            var y = Math.random();
+            for (var i = 0; i < NUM; i++) {
+                var ray = perspectiveLens.unprojectRay(x, y);
+                var p = ray.getPointWithZ(feng3d.FMath.lerp(near, far, Math.random()));
+                var pp = perspectiveLens.project(p);
+                assert.ok(feng3d.FMath.equals(x, pp.x));
+                assert.ok(feng3d.FMath.equals(y, pp.y));
+            }
+        });
+        QUnit.test("unprojectWithDepth", function (assert) {
+            var fov = Math.random() * 360;
+            var aspect = Math.random();
+            var near = Math.random();
+            var far = Math.random();
+            var perspectiveLens = new feng3d.PerspectiveLens(fov, aspect, near, far);
+            var x = Math.random();
+            var y = Math.random();
+            for (var i = 0; i < NUM; i++) {
+                var sZ = feng3d.FMath.lerp(near, far, Math.random());
+                var p = perspectiveLens.unprojectWithDepth(x, y, sZ);
+                assert.ok(feng3d.FMath.equals(sZ, p.z));
+                var pp = perspectiveLens.project(p);
+                assert.ok(feng3d.FMath.equals(x, pp.x));
+                assert.ok(feng3d.FMath.equals(y, pp.y));
+            }
+        });
+    });
+})(feng3d || (feng3d = {}));
+var feng3d;
+(function (feng3d) {
     QUnit.module("ClassUtils", function () {
         QUnit.test("getQualifiedClassName", function (assert) {
             var className = feng3d.classUtils.getQualifiedClassName(feng3d.EventDispatcher);
@@ -129,6 +347,38 @@ var feng3d;
             assert.ok(className == "Number");
             var className = feng3d.classUtils.getQualifiedClassName(Number);
             assert.ok(className == "Number");
+        });
+    });
+})(feng3d || (feng3d = {}));
+var feng3d;
+(function (feng3d) {
+    QUnit.module("Component", function () {
+        // @see https://gitee.com/feng3d/feng3d/issues/IK27X
+        // 测试Component配发的事件会先传递到GameObject中然后传递到组件中
+        QUnit.test("dispatchEvent", function (assert) {
+            var c = new feng3d.GameObject({ name: "t" }).addComponent(feng3d.Camera);
+            var e = c.dispatch("lensChanged");
+            c.dispatchEvent(e);
+            assert.ok(e.targets[0] == c.gameObject);
+            c.gameObject.components.forEach(function (element) {
+                assert.ok(e.targets.indexOf(element) != -1);
+            });
+        });
+    });
+})(feng3d || (feng3d = {}));
+var feng3d;
+(function (feng3d) {
+    QUnit.module("GameObject", function () {
+        // @see https://gitee.com/feng3d/feng3d/issues/IK27X
+        // 测试GameObject配发的事件会先处理自身然后传递到组件中
+        QUnit.test("dispatchEvent", function (assert) {
+            var g = new feng3d.GameObject({ name: "t" });
+            var e = g.dispatch("click");
+            g.dispatchEvent(e);
+            assert.ok(e.targets[0] == g);
+            g.components.forEach(function (element) {
+                assert.ok(e.targets.indexOf(element) != -1);
+            });
         });
     });
 })(feng3d || (feng3d = {}));
@@ -374,6 +624,181 @@ var feng3d;
             var mat3 = new feng3d.Matrix4x4().recompose(vs);
             // !!!!
             assert.notOk(mat2.equals(mat3));
+        });
+        QUnit.test("setOrtho， 测试正交矩阵可逆性", function (assert) {
+            // 生成随机正交矩阵
+            var left = Math.random();
+            var right = Math.random() + left;
+            var top = Math.random();
+            var bottom = Math.random() + top;
+            var near = Math.random();
+            var far = Math.random() + near;
+            //
+            var mat = new feng3d.Matrix4x4().setOrtho(left, right, top, bottom, near, far);
+            assert.ok(mat.determinant != 0);
+            var invertMat = mat.clone().invert();
+            var v = feng3d.Vector4.random();
+            var v1 = invertMat.transformVector4(mat.transformVector4(v));
+            assert.ok(v.equals(v1));
+        });
+        QUnit.test("setOrtho，测试可视空间的8个顶点是否被正确投影", function (assert) {
+            // 生成随机正交矩阵
+            var left = Math.random();
+            var right = Math.random() + left;
+            var top = Math.random();
+            var bottom = Math.random() + top;
+            var near = Math.random();
+            var far = Math.random() + near;
+            //
+            var mat = new feng3d.Matrix4x4().setOrtho(left, right, top, bottom, near, far);
+            // 测试可视空间的8个顶点是否被正确投影
+            var lbn = new feng3d.Vector4(left, bottom, near, 1);
+            var tv = mat.transformVector4(lbn);
+            assert.ok(new feng3d.Vector4(-1, -1, -1, 1).equals(tv));
+            var lbf = new feng3d.Vector4(left, bottom, far, 1);
+            var tv = mat.transformVector4(lbf);
+            assert.ok(new feng3d.Vector4(-1, -1, 1, 1).equals(tv));
+            var ltn = new feng3d.Vector4(left, top, near, 1);
+            var tv = mat.transformVector4(ltn);
+            assert.ok(new feng3d.Vector4(-1, 1, -1, 1).equals(tv));
+            var ltf = new feng3d.Vector4(left, top, far, 1);
+            var tv = mat.transformVector4(ltf);
+            assert.ok(new feng3d.Vector4(-1, 1, 1, 1).equals(tv));
+            var rbn = new feng3d.Vector4(right, bottom, near, 1);
+            var tv = mat.transformVector4(rbn);
+            assert.ok(new feng3d.Vector4(1, -1, -1, 1).equals(tv));
+            var rbf = new feng3d.Vector4(right, bottom, far, 1);
+            var tv = mat.transformVector4(rbf);
+            assert.ok(new feng3d.Vector4(1, -1, 1, 1).equals(tv));
+            var rtn = new feng3d.Vector4(right, top, near, 1);
+            var tv = mat.transformVector4(rtn);
+            assert.ok(new feng3d.Vector4(1, 1, -1, 1).equals(tv));
+            var rtf = new feng3d.Vector4(right, top, far, 1);
+            var tv = mat.transformVector4(rtf);
+            assert.ok(new feng3d.Vector4(1, 1, 1, 1).equals(tv));
+        });
+        QUnit.test("setPerspectiveFromFOV，测试透视矩阵可逆性", function (assert) {
+            var fov = Math.random() * Math.PI * 2;
+            var aspect = Math.random();
+            var near = Math.random();
+            var far = Math.random();
+            //
+            var mat = new feng3d.Matrix4x4().setPerspectiveFromFOV(fov, aspect, near, far);
+            assert.ok(mat.determinant != 0);
+            var invertMat = mat.clone().invert();
+            var v = feng3d.Vector4.random();
+            var v1 = invertMat.transformVector4(mat.transformVector4(v));
+            assert.ok(v.equals(v1));
+        });
+        QUnit.test("setPerspectiveFromFOV，测试可视空间的8个顶点是否被正确投影", function (assert) {
+            var fov = Math.random() * 360;
+            var aspect = Math.random();
+            var near = Math.random();
+            var far = Math.random();
+            //
+            var mat = new feng3d.Matrix4x4().setPerspectiveFromFOV(fov, aspect, near, far);
+            var tan = Math.tan(fov * Math.PI / 360);
+            // 测试可视空间的8个顶点是否被正确投影
+            var lbn = new feng3d.Vector4(-tan * near * aspect, -tan * near, near, 1);
+            var tv = mat.transformVector4(lbn);
+            assert.equal(tv.w, lbn.z);
+            tv.scale(1 / tv.w);
+            assert.ok(new feng3d.Vector4(-1, -1, -1, 1).equals(tv));
+            var lbf = new feng3d.Vector4(-tan * far * aspect, -tan * far, far, 1);
+            var tv = mat.transformVector4(lbf);
+            assert.equal(tv.w, lbf.z);
+            tv.scale(1 / tv.w);
+            assert.ok(new feng3d.Vector4(-1, -1, 1, 1).equals(tv));
+            var ltn = new feng3d.Vector4(-tan * near * aspect, tan * near, near, 1);
+            var tv = mat.transformVector4(ltn);
+            assert.equal(tv.w, ltn.z);
+            tv.scale(1 / tv.w);
+            assert.ok(new feng3d.Vector4(-1, 1, -1, 1).equals(tv));
+            var ltf = new feng3d.Vector4(-tan * far * aspect, tan * far, far, 1);
+            var tv = mat.transformVector4(ltf);
+            assert.equal(tv.w, ltf.z);
+            tv.scale(1 / tv.w);
+            assert.ok(new feng3d.Vector4(-1, 1, 1, 1).equals(tv));
+            var rbn = new feng3d.Vector4(tan * near * aspect, -tan * near, near, 1);
+            var tv = mat.transformVector4(rbn);
+            assert.equal(tv.w, rbn.z);
+            tv.scale(1 / tv.w);
+            assert.ok(new feng3d.Vector4(1, -1, -1, 1).equals(tv));
+            var rbf = new feng3d.Vector4(tan * far * aspect, -tan * far, far, 1);
+            var tv = mat.transformVector4(rbf);
+            assert.equal(tv.w, rbf.z);
+            tv.scale(1 / tv.w);
+            assert.ok(new feng3d.Vector4(1, -1, 1, 1).equals(tv));
+            var rtn = new feng3d.Vector4(tan * near * aspect, tan * near, near, 1);
+            var tv = mat.transformVector4(rtn);
+            assert.equal(tv.w, rtn.z);
+            tv.scale(1 / tv.w);
+            assert.ok(new feng3d.Vector4(1, 1, -1, 1).equals(tv));
+            var rtf = new feng3d.Vector4(tan * far * aspect, tan * far, far, 1);
+            var tv = mat.transformVector4(rtf);
+            assert.equal(tv.w, rtf.z);
+            tv.scale(1 / tv.w);
+            assert.ok(new feng3d.Vector4(1, 1, 1, 1).equals(tv));
+        });
+        QUnit.test("setPerspective，测试透视矩阵可逆性", function (assert) {
+            var left = Math.random();
+            var right = Math.random();
+            var top = Math.random();
+            var bottom = Math.random();
+            var near = Math.random();
+            var far = Math.random();
+            //
+            var mat = new feng3d.Matrix4x4().setPerspective(left, right, top, bottom, near, far);
+            assert.ok(mat.determinant != 0);
+            var invertMat = mat.clone().invert();
+            var v = feng3d.Vector4.random();
+            var v1 = invertMat.transformVector4(mat.transformVector4(v));
+            assert.ok(v.equals(v1));
+        });
+        QUnit.test("setPerspective,测试可视空间的8个顶点是否被正确投影", function (assert) {
+            var left = Math.random();
+            var right = Math.random();
+            var top = Math.random();
+            var bottom = Math.random();
+            var near = Math.random();
+            var far = Math.random();
+            //
+            var mat = new feng3d.Matrix4x4().setPerspective(left, right, top, bottom, near, far);
+            var tan = (top - bottom) / 2 / near;
+            var aspect = (right - left) / (top - bottom);
+            // 测试可视空间的8个顶点是否被正确投影
+            var lbn = new feng3d.Vector4(-tan * near * aspect, -tan * near, near, 1);
+            var tv = mat.transformVector4(lbn);
+            tv.scale(1 / tv.w);
+            assert.ok(new feng3d.Vector4(-1, -1, -1, 1).equals(tv));
+            var lbf = new feng3d.Vector4(-tan * far * aspect, -tan * far, far, 1);
+            var tv = mat.transformVector4(lbf);
+            tv.scale(1 / tv.w);
+            assert.ok(new feng3d.Vector4(-1, -1, 1, 1).equals(tv));
+            var ltn = new feng3d.Vector4(-tan * near * aspect, tan * near, near, 1);
+            var tv = mat.transformVector4(ltn);
+            tv.scale(1 / tv.w);
+            assert.ok(new feng3d.Vector4(-1, 1, -1, 1).equals(tv));
+            var ltf = new feng3d.Vector4(-tan * far * aspect, tan * far, far, 1);
+            var tv = mat.transformVector4(ltf);
+            tv.scale(1 / tv.w);
+            assert.ok(new feng3d.Vector4(-1, 1, 1, 1).equals(tv));
+            var rbn = new feng3d.Vector4(tan * near * aspect, -tan * near, near, 1);
+            var tv = mat.transformVector4(rbn);
+            tv.scale(1 / tv.w);
+            assert.ok(new feng3d.Vector4(1, -1, -1, 1).equals(tv));
+            var rbf = new feng3d.Vector4(tan * far * aspect, -tan * far, far, 1);
+            var tv = mat.transformVector4(rbf);
+            tv.scale(1 / tv.w);
+            assert.ok(new feng3d.Vector4(1, -1, 1, 1).equals(tv));
+            var rtn = new feng3d.Vector4(tan * near * aspect, tan * near, near, 1);
+            var tv = mat.transformVector4(rtn);
+            tv.scale(1 / tv.w);
+            assert.ok(new feng3d.Vector4(1, 1, -1, 1).equals(tv));
+            var rtf = new feng3d.Vector4(tan * far * aspect, tan * far, far, 1);
+            var tv = mat.transformVector4(rtf);
+            tv.scale(1 / tv.w);
+            assert.ok(new feng3d.Vector4(1, 1, 1, 1).equals(tv));
         });
     });
 })(feng3d || (feng3d = {}));

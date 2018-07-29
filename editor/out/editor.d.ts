@@ -518,11 +518,11 @@ declare namespace editor {
         openChanged: TreeNode;
     }
     interface Tree {
-        once<K extends keyof TreeEventMap>(type: K, listener: (event: TreeEventMap[K]) => void, thisObject?: any, priority?: number): void;
-        dispatch<K extends keyof TreeEventMap>(type: K, data?: TreeEventMap[K], bubbles?: boolean): any;
+        once<K extends keyof TreeEventMap>(type: K, listener: (event: feng3d.Event<TreeEventMap[K]>) => void, thisObject?: any, priority?: number): void;
+        dispatch<K extends keyof TreeEventMap>(type: K, data?: TreeEventMap[K], bubbles?: boolean): feng3d.Event<TreeEventMap[K]>;
         has<K extends keyof TreeEventMap>(type: K): boolean;
-        on<K extends keyof TreeEventMap>(type: K, listener: (event: TreeEventMap[K]) => any, thisObject?: any, priority?: number, once?: boolean): any;
-        off<K extends keyof TreeEventMap>(type?: K, listener?: (event: TreeEventMap[K]) => any, thisObject?: any): any;
+        on<K extends keyof TreeEventMap>(type: K, listener: (event: feng3d.Event<TreeEventMap[K]>) => any, thisObject?: any, priority?: number, once?: boolean): any;
+        off<K extends keyof TreeEventMap>(type?: K, listener?: (event: feng3d.Event<TreeEventMap[K]>) => any, thisObject?: any): any;
     }
     class Tree extends feng3d.EventDispatcher {
         _rootnode: TreeNode;
@@ -1857,6 +1857,7 @@ declare namespace editor {
         init(gameObject: feng3d.GameObject): void;
         protected onAddedToScene(): void;
         protected onRemovedFromScene(): void;
+        protected onItemMouseDown(event: feng3d.Event<any>): void;
         protected toolModel: feng3d.Component;
         selectedItem: CoordinateAxis | CoordinatePlane | CoordinateCube | CoordinateRotationAxis | CoordinateRotationFreeAxis | CoordinateScaleCube;
         gameobjectControllerTarget: MRSToolTarget;
@@ -2061,10 +2062,16 @@ declare namespace editor {
 declare namespace editor {
     var engine: feng3d.Engine;
     var editorCamera: feng3d.Camera;
+    var editorScene: feng3d.Scene3D;
+    var editorComponent: EditorComponent;
     class EditorEngine extends feng3d.Engine {
         scene: feng3d.Scene3D;
         readonly camera: feng3d.Camera;
         private _scene;
+        /**
+         * 绘制场景
+         */
+        render(): void;
     }
     /**
     * 编辑器3D入口
@@ -2079,20 +2086,20 @@ declare namespace editor {
 }
 declare namespace editor {
     class EditorComponent extends feng3d.Component {
-        serializable: boolean;
-        showInInspector: boolean;
         scene: feng3d.Scene3D;
+        private _scene;
         init(gameobject: feng3d.GameObject): void;
         /**
          * 销毁
          */
         dispose(): void;
-        private onAddedToScene();
-        private onRemovedFromScene();
         private onAddComponentToScene(event);
         private onRemoveComponentFromScene(event);
         private addLightIcon(light);
         private removeLightIcon(light);
+        private directionLightIconMap;
+        private pointLightIconMap;
+        private spotLightIconMap;
     }
 }
 declare namespace editor {
@@ -2310,8 +2317,6 @@ declare namespace feng3d {
         clipTo(node: ThreeBSPNode): this;
     }
 }
-declare namespace feng3d {
-}
 declare namespace navigation {
     class NavigationProcess {
         private data;
@@ -2368,8 +2373,6 @@ declare namespace editor {
      * 编辑器脚本
      */
     class EditorScript extends feng3d.ScriptComponent {
-        showInInspector: boolean;
-        serializable: boolean;
         flag: feng3d.ScriptFlag;
     }
 }
@@ -2386,32 +2389,53 @@ declare namespace editor {
 }
 declare namespace editor {
     class DirectionLightIcon extends EditorScript {
+        light: feng3d.DirectionalLight;
+        private _light;
         private lightIcon;
         private lightLines;
         private textureMaterial;
-        private directionalLight;
         init(gameObject: feng3d.GameObject): void;
         initicon(): void;
         update(): void;
         dispose(): void;
+        private onScenetransformChanged();
+        private onMousedown();
     }
 }
 declare namespace editor {
     class PointLightIcon extends EditorScript {
-        showInInspector: boolean;
-        serializable: boolean;
+        light: feng3d.PointLight;
+        private _light;
         private lightIcon;
         private lightLines;
-        private lightLines1;
         private lightpoints;
         private textureMaterial;
-        private pointLight;
         private segmentGeometry;
         private pointGeometry;
         init(gameObject: feng3d.GameObject): void;
         initicon(): void;
         update(): void;
         dispose(): void;
+        private onScenetransformChanged();
+        private onMousedown();
+    }
+}
+declare namespace editor {
+    class SpotLightIcon extends EditorScript {
+        light: feng3d.SpotLight;
+        private _light;
+        private lightIcon;
+        private lightLines;
+        private lightpoints;
+        private textureMaterial;
+        private segmentGeometry;
+        private pointGeometry;
+        init(gameObject: feng3d.GameObject): void;
+        initicon(): void;
+        update(): void;
+        dispose(): void;
+        private onScenetransformChanged();
+        private onMousedown();
     }
 }
 declare namespace editor {
