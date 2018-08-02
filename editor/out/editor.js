@@ -10984,7 +10984,7 @@ var editor;
      * @author feng 2015-03-20
      */
     editor.revision = "2018.08.02";
-    feng3d.log("Editot version " + editor.revision);
+    feng3d.log("Editor version " + editor.revision);
     /**
      * 编辑器
      * @author feng 2016-10-29
