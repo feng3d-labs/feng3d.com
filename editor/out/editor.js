@@ -10980,6 +10980,12 @@ var editor;
 var editor;
 (function (editor) {
     /**
+     * feng3d的版本号
+     * @author feng 2015-03-20
+     */
+    editor.revision = "2018.08.02";
+    feng3d.log("Feng3D version " + editor.revision);
+    /**
      * 编辑器
      * @author feng 2016-10-29
      */

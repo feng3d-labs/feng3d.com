@@ -2491,6 +2491,11 @@ declare namespace editor {
 declare namespace editor {
     var editorData: EditorData;
     /**
+     * feng3d的版本号
+     * @author feng 2015-03-20
+     */
+    var revision: string;
+    /**
      * 编辑器
      * @author feng 2016-10-29
      */
