@@ -2113,11 +2113,38 @@ var editor;
             if (this.component instanceof feng3d.Transform) {
                 this.componentIcon.source = "Transform_png";
             }
+            else if (this.component instanceof feng3d.Water) {
+                this.componentIcon.source = "Water_png";
+            }
+            else if (this.component instanceof feng3d.Terrain) {
+                this.componentIcon.source = "Terrain_png";
+            }
             else if (this.component instanceof feng3d.MeshRenderer) {
                 this.componentIcon.source = "MeshRenderer_png";
             }
             else if (this.component instanceof feng3d.ScriptComponent) {
                 this.componentIcon.source = "ScriptComponent_png";
+            }
+            else if (this.component instanceof feng3d.Camera) {
+                this.componentIcon.source = "Camera_png";
+            }
+            else if (this.component instanceof feng3d.AudioSource) {
+                this.componentIcon.source = "AudioSource_png";
+            }
+            else if (this.component instanceof feng3d.SpotLight) {
+                this.componentIcon.source = "SpotLight_png";
+            }
+            else if (this.component instanceof feng3d.PointLight) {
+                this.componentIcon.source = "PointLight_png";
+            }
+            else if (this.component instanceof feng3d.DirectionalLight) {
+                this.componentIcon.source = "DirectionalLight_png";
+            }
+            else if (this.component instanceof feng3d.FPSController) {
+                this.componentIcon.source = "FPSController_png";
+            }
+            else if (this.component instanceof feng3d.AudioListener) {
+                this.componentIcon.source = "AudioListener_png";
             }
             this.addEventListener(egret.Event.ADDED_TO_STAGE, this.onAddToStage, this);
             this.addEventListener(egret.Event.REMOVED_FROM_STAGE, this.onRemovedFromStage, this);

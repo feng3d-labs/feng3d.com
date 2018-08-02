@@ -13605,8 +13605,8 @@ var feng3d;
                 "vertex": "\r\n\r\nattribute vec3 a_position;\r\nattribute vec2 a_uv;\r\n\r\nvarying vec2 v_uv;\r\nuniform mat4 u_modelMatrix;\r\nuniform mat4 u_viewProjection;\r\n\r\nvoid main(void) {\r\n\r\n    gl_Position = u_viewProjection * u_modelMatrix * vec4(a_position, 1.0);\r\n    v_uv = a_uv;\r\n}"
             },
             "water": {
-                "fragment": "precision mediump float;  \r\n\r\nuniform mat4 u_cameraMatrix;\r\n\r\nvarying vec4 v_mirrorCoord;\r\nvarying vec4 v_worldPosition;\r\n\r\nuniform sampler2D s_mirrorSampler;\r\nuniform sampler2D s_normalSampler;\r\n\r\nuniform float u_alpha;\r\nuniform float u_time;\r\nuniform float u_size;\r\nuniform float u_distortionScale;\r\nuniform vec3 u_sunColor;\r\nuniform vec3 u_sunDirection;\r\nuniform vec3 u_waterColor;\r\n\r\nvec4 getNoise( vec2 uv ) {\r\n\tvec2 uv0 = ( uv / 103.0 ) + vec2(u_time / 17.0, u_time / 29.0);\r\n\tvec2 uv1 = uv / 107.0-vec2( u_time / -19.0, u_time / 31.0 );\r\n\tvec2 uv2 = uv / vec2( 8907.0, 9803.0 ) + vec2( u_time / 101.0, u_time / 97.0 );\r\n\tvec2 uv3 = uv / vec2( 1091.0, 1027.0 ) - vec2( u_time / 109.0, u_time / -113.0 );\r\n\tvec4 noise = texture2D( s_normalSampler, uv0 ) +\r\n\t\ttexture2D( s_normalSampler, uv1 ) +\r\n\t\ttexture2D( s_normalSampler, uv2 ) +\r\n\t\ttexture2D( s_normalSampler, uv3 );\r\n\treturn noise * 0.5 - 1.0;\r\n}\r\n\r\nvoid sunLight( const vec3 surfaceNormal, const vec3 eyeDirection, float shiny, float spec, float diffuse, inout vec3 diffuseColor, inout vec3 specularColor ) {\r\n\tvec3 reflection = normalize( reflect( -u_sunDirection, surfaceNormal ) );\r\n\tfloat direction = max( 0.0, dot( eyeDirection, reflection ) );\r\n\tspecularColor += pow( direction, shiny ) * u_sunColor * spec;\r\n\tdiffuseColor += max( dot( u_sunDirection, surfaceNormal ), 0.0 ) * u_sunColor * diffuse;\r\n}\r\n\r\nvoid main() {\r\n\tvec4 noise = getNoise( v_worldPosition.xz * u_size );\r\n\tvec3 surfaceNormal = normalize( noise.xzy * vec3( 1.5, 1.0, 1.5 ) );\r\n\tvec3 diffuseLight = vec3(0.0);\r\n\tvec3 specularLight = vec3(0.0);\r\n\tvec3 worldToEye = u_cameraMatrix[3].xyz-v_worldPosition.xyz;\r\n\tvec3 eyeDirection = normalize( worldToEye );\r\n\tsunLight( surfaceNormal, eyeDirection, 100.0, 2.0, 0.5, diffuseLight, specularLight );\r\n\tfloat distance = length(worldToEye);\r\n\tvec2 distortion = surfaceNormal.xz * ( 0.001 + 1.0 / distance ) * u_distortionScale;\r\n\tvec3 reflectionSample = vec3( texture2D( s_mirrorSampler, v_mirrorCoord.xy / v_mirrorCoord.z + distortion ) );\r\n\tfloat theta = max( dot( eyeDirection, surfaceNormal ), 0.0 );\r\n\tfloat rf0 = 0.3;\r\n\tfloat reflectance = rf0 + ( 1.0 - rf0 ) * pow( ( 1.0 - theta ), 5.0 );\r\n\tvec3 scatter = max( 0.0, dot( surfaceNormal, eyeDirection ) ) * u_waterColor;\r\n\r\n\tfloat shadowMask = 1.0;\r\n\t// float shadowMask = getShadowMask();\r\n\r\n\tvec3 albedo = mix( ( u_sunColor * diffuseLight * 0.3 + scatter ) * shadowMask, ( vec3( 0.1 ) + reflectionSample * 0.9 + reflectionSample * specularLight ), reflectance);\r\n\tvec3 outgoingLight = albedo;\r\n\tgl_FragColor = vec4( outgoingLight, u_alpha );\r\n}",
-                "vertex": "attribute vec3 a_position;\r\n\r\nuniform mat4 u_modelMatrix;\r\nuniform mat4 u_viewProjection;\r\n\r\nuniform mat4 u_textureMatrix;\r\n\r\nvarying vec4 v_mirrorCoord;\r\nvarying vec4 v_worldPosition;\r\n\r\nvoid main() {\r\n\r\n\tvec4 position = vec4(a_position,1.0);\r\n\t//获取全局坐标\r\n    vec4 worldPosition = u_modelMatrix * position;\r\n    //计算投影坐标\r\n    gl_Position = u_viewProjection * worldPosition;\r\n\t\r\n\tv_worldPosition = worldPosition;\r\n\tv_mirrorCoord = u_textureMatrix * worldPosition;\r\n}"
+                "fragment": "precision mediump float;  \r\n\r\nuniform mat4 u_cameraMatrix;\r\n\r\nvarying vec4 v_mirrorCoord;\r\nvarying vec4 v_worldPosition;\r\n\r\nuniform sampler2D s_mirrorSampler;\r\nuniform sampler2D s_normalSampler;\r\n\r\nuniform float u_alpha;\r\nuniform float u_time;\r\nuniform float u_size;\r\nuniform float u_distortionScale;\r\nuniform vec3 u_sunColor;\r\nuniform vec3 u_sunDirection;\r\nuniform vec3 u_waterColor;\r\n\r\nvec4 getNoise( vec2 uv ) \r\n{\r\n\tvec2 uv0 = ( uv / 103.0 ) + vec2(u_time / 17.0, u_time / 29.0);\r\n\tvec2 uv1 = uv / 107.0-vec2( u_time / -19.0, u_time / 31.0 );\r\n\tvec2 uv2 = uv / vec2( 8907.0, 9803.0 ) + vec2( u_time / 101.0, u_time / 97.0 );\r\n\tvec2 uv3 = uv / vec2( 1091.0, 1027.0 ) - vec2( u_time / 109.0, u_time / -113.0 );\r\n\tvec4 noise = texture2D( s_normalSampler, uv0 ) +\r\n\t\ttexture2D( s_normalSampler, uv1 ) +\r\n\t\ttexture2D( s_normalSampler, uv2 ) +\r\n\t\ttexture2D( s_normalSampler, uv3 );\r\n\treturn noise * 0.5 - 1.0;\r\n}\r\n\r\nvoid sunLight( const vec3 surfaceNormal, const vec3 eyeDirection, float shiny, float spec, float diffuse, inout vec3 diffuseColor, inout vec3 specularColor ) \r\n{\r\n\tvec3 reflection = normalize( reflect( -u_sunDirection, surfaceNormal ) );\r\n\tfloat direction = max( 0.0, dot( eyeDirection, reflection ) );\r\n\tspecularColor += pow( direction, shiny ) * u_sunColor * spec;\r\n\tdiffuseColor += max( dot( u_sunDirection, surfaceNormal ), 0.0 ) * u_sunColor * diffuse;\r\n}\r\n\r\nvoid main() \r\n{\r\n\tvec4 noise = getNoise( v_worldPosition.xz * u_size );\r\n\tvec3 surfaceNormal = normalize( noise.xzy * vec3( 1.5, 1.0, 1.5 ) );\r\n\tvec3 diffuseLight = vec3(0.0);\r\n\tvec3 specularLight = vec3(0.0);\r\n\tvec3 worldToEye = u_cameraMatrix[3].xyz-v_worldPosition.xyz;\r\n\tvec3 eyeDirection = normalize( worldToEye );\r\n\tsunLight( surfaceNormal, eyeDirection, 100.0, 2.0, 0.5, diffuseLight, specularLight );\r\n\tfloat distance = length(worldToEye);\r\n\tvec2 distortion = surfaceNormal.xz * ( 0.001 + 1.0 / distance ) * u_distortionScale;\r\n\tvec3 reflectionSample = vec3( texture2D( s_mirrorSampler, v_mirrorCoord.xy / v_mirrorCoord.z + distortion ) );\r\n\tfloat theta = max( dot( eyeDirection, surfaceNormal ), 0.0 );\r\n\tfloat rf0 = 0.3;\r\n\tfloat reflectance = rf0 + ( 1.0 - rf0 ) * pow( ( 1.0 - theta ), 5.0 );\r\n\tvec3 scatter = max( 0.0, dot( surfaceNormal, eyeDirection ) ) * u_waterColor;\r\n\r\n\tfloat shadowMask = 1.0;\r\n\t// float shadowMask = getShadowMask();\r\n\r\n\tvec3 albedo = mix( ( u_sunColor * diffuseLight * 0.3 + scatter ) * shadowMask, ( vec3( 0.1 ) + reflectionSample * 0.9 + reflectionSample * specularLight ), reflectance);\r\n\tvec3 outgoingLight = albedo;\r\n\tgl_FragColor = vec4( outgoingLight, u_alpha );\r\n\r\n\t// debug\r\n\t// gl_FragColor = texture2D( s_mirrorSampler, (v_mirrorCoord.xy / v_mirrorCoord.z + 1.0) / 2.0 );\r\n\t// gl_FragColor = vec4( reflectionSample, 1.0 );\r\n\t// gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );\r\n}",
+                "vertex": "attribute vec3 a_position;\r\n\r\nuniform mat4 u_modelMatrix;\r\nuniform mat4 u_viewProjection;\r\n\r\nuniform mat4 u_textureMatrix;\r\n\r\nvarying vec4 v_mirrorCoord;\r\nvarying vec4 v_worldPosition;\r\n\r\nvoid main() \r\n{\r\n\tvec4 position = vec4(a_position,1.0);\r\n\t//获取全局坐标\r\n    vec4 worldPosition = u_modelMatrix * position;\r\n    //计算投影坐标\r\n    gl_Position = u_viewProjection * worldPosition;\r\n\t\r\n\tv_worldPosition = worldPosition;\r\n\tv_mirrorCoord = u_textureMatrix * worldPosition;\r\n}"
             },
             "wireframe": {
                 "fragment": "precision mediump float;\r\n\r\nuniform vec4 u_wireframeColor;\r\n\r\nvoid main(void) {\r\n    gl_FragColor = u_wireframeColor;\r\n}",
@@ -13863,7 +13863,7 @@ var feng3d;
         Component.prototype.dispose = function () {
             this._gameObject = null;
         };
-        Component.prototype.beforeRender = function (renderAtomic, scene3d, camera) {
+        Component.prototype.beforeRender = function (gl, renderAtomic, scene3d, camera) {
         };
         __decorate([
             feng3d.serialize
@@ -14216,7 +14216,7 @@ var feng3d;
             unblenditems.concat(blenditems).forEach(function (meshRenderer) {
                 //绘制
                 var renderAtomic = meshRenderer.gameObject.renderAtomic;
-                meshRenderer.gameObject.preRender(renderAtomic, scene3d, camera);
+                meshRenderer.gameObject.beforeRender(gl, renderAtomic, scene3d, camera);
                 renderAtomic.next = _this.renderAtomic;
                 gl.renderer.draw(renderAtomic);
             });
@@ -14486,7 +14486,7 @@ var feng3d;
          */
         ShadowRenderer.prototype.drawGameObject = function (gl, gameObject, scene3d, camera) {
             var renderAtomic = gameObject.renderAtomic;
-            gameObject.preRender(renderAtomic, scene3d, camera);
+            gameObject.beforeRender(gl, renderAtomic, scene3d, camera);
             var meshRenderer = gameObject.getComponent(feng3d.MeshRenderer);
             if (meshRenderer instanceof feng3d.SkinnedMeshRenderer) {
                 this.renderAtomic.shader = this.skeleton_shader;
@@ -14538,7 +14538,7 @@ var feng3d;
                 var meshRenderer = unblenditems[i];
                 if (meshRenderer.getComponent(OutLineComponent) || meshRenderer.getComponent(feng3d.CartoonComponent)) {
                     var renderAtomic = meshRenderer.gameObject.renderAtomic;
-                    meshRenderer.gameObject.preRender(renderAtomic, scene3d, camera);
+                    meshRenderer.gameObject.beforeRender(gl, renderAtomic, scene3d, camera);
                     this.renderAtomic.next = renderAtomic;
                     gl.renderer.draw(this.renderAtomic);
                 }
@@ -14560,7 +14560,7 @@ var feng3d;
         OutLineComponent.prototype.init = function (gameobject) {
             _super.prototype.init.call(this, gameobject);
         };
-        OutLineComponent.prototype.beforeRender = function (renderAtomic) {
+        OutLineComponent.prototype.beforeRender = function (gl, renderAtomic, scene3d, camera) {
             var _this = this;
             renderAtomic.uniforms.u_outlineSize = function () { return _this.size; };
             renderAtomic.uniforms.u_outlineColor = function () { return _this.color; };
@@ -14615,7 +14615,7 @@ var feng3d;
          */
         WireframeRenderer.prototype.drawGameObject = function (gl, gameObject, scene3d, camera) {
             var renderAtomic = gameObject.renderAtomic;
-            gameObject.preRender(renderAtomic, scene3d, camera);
+            gameObject.beforeRender(gl, renderAtomic, scene3d, camera);
             var meshRenderer = gameObject.getComponent(feng3d.MeshRenderer);
             var renderMode = feng3d.lazy.getvalue(renderAtomic.renderParams.renderMode);
             if (renderMode == feng3d.RenderMode.POINTS
@@ -14665,9 +14665,9 @@ var feng3d;
         WireframeComponent.prototype.init = function (gameobject) {
             _super.prototype.init.call(this, gameobject);
         };
-        WireframeComponent.prototype.beforeRender = function (renderAtomic, scene3d, camera) {
+        WireframeComponent.prototype.beforeRender = function (gl, renderAtomic, scene3d, camera) {
             var _this = this;
-            _super.prototype.beforeRender.call(this, renderAtomic, scene3d, camera);
+            _super.prototype.beforeRender.call(this, gl, renderAtomic, scene3d, camera);
             renderAtomic.uniforms.u_wireframeColor = function () { return _this.color; };
         };
         __decorate([
@@ -14714,7 +14714,7 @@ var feng3d;
         CartoonComponent.prototype.init = function (gameObject) {
             _super.prototype.init.call(this, gameObject);
         };
-        CartoonComponent.prototype.beforeRender = function (renderAtomic) {
+        CartoonComponent.prototype.beforeRender = function (gl, renderAtomic, scene3d, camera) {
             var _this = this;
             renderAtomic.uniforms.u_diffuseSegment = function () { return _this.diffuseSegment; };
             renderAtomic.uniforms.u_diffuseSegmentValue = function () { return _this.diffuseSegmentValue; };
@@ -14772,7 +14772,7 @@ var feng3d;
         SkyBox.prototype.init = function (gameObject) {
             _super.prototype.init.call(this, gameObject);
         };
-        SkyBox.prototype.beforeRender = function (renderAtomic) {
+        SkyBox.prototype.beforeRender = function (gl, renderAtomic, scene3d, camera) {
             var _this = this;
             renderAtomic.uniforms.s_skyboxTexture = function () { return _this.s_skyboxTexture; };
         };
@@ -14846,7 +14846,7 @@ var feng3d;
                 return;
             this.init();
             //
-            skybox.gameObject.preRender(this.renderAtomic, scene3d, camera);
+            skybox.gameObject.beforeRender(gl, this.renderAtomic, scene3d, camera);
             //
             this.renderAtomic.uniforms.u_viewProjection = camera.viewProjection;
             this.renderAtomic.uniforms.u_viewMatrix = camera.transform.worldToLocalMatrix;
@@ -16169,9 +16169,9 @@ var feng3d;
             while (this.numChildren > 0)
                 this.getChildAt(0).dispose();
         };
-        GameObject.prototype.preRender = function (renderAtomic, scene3d, camera) {
+        GameObject.prototype.beforeRender = function (gl, renderAtomic, scene3d, camera) {
             this._components.forEach(function (element) {
-                element.beforeRender(renderAtomic, scene3d, camera);
+                element.beforeRender(gl, renderAtomic, scene3d, camera);
             });
         };
         /**
@@ -16677,16 +16677,16 @@ var feng3d;
             if (!this.material)
                 this.material = feng3d.materialFactory.create("standard");
         };
-        MeshRenderer.prototype.beforeRender = function (renderAtomic, scene3d, camera) {
+        MeshRenderer.prototype.beforeRender = function (gl, renderAtomic, scene3d, camera) {
             var _this = this;
             renderAtomic.uniforms.u_modelMatrix = function () { return _this.transform.localToWorldMatrix; };
             renderAtomic.uniforms.u_ITModelMatrix = function () { return _this.transform.ITlocalToWorldMatrix; };
             renderAtomic.uniforms.u_mvMatrix = function () { return feng3d.lazy.getvalue(renderAtomic.uniforms.u_modelMatrix).clone().append(feng3d.lazy.getvalue(renderAtomic.uniforms.u_viewMatrix)); };
             renderAtomic.uniforms.u_ITMVMatrix = function () { return feng3d.lazy.getvalue(renderAtomic.uniforms.u_mvMatrix).clone().invert().transpose(); };
             //
-            this._geometry.preRender(renderAtomic);
-            this.material.preRender(renderAtomic);
-            this.lightPicker.preRender(renderAtomic);
+            this._geometry.beforeRender(renderAtomic);
+            this.material.beforeRender(renderAtomic);
+            this.lightPicker.beforeRender(renderAtomic);
         };
         /**
          * 销毁
@@ -16911,10 +16911,6 @@ var feng3d;
             var _this = this;
             // 每帧清理拾取缓存
             this.pickMap.forEach(function (item) { return item.clear(); });
-            this.animations.forEach(function (element) {
-                if (element.isplaying)
-                    element.update(interval);
-            });
             this.behaviours.forEach(function (element) {
                 if (element.isVisibleAndEnabled && (_this.updateScriptFlag & element.flag))
                     element.update(interval);
@@ -17802,7 +17798,7 @@ var feng3d;
                 this.setVAData(key, attributeRenderData.data, attributeRenderData.size);
             }
         };
-        Geometry.prototype.preRender = function (renderAtomic) {
+        Geometry.prototype.beforeRender = function (renderAtomic) {
             renderAtomic.indexBuffer = renderAtomic.indexBuffer || new feng3d.Index();
             renderAtomic.indexBuffer.indices = this.indices;
             var attributes = renderAtomic.attributes;
@@ -18479,6 +18475,9 @@ var feng3d;
             this.left = center + 0.5 * w * (this.left - center) / Math.abs(this.left - center);
             this.right = center + 0.5 * w * (this.right - center) / Math.abs(this.right - center);
         };
+        OrthographicLens.prototype.clone = function () {
+            return new OrthographicLens(this.left, this.right, this.top, this.bottom, this.near, this.far);
+        };
         __decorate([
             feng3d.serialize,
             feng3d.oav(),
@@ -18521,12 +18520,12 @@ var feng3d;
          * @param fov 垂直视角，视锥体顶面和底面间的夹角；单位为角度，取值范围 [1,179]
          *
          */
-        function PerspectiveLens(fov, aspectRatio, near, far) {
+        function PerspectiveLens(fov, aspect, near, far) {
             if (fov === void 0) { fov = 60; }
-            if (aspectRatio === void 0) { aspectRatio = 1; }
+            if (aspect === void 0) { aspect = 1; }
             if (near === void 0) { near = 0.3; }
             if (far === void 0) { far = 2000; }
-            var _this = _super.call(this, aspectRatio, near, far) || this;
+            var _this = _super.call(this, aspect, near, far) || this;
             _this.fov = fov;
             return _this;
         }
@@ -18604,6 +18603,9 @@ var feng3d;
                 new feng3d.Vector3(tan * near * aspect, tan * near, near),
                 new feng3d.Vector3(tan * far * aspect, tan * far, far)
             ]);
+        };
+        PerspectiveLens.prototype.clone = function () {
+            return new PerspectiveLens(this.fov, this.aspect, this.near, this.far);
         };
         __decorate([
             feng3d.watch("invalidate"),
@@ -20748,7 +20750,7 @@ var feng3d;
             feng3d.feng3dDispatcher.on("assets.shaderChanged", _this.onShaderChanged, _this);
             return _this;
         }
-        Material.prototype.preRender = function (renderAtomic) {
+        Material.prototype.beforeRender = function (renderAtomic) {
             for (var key in this.uniforms) {
                 if (this.uniforms.hasOwnProperty(key)) {
                     renderAtomic.uniforms[key] = this.uniforms[key];
@@ -21389,7 +21391,7 @@ var feng3d;
         function LightPicker(meshRenderer) {
             this._meshRenderer = meshRenderer;
         }
-        LightPicker.prototype.preRender = function (renderAtomic) {
+        LightPicker.prototype.beforeRender = function (renderAtomic) {
             var _this = this;
             var pointLights = [];
             var directionalLights = [];
@@ -22547,16 +22549,24 @@ var feng3d;
             var _this = _super !== null && _super.apply(this, arguments) || this;
             _this.geometry = new feng3d.PlaneGeometry({ width: 10, height: 10 });
             _this.material = feng3d.materialFactory.create("water");
+            /**
+             * 帧缓冲对象，用于处理水面反射
+             */
+            _this.frameBufferObject = new feng3d.FrameBufferObject();
             return _this;
         }
-        Water.prototype.beforeRender = function (renderAtomic, scene3d, camera) {
+        Water.prototype.beforeRender = function (gl, renderAtomic, scene3d, camera) {
             var sun = this.gameObject.scene.activeDirectionalLights[0];
             if (sun) {
                 this.material.uniforms.u_sunColor = sun.color;
                 this.material.uniforms.u_sunDirection = sun.transform.localToWorldMatrix.forward.clone().negate();
             }
+            var clipBias = 0;
             this.material.uniforms.u_time += 1.0 / 60.0;
-            this.material.uniforms.u_textureMatrix;
+            // this.material.uniforms.s_mirrorSampler.url = "Assets/floor_diffuse.jpg";
+            _super.prototype.beforeRender.call(this, gl, renderAtomic, scene3d, camera);
+            if (1)
+                return;
             //
             var mirrorWorldPosition = this.transform.scenePosition;
             var cameraWorldPosition = camera.transform.scenePosition;
@@ -22577,7 +22587,7 @@ var feng3d;
             var mirrorCamera = feng3d.GameObject.create("waterMirrorCamera").addComponent(feng3d.Camera);
             mirrorCamera.transform.position = view;
             mirrorCamera.transform.lookAt(target, rotationMatrix.up);
-            mirrorCamera.lens = camera.lens;
+            mirrorCamera.lens = camera.lens.clone();
             var textureMatrix = new feng3d.Matrix4x4([
                 0.5, 0.0, 0.0, 0.0,
                 0.0, 0.5, 0.0, 0.0,
@@ -22594,7 +22604,25 @@ var feng3d;
             q.z = -1.0;
             q.w = (1.0 + projectionMatrix.rawData[10]) / projectionMatrix.rawData[14];
             clipPlane.scale(2.0 / clipPlane.dot(q));
-            _super.prototype.beforeRender.call(this, renderAtomic, scene3d, camera);
+            projectionMatrix.rawData[2] = clipPlane.x;
+            projectionMatrix.rawData[6] = clipPlane.y;
+            projectionMatrix.rawData[10] = clipPlane.z + 1.0 - clipBias;
+            projectionMatrix.rawData[14] = clipPlane.w;
+            var eye = camera.transform.scenePosition;
+            // 
+            var frameBufferObject = this.frameBufferObject;
+            frameBufferObject.active(gl);
+            //
+            gl.viewport(0, 0, frameBufferObject.OFFSCREEN_WIDTH, frameBufferObject.OFFSCREEN_HEIGHT);
+            gl.clearColor(1.0, 1.0, 1.0, 1.0);
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+            feng3d.skyboxRenderer.draw(gl, scene3d, mirrorCamera);
+            // forwardRenderer.draw(gl, scene3d, mirrorCamera);
+            // forwardRenderer.draw(gl, scene3d, camera);
+            frameBufferObject.deactive(gl);
+            //
+            // this.material.uniforms.s_mirrorSampler = frameBufferObject.texture;
+            this.material.uniforms.u_textureMatrix = textureMatrix;
         };
         return Water;
     }(feng3d.MeshRenderer));
@@ -22615,6 +22643,7 @@ var feng3d;
             /**
              * 镜面反射贴图
              */
+            // s_mirrorSampler = new RenderTargetTexture2D();
             this.s_mirrorSampler = new feng3d.UrlImageTexture2D();
             this.u_textureMatrix = new feng3d.Matrix4x4();
             this.u_sunColor = new feng3d.Color3().fromUnit(0x7F7F7F);
@@ -22641,6 +22670,10 @@ var feng3d;
             feng3d.serialize,
             feng3d.oav({ componentParam: { tooltip: "水体法线图" } })
         ], WaterUniforms.prototype, "s_normalSampler", void 0);
+        __decorate([
+            feng3d.oav()
+            // s_mirrorSampler = new RenderTargetTexture2D();
+        ], WaterUniforms.prototype, "s_mirrorSampler", void 0);
         return WaterUniforms;
     }());
     feng3d.WaterUniforms = WaterUniforms;
@@ -22915,7 +22948,7 @@ var feng3d;
             _this.splatMergeTexture.wrapT = feng3d.TextureWrap.REPEAT;
             return _this;
         }
-        TerrainMergeMethod.prototype.preRender = function (renderAtomic) {
+        TerrainMergeMethod.prototype.beforeRender = function (renderAtomic) {
             renderAtomic.uniforms.s_blendTexture = this.blendTexture;
             renderAtomic.uniforms.s_splatMergeTexture = this.splatMergeTexture;
             renderAtomic.uniforms.u_splatMergeTextureSize = this.splatMergeTexture.getSize();
@@ -23643,9 +23676,9 @@ var feng3d;
                 throw new Error("\u65E0\u6CD5\u5904\u7406" + feng3d.classUtils.getQualifiedClassName(data) + "\u7C92\u5B50\u5C5E\u6027");
             }
         };
-        ParticleSystem.prototype.beforeRender = function (renderAtomic, scene3d, camera) {
+        ParticleSystem.prototype.beforeRender = function (gl, renderAtomic, scene3d, camera) {
             var _this = this;
-            _super.prototype.beforeRender.call(this, renderAtomic, scene3d, camera);
+            _super.prototype.beforeRender.call(this, gl, renderAtomic, scene3d, camera);
             this.components.forEach(function (element) {
                 element.setRenderState(_this, renderAtomic);
             });
@@ -24031,9 +24064,9 @@ var feng3d;
             enumerable: true,
             configurable: true
         });
-        SkinnedMeshRenderer.prototype.beforeRender = function (renderAtomic) {
+        SkinnedMeshRenderer.prototype.beforeRender = function (gl, renderAtomic, scene3d, camera) {
             var _this = this;
-            _super.prototype.beforeRender.call(this, renderAtomic);
+            _super.prototype.beforeRender.call(this, gl, renderAtomic, scene3d, camera);
             renderAtomic.uniforms.u_modelMatrix = function () { return _this.u_modelMatrix; };
             renderAtomic.uniforms.u_ITModelMatrix = function () { return _this.u_ITModelMatrix; };
             //
@@ -24168,7 +24201,8 @@ var feng3d;
             configurable: true
         });
         Animation.prototype.update = function (interval) {
-            this.time += interval * this.playspeed;
+            if (this.isplaying)
+                this.time += interval * this.playspeed;
         };
         Animation.prototype.updateAni = function () {
             if (!this.animation)
