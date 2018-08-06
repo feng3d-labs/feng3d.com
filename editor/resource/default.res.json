@@ -422,7 +422,7 @@
 			"name": "MeshFilter_png"
 		},
 		{
-			"url": "assets/component/MeshRenderer.png",
+			"url": "assets/component/Model.png",
 			"type": "image",
 			"name": "MeshRenderer_png"
 		},

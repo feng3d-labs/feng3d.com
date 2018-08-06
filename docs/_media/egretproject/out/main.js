@@ -91,7 +91,7 @@ function initFeng3d() {
     var engine = new feng3d.Engine(feng3dCanvas);
     engine.scene.background = new feng3d.Color4(0, 0, 0, 0.5);
     cube = feng3d.gameObjectFactory.createCube();
-    cube.getComponent(feng3d.MeshRenderer).material.uniforms.u_diffuse = new feng3d.Color4(1, 0, 1, 1);
+    cube.getComponent(feng3d.Model).material.uniforms.u_diffuse = new feng3d.Color4(1, 0, 1, 1);
     cube.transform.z = 4;
     cube.transform.y = -1;
     engine.scene.gameObject.addChild(cube);

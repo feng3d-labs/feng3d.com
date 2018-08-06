@@ -66,7 +66,7 @@ interface MaterialRawMap
 
 ## 使用着色器
 
-进入材质属性面板（可以是从材质文件属性中进入，也可以通过层级树中游戏对象->MeshRenderer->matrial进入），选择使用创建的新材质
+进入材质属性面板（可以是从材质文件属性中进入，也可以通过层级树中游戏对象->Model->matrial进入），选择使用创建的新材质
 
 ![新建着色器](_images/useshader.jpg)
 

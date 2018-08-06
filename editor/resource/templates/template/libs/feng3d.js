@@ -11405,7 +11405,7 @@ var feng3d;
         if (!(renderObjectflag & gameObject.flag))
             return [];
         var meshRenderers = [];
-        var meshRenderer = gameObject.getComponent(feng3d.MeshRenderer);
+        var meshRenderer = gameObject.getComponent(feng3d.Model);
         if (meshRenderer && meshRenderer.enabled) {
             var boundingComponent = gameObject.getComponent(feng3d.BoundingComponent);
             if (boundingComponent.selfWorldBounds) {
@@ -11531,7 +11531,7 @@ var feng3d;
             // var frameBufferObject = new FrameBufferObject();
             // frameBufferObject.init(gl);
             // frameBufferObject.active(gl);
-            // MeshRenderer.meshRenderers.forEach(element =>
+            // Model.meshRenderers.forEach(element =>
             // {
             // this.drawRenderables(renderContext, element);
             // });
@@ -11568,7 +11568,7 @@ var feng3d;
             if (item.getComponent(OutLineComponent) || item.getComponent(feng3d.CartoonComponent)) {
                 var renderAtomic = item.gameObject.renderAtomic;
                 item.gameObject.preRender(renderAtomic);
-                var meshRenderer = item.getComponent(feng3d.MeshRenderer);
+                var meshRenderer = item.getComponent(feng3d.Model);
                 drawGameObject(gl, renderAtomic); //
             }
         }
@@ -11664,7 +11664,7 @@ var feng3d;
     function drawGameObject(gl, gameObject) {
         var renderAtomic = gameObject.renderAtomic;
         gameObject.preRender(renderAtomic);
-        var meshRenderer = gameObject.getComponent(feng3d.MeshRenderer);
+        var meshRenderer = gameObject.getComponent(feng3d.Model);
         var renderMode = feng3d.lazy.getvalue(renderAtomic.renderParams.renderMode);
         if (renderMode == feng3d.RenderMode.POINTS
             || renderMode == feng3d.RenderMode.LINES
@@ -13296,7 +13296,7 @@ var feng3d;
                 rayEntryDistance: rayEntryDistance,
                 ray3D: ray3D,
                 rayOriginIsInsideBounds: rayEntryDistance == 0,
-                geometry: this.gameObject.getComponent(feng3d.MeshRenderer).geometry,
+                geometry: this.gameObject.getComponent(feng3d.Model).geometry,
             };
             return pickingCollisionVO;
         };
@@ -13348,7 +13348,7 @@ var feng3d;
          * @inheritDoc
          */
         BoundingComponent.prototype.updateBounds = function () {
-            var meshRenderer = this.gameObject.getComponent(feng3d.MeshRenderer);
+            var meshRenderer = this.gameObject.getComponent(feng3d.Model);
             if (meshRenderer && meshRenderer.geometry)
                 this._selfLocalBounds = meshRenderer.geometry.bounding;
         };
@@ -13663,17 +13663,17 @@ var feng3d;
 })(feng3d || (feng3d = {}));
 var feng3d;
 (function (feng3d) {
-    var MeshRenderer = /** @class */ (function (_super) {
-        __extends(MeshRenderer, _super);
-        function MeshRenderer() {
+    var Model = /** @class */ (function (_super) {
+        __extends(Model, _super);
+        function Model() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
-        Object.defineProperty(MeshRenderer.prototype, "single", {
+        Object.defineProperty(Model.prototype, "single", {
             get: function () { return true; },
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(MeshRenderer.prototype, "geometry", {
+        Object.defineProperty(Model.prototype, "geometry", {
             /**
              * Returns the instantiated Mesh assigned to the mesh filter.
              */
@@ -13694,14 +13694,14 @@ var feng3d;
             enumerable: true,
             configurable: true
         });
-        MeshRenderer.prototype.init = function (gameObject) {
+        Model.prototype.init = function (gameObject) {
             _super.prototype.init.call(this, gameObject);
             if (!this.geometry)
                 this.geometry = new feng3d.CubeGeometry();
             if (!this.material)
                 this.material = feng3d.materialFactory.create("standard");
         };
-        MeshRenderer.prototype.preRender = function (renderAtomic) {
+        Model.prototype.preRender = function (renderAtomic) {
             var _this = this;
             renderAtomic.uniforms.u_modelMatrix = function () { return _this.transform.localToWorldMatrix; };
             renderAtomic.uniforms.u_ITModelMatrix = function () { return _this.transform.ITlocalToWorldMatrix; };
@@ -13714,26 +13714,26 @@ var feng3d;
         /**
          * 销毁
          */
-        MeshRenderer.prototype.dispose = function () {
+        Model.prototype.dispose = function () {
             this.geometry = null;
             this.material = null;
             _super.prototype.dispose.call(this);
         };
-        MeshRenderer.prototype.onBoundsInvalid = function (event) {
+        Model.prototype.onBoundsInvalid = function (event) {
             if (this.gameObject)
                 this.gameObject.dispatch(event.type, event.data);
         };
         __decorate([
             feng3d.oav({ componentParam: { dragparam: { accepttype: "geometry", datatype: "geometry" } } }),
             feng3d.serialize
-        ], MeshRenderer.prototype, "geometry", null);
+        ], Model.prototype, "geometry", null);
         __decorate([
             feng3d.oav({ componentParam: { dragparam: { accepttype: "material", datatype: "material" } } }),
             feng3d.serialize
-        ], MeshRenderer.prototype, "material", void 0);
-        return MeshRenderer;
+        ], Model.prototype, "material", void 0);
+        return Model;
     }(feng3d.Behaviour));
-    feng3d.MeshRenderer = MeshRenderer;
+    feng3d.Model = Model;
 })(feng3d || (feng3d = {}));
 var feng3d;
 (function (feng3d) {
@@ -13958,7 +13958,7 @@ var feng3d;
                 while (i < checkList.length) {
                     var checkObject = checkList[i++];
                     if (checkObject.mouseEnabled) {
-                        if (checkObject.getComponents(feng3d.MeshRenderer)) {
+                        if (checkObject.getComponents(feng3d.Model)) {
                             var mouselayer = ~~checkObject.mouselayer;
                             layers[mouselayer] = layers[mouselayer] || [];
                             layers[mouselayer].push(checkObject);
@@ -18751,7 +18751,7 @@ var feng3d;
             return _this;
         }
         return Terrain;
-    }(feng3d.MeshRenderer));
+    }(feng3d.Model));
     feng3d.Terrain = Terrain;
 })(feng3d || (feng3d = {}));
 var feng3d;
@@ -19280,7 +19280,7 @@ var feng3d;
             feng3d.serialize
         ], ParticleSystem.prototype, "numParticles", void 0);
         return ParticleSystem;
-    }(feng3d.MeshRenderer));
+    }(feng3d.Model));
     feng3d.ParticleSystem = ParticleSystem;
 })(feng3d || (feng3d = {}));
 var feng3d;
@@ -19569,7 +19569,7 @@ var feng3d;
             feng3d.serialize
         ], SkinnedMeshRenderer.prototype, "initMatrix3d", void 0);
         return SkinnedMeshRenderer;
-    }(feng3d.MeshRenderer));
+    }(feng3d.Model));
     feng3d.SkinnedMeshRenderer = SkinnedMeshRenderer;
     var SkinSkeleton = /** @class */ (function () {
         function SkinSkeleton() {
@@ -21458,7 +21458,7 @@ var feng3d;
                 for (var i = 0; i < this.geosets.length; i++) {
                     var geoset = this.geosets[i];
                     var mesh = this.meshs[i] = feng3d.GameObject.create();
-                    // var meshRenderer = mesh.addComponent(MeshRenderer);
+                    // var meshRenderer = mesh.addComponent(Model);
                     var meshRenderer = mesh.addComponent(feng3d.SkinnedMeshRenderer);
                     var geometry = new feng3d.CustomGeometry();
                     geometry.positions = geoset.Vertices;
@@ -22877,7 +22877,7 @@ var feng3d;
     var _vertexIndex;
     function createMaterialObj(obj, subObj, material, mtlData) {
         var gameObject = feng3d.GameObject.create();
-        var model = gameObject.addComponent(feng3d.MeshRenderer);
+        var model = gameObject.addComponent(feng3d.Model);
         model.material = material || feng3d.materialFactory.create("standard");
         model.material.renderParams.cullFace = feng3d.CullFace.FRONT;
         var geometry = model.geometry = new feng3d.CustomGeometry();
@@ -23276,7 +23276,7 @@ var feng3d;
             gameobject.mouseEnabled = true;
             if (name == "GameObject")
                 return gameobject;
-            var meshRenderer = gameobject.addComponent(feng3d.MeshRenderer);
+            var meshRenderer = gameobject.addComponent(feng3d.Model);
             switch (name) {
                 case "Plane":
                     meshRenderer.geometry = new feng3d.PlaneGeometry();
@@ -23313,14 +23313,14 @@ var feng3d;
         GameObjectFactory.prototype.createCube = function (name) {
             if (name === void 0) { name = "cube"; }
             var gameobject = feng3d.GameObject.create(name);
-            var model = gameobject.addComponent(feng3d.MeshRenderer);
+            var model = gameobject.addComponent(feng3d.Model);
             model.geometry = new feng3d.CubeGeometry();
             return gameobject;
         };
         GameObjectFactory.prototype.createPlane = function (name) {
             if (name === void 0) { name = "plane"; }
             var gameobject = feng3d.GameObject.create(name);
-            var model = gameobject.addComponent(feng3d.MeshRenderer);
+            var model = gameobject.addComponent(feng3d.Model);
             model.geometry = new feng3d.PlaneGeometry();
             model.material = feng3d.materialFactory.create("standard");
             return gameobject;
@@ -23328,7 +23328,7 @@ var feng3d;
         GameObjectFactory.prototype.createCylinder = function (name) {
             if (name === void 0) { name = "cylinder"; }
             var gameobject = feng3d.GameObject.create(name);
-            var model = gameobject.addComponent(feng3d.MeshRenderer);
+            var model = gameobject.addComponent(feng3d.Model);
             model.geometry = new feng3d.CylinderGeometry();
             model.material = feng3d.materialFactory.create("standard");
             return gameobject;
@@ -23336,7 +23336,7 @@ var feng3d;
         GameObjectFactory.prototype.createCone = function (name) {
             if (name === void 0) { name = "Cone"; }
             var gameobject = feng3d.GameObject.create(name);
-            var model = gameobject.addComponent(feng3d.MeshRenderer);
+            var model = gameobject.addComponent(feng3d.Model);
             model.geometry = new feng3d.ConeGeometry();
             model.material = feng3d.materialFactory.create("standard");
             return gameobject;
@@ -23344,7 +23344,7 @@ var feng3d;
         GameObjectFactory.prototype.createTorus = function (name) {
             if (name === void 0) { name = "Torus"; }
             var gameobject = feng3d.GameObject.create(name);
-            var model = gameobject.addComponent(feng3d.MeshRenderer);
+            var model = gameobject.addComponent(feng3d.Model);
             model.geometry = new feng3d.TorusGeometry();
             model.material = feng3d.materialFactory.create("standard");
             return gameobject;
@@ -23358,7 +23358,7 @@ var feng3d;
         GameObjectFactory.prototype.createSphere = function (name) {
             if (name === void 0) { name = "sphere"; }
             var gameobject = feng3d.GameObject.create(name);
-            var model = gameobject.addComponent(feng3d.MeshRenderer);
+            var model = gameobject.addComponent(feng3d.Model);
             model.geometry = new feng3d.SphereGeometry();
             model.material = feng3d.materialFactory.create("standard");
             return gameobject;
@@ -23366,7 +23366,7 @@ var feng3d;
         GameObjectFactory.prototype.createCapsule = function (name) {
             if (name === void 0) { name = "capsule"; }
             var gameobject = feng3d.GameObject.create(name);
-            var model = gameobject.addComponent(feng3d.MeshRenderer);
+            var model = gameobject.addComponent(feng3d.Model);
             model.geometry = new feng3d.CapsuleGeometry();
             model.material = feng3d.materialFactory.create("standard");
             return gameobject;
