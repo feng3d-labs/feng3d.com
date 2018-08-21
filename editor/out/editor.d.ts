@@ -189,7 +189,7 @@ declare namespace editor {
          * 更新状态
          * @param callback 回调函数
          */
-        private updateStats(path, callback, onComplete?, onError?);
+        private updateStats;
     }
 }
 declare function require(module: string): any;
@@ -282,9 +282,31 @@ declare namespace editor {
     }
 }
 declare namespace editor {
-    var editorshortcut: Editorshortcut;
     class Editorshortcut {
-        init(): void;
+        private preMousePoint;
+        private selectedObjectsHistory;
+        private dragSceneMousePoint;
+        private dragSceneCameraGlobalMatrix3D;
+        private rotateSceneCenter;
+        private rotateSceneCameraGlobalMatrix3D;
+        private rotateSceneMousePoint;
+        constructor();
+        private onGameobjectMoveTool;
+        private onGameobjectRotationTool;
+        private onGameobjectScaleTool;
+        private onSceneCameraForwardBackMouseMoveStart;
+        private onSceneCameraForwardBackMouseMove;
+        private onSelectGameObject;
+        private onDeleteSeletedGameObject;
+        private onDragSceneStart;
+        private onDragScene;
+        private onFpsViewStart;
+        private onFpsViewStop;
+        private updateFpsView;
+        private onMouseRotateSceneStart;
+        private onMouseRotateScene;
+        private onLookToSelectedGameObject;
+        private onMouseWheelMoveSceneCamera;
     }
     class SceneControlConfig {
         mouseWheelMoveStep: number;
@@ -300,7 +322,7 @@ declare namespace editor {
         constructor();
         $onAddToStage(stage: egret.Stage, nestLevel: number): void;
         $onRemoveFromStage(): void;
-        private onResize();
+        private onResize;
     }
 }
 declare namespace editor {
@@ -313,9 +335,9 @@ declare namespace editor {
         constructor();
         $onAddToStage(stage: egret.Stage, nestLevel: number): void;
         $onRemoveFromStage(): void;
-        private onResize();
-        private onDataChange();
-        private onframe();
+        private onResize;
+        private onDataChange;
+        private onframe;
     }
 }
 declare var defaultTextFiled: egret.TextField;
@@ -341,7 +363,7 @@ declare class RenameTextInput extends eui.Component implements eui.UIComponent {
      * 取消编辑
      */
     cancelEdit(): void;
-    private onnameeditChanged();
+    private onnameeditChanged;
 }
 declare namespace editor {
     /**
@@ -355,10 +377,10 @@ declare namespace editor {
         constructor();
         $onAddToStage(stage: egret.Stage, nestLevel: number): void;
         $onRemoveFromStage(): void;
-        private onMouseMove(e);
-        private _findSplit(stageX, stageY);
-        private onMouseDown(e);
-        private onMouseUp(e);
+        private onMouseMove;
+        private _findSplit;
+        private onMouseDown;
+        private onMouseUp;
     }
 }
 declare namespace editor {
@@ -409,10 +431,10 @@ declare class ComboBox extends eui.Component implements eui.UIComponent {
     constructor();
     $onAddToStage(stage: egret.Stage, nestLevel: number): void;
     $onRemoveFromStage(): void;
-    private init();
-    private updateview();
-    private onClick();
-    private onlistChange();
+    private init;
+    private updateview;
+    private onClick;
+    private onlistChange;
 }
 declare namespace editor {
     class Accordion extends eui.Component implements eui.UIComponent {
@@ -429,7 +451,7 @@ declare namespace editor {
         protected onComplete(): void;
         protected onAddedToStage(): void;
         protected onRemovedFromStage(): void;
-        private onTitleButtonClick();
+        private onTitleButtonClick;
     }
 }
 declare namespace editor {
@@ -438,10 +460,10 @@ declare namespace editor {
         value: feng3d.Color3;
         private _value;
         constructor();
-        private onComplete();
-        private onAddedToStage();
-        private onRemovedFromStage();
-        private onClick();
+        private onComplete;
+        private onAddedToStage;
+        private onRemovedFromStage;
+        private onClick;
     }
 }
 declare namespace editor {
@@ -457,8 +479,8 @@ declare namespace editor {
         constructor();
         $onAddToStage(stage: egret.Stage, nestLevel: number): void;
         $onRemoveFromStage(): void;
-        private onDisclosureButtonClick();
-        private updateView();
+        private onDisclosureButtonClick;
+        private updateView;
     }
 }
 declare namespace editor {
@@ -468,14 +490,14 @@ declare namespace editor {
         selectedRect: eui.Rect;
         protected dataChanged(): void;
         constructor();
-        private onComplete();
-        private onAddedToStage();
-        private onRemovedFromStage();
-        private updateView();
-        private onItemMouseDown(event);
-        private onItemMouseOver();
-        private onItemMouseOut();
-        private onsubMenuUIRemovedFromeStage(e);
+        private onComplete;
+        private onAddedToStage;
+        private onRemovedFromStage;
+        private updateView;
+        private onItemMouseDown;
+        private onItemMouseOver;
+        private onItemMouseOut;
+        private onsubMenuUIRemovedFromeStage;
     }
 }
 declare namespace editor {
@@ -509,7 +531,7 @@ declare namespace editor {
          * 销毁
          */
         destroy(): void;
-        private selectedchange();
+        private selectedchange;
     }
     interface TreeEventMap {
         added: TreeNode;
@@ -536,7 +558,7 @@ declare namespace editor {
         destroy(node: TreeNode): void;
         updateChildrenDepth(node: TreeNode): void;
         getShowNodes(node?: TreeNode): TreeNode[];
-        private isopenchanged(host, property, oldvalue);
+        private isopenchanged;
     }
     function treeMap<T extends TreeNode>(treeNode: T, callback: (node: T, parent: T) => void): void;
 }
@@ -553,21 +575,21 @@ declare namespace editor {
         constructor();
         showw: any;
         private _showw;
-        private onComplete();
-        private onAddedToStage();
-        private onRemovedFromStage();
-        private addItemEventListener(input);
-        private removeItemEventListener(input);
+        private onComplete;
+        private onAddedToStage;
+        private onRemovedFromStage;
+        private addItemEventListener;
+        private removeItemEventListener;
         private _textfocusintxt;
-        private ontxtfocusin();
-        private ontxtfocusout();
+        private ontxtfocusin;
+        private ontxtfocusout;
         updateView(): void;
-        private onTextChange(event);
+        private onTextChange;
     }
 }
 declare namespace editor {
     class ComponentView extends eui.Component {
-        component: feng3d.Component;
+        component: feng3d.Components;
         componentView: feng3d.IObjectView;
         accordion: editor.Accordion;
         enabledCB: eui.CheckBox;
@@ -578,22 +600,22 @@ declare namespace editor {
         /**
          * 对象界面数据
          */
-        constructor(component: feng3d.Component);
+        constructor(component: feng3d.Components);
         /**
          * 更新界面
          */
         updateView(): void;
-        private onComplete();
-        private onDeleteButton(event);
-        private onAddToStage();
-        private onRemovedFromStage();
-        private updateEnableCB();
-        private onEnableCBChange();
-        private initScriptView();
-        private removeScriptView();
-        private onOperationBtnClick();
-        private onHelpBtnClick();
-        private onScriptChanged();
+        private onComplete;
+        private onDeleteButton;
+        private onAddToStage;
+        private onRemovedFromStage;
+        private updateEnableCB;
+        private onEnableCBChange;
+        private initScriptView;
+        private removeScriptView;
+        private onOperationBtnClick;
+        private onHelpBtnClick;
+        private onScriptChanged;
     }
 }
 declare namespace editor {
@@ -611,11 +633,11 @@ declare namespace editor {
          * 更新界面
          */
         updateView(): void;
-        private onComplete();
-        private onAddToStage();
-        private onRemovedFromStage();
-        private updateEnableCB();
-        private onEnableCBChange();
+        private onComplete;
+        private onAddToStage;
+        private onRemovedFromStage;
+        private updateEnableCB;
+        private onEnableCBChange;
     }
 }
 declare namespace editor {
@@ -650,10 +672,10 @@ declare namespace editor {
         readonly topMenu: MenuUI;
         constructor();
         static create(menu: MenuItem[], mousex?: number, mousey?: number, width?: number): MenuUI;
-        private onComplete();
-        private onAddedToStage();
-        private onRemovedFromStage();
-        private updateView();
+        private onComplete;
+        private onAddedToStage;
+        private onRemovedFromStage;
+        private updateView;
         remove(): void;
     }
 }
@@ -677,8 +699,8 @@ declare namespace editor {
         unregister(displayObject: egret.DisplayObject): void;
         private ischeck;
         private _ischeck;
-        private onMouseMove(event);
-        private removeTipview();
+        private onMouseMove;
+        private removeTipview;
     }
 }
 declare namespace editor {
@@ -691,13 +713,12 @@ declare namespace editor {
         value: string;
         $onAddToStage(stage: egret.Stage, nestLevel: number): void;
         $onRemoveFromStage(): void;
-        private valuechanged();
+        private valuechanged;
     }
 }
 declare namespace editor {
     /**
      * 默认基础对象界面
-     * @author feng 2016-3-11
      */
     class OVBaseDefault extends eui.Component implements feng3d.IObjectView {
         label: eui.Label;
@@ -725,7 +746,6 @@ declare namespace feng3d {
 declare namespace editor {
     /**
      * 默认使用块的对象界面
-     * @author feng 2016-3-22
      */
     class OVDefault extends eui.Component implements feng3d.IObjectView {
         private _space;
@@ -763,15 +783,15 @@ declare namespace editor {
         private _space;
         private _objectViewInfo;
         constructor(objectViewInfo: feng3d.ObjectViewInfo);
-        private onComplete();
-        private onAddedToStage();
-        private onRemovedFromStage();
-        private addItemEventListener(input);
-        private removeItemEventListener(input);
+        private onComplete;
+        private onAddedToStage;
+        private onRemovedFromStage;
+        private addItemEventListener;
+        private removeItemEventListener;
         private _textfocusintxt;
-        private ontxtfocusin();
-        private ontxtfocusout();
-        private onTextChange(event);
+        private ontxtfocusin;
+        private ontxtfocusout;
+        private onTextChange;
         space: feng3d.Transform;
         getAttributeView(attributeName: String): any;
         getblockView(blockName: String): any;
@@ -784,7 +804,6 @@ declare namespace editor {
 declare namespace editor {
     /**
      * 默认对象属性块界面
-     * @author feng 2016-3-22
      */
     class OBVDefault extends eui.Component implements feng3d.IObjectBlockView {
         private _space;
@@ -809,7 +828,7 @@ declare namespace editor {
         readonly blockName: string;
         updateView(): void;
         getAttributeView(attributeName: String): feng3d.IObjectAttributeView;
-        private onTitleButtonClick();
+        private onTitleButtonClick;
     }
 }
 declare namespace feng3d {
@@ -861,7 +880,6 @@ declare namespace editor {
 declare namespace editor {
     /**
      * 默认对象属性界面
-     * @author feng 2016-3-10
      */
     class OAVDefault extends OAVBase {
         labelLab: eui.Label;
@@ -882,8 +900,8 @@ declare namespace editor {
          * 更新界面
          */
         updateView(): void;
-        private onDoubleClick();
-        private onTextChange();
+        private onDoubleClick;
+        private onTextChange;
     }
 }
 declare namespace editor {
@@ -899,7 +917,6 @@ declare namespace editor {
 declare namespace editor {
     /**
      * 默认对象属性界面
-     * @author feng 2016-3-10
      */
     class OAVNumber extends OAVDefault {
         /**
@@ -923,12 +940,12 @@ declare namespace editor {
         updateView(): void;
         private mouseDownPosition;
         private mouseDownValue;
-        private onMouseDown(e);
-        private onStageMouseMove(e);
-        private onStageMouseUp();
+        private onMouseDown;
+        private onStageMouseMove;
+        private onStageMouseUp;
         protected ontxtfocusin(): void;
         protected ontxtfocusout(): void;
-        private onWindowKeyDown(event);
+        private onWindowKeyDown;
     }
 }
 declare namespace editor {
@@ -954,8 +971,8 @@ declare namespace editor {
         attributeValue: any[];
         initView(): void;
         dispose(): void;
-        private onTitleButtonClick();
-        private onsizeTxtfocusout();
+        private onTitleButtonClick;
+        private onsizeTxtfocusout;
     }
     class OAVArrayItem extends OAVDefault {
         constructor(arr: any[], index: number, componentParam: Object);
@@ -972,7 +989,7 @@ declare namespace editor {
         initView(): void;
         dispose(): void;
         updateView(): void;
-        private onComboxChange();
+        private onComboxChange;
     }
 }
 declare namespace editor {
@@ -981,20 +998,20 @@ declare namespace editor {
         group: eui.Group;
         addComponentButton: eui.Button;
         constructor(attributeViewInfo: feng3d.AttributeViewInfo);
-        private onAddComponentButtonClick();
+        private onAddComponentButtonClick;
         space: feng3d.GameObject;
         readonly attributeName: string;
         attributeValue: Object;
         initView(): void;
         dispose(): void;
-        private addComponentView(component);
+        private addComponentView;
         /**
          * 更新界面
          */
         updateView(): void;
-        private removedComponentView(component);
-        private onaddedcompont(event);
-        private onremovedComponent(event);
+        private removedComponentView;
+        private onaddedcompont;
+        private onremovedComponent;
     }
 }
 declare namespace editor {
@@ -1020,9 +1037,9 @@ declare namespace editor {
         updateView(): void;
         protected onChange(event: egret.Event): void;
         private _textfocusintxt;
-        private ontxtfocusin();
-        private ontxtfocusout();
-        private onTextChange();
+        private ontxtfocusin;
+        private ontxtfocusout;
+        private onTextChange;
     }
 }
 declare namespace editor {
@@ -1038,7 +1055,7 @@ declare namespace editor {
         initView(): void;
         dispose(): void;
         updateView(): void;
-        private onShaderComboBoxChange();
+        private onShaderComboBoxChange;
     }
 }
 declare namespace editor {
@@ -1064,18 +1081,17 @@ declare namespace editor {
         initView(): void;
         dispose(): void;
         updateView(): void;
-        private onVisibleCBClick();
-        private onMouseEnabledCBClick();
+        private onVisibleCBClick;
+        private onMouseEnabledCBClick;
         private _textfocusintxt;
-        private ontxtfocusin();
-        private ontxtfocusout();
-        private onTextChange();
+        private ontxtfocusin;
+        private ontxtfocusout;
+        private onTextChange;
     }
 }
 declare namespace editor {
     /**
      * 挑选（拾取）OAV界面
-     * @author feng 2016-3-10
      */
     class OAVPick extends OAVBase {
         labelLab: eui.Label;
@@ -1084,18 +1100,17 @@ declare namespace editor {
         constructor(attributeViewInfo: feng3d.AttributeViewInfo);
         initView(): void;
         dispose(): void;
-        private ontxtClick();
+        private ontxtClick;
         /**
          * 更新界面
          */
         updateView(): void;
-        private onDoubleClick();
+        private onDoubleClick;
     }
 }
 declare namespace editor {
     /**
      * 挑选（拾取）OAV界面
-     * @author feng 2016-3-10
      */
     class OAVTexture2D extends OAVBase {
         image: eui.Image;
@@ -1105,12 +1120,12 @@ declare namespace editor {
         constructor(attributeViewInfo: feng3d.AttributeViewInfo);
         initView(): void;
         dispose(): void;
-        private ontxtClick();
+        private ontxtClick;
         /**
          * 更新界面
          */
         updateView(): void;
-        private onDoubleClick();
+        private onDoubleClick;
     }
 }
 declare namespace editor {
@@ -1119,36 +1134,35 @@ declare namespace editor {
         group: eui.Group;
         addComponentButton: eui.Button;
         constructor(attributeViewInfo: feng3d.AttributeViewInfo);
-        private onAddComponentButtonClick();
+        private onAddComponentButtonClick;
         space: feng3d.ParticleSystem;
         readonly attributeName: string;
         attributeValue: Object;
         initView(): void;
         dispose(): void;
-        private addComponentView(component);
+        private addComponentView;
         /**
          * 更新界面
          */
         updateView(): void;
-        private removedComponentView(component);
+        private removedComponentView;
     }
 }
 declare namespace editor {
     /**
      * 属性面板（检查器）
-     * @author feng     2017-03-20
      */
     class InspectorView extends eui.Component implements eui.UIComponent {
         backButton: eui.Button;
         group: eui.Group;
         private view;
-        viewData: any;
-        viewDataList: any[];
+        private viewData;
+        private viewDataList;
         constructor();
-        private onComplete();
-        private onAddedToStage();
-        private onRemovedFromStage();
-        private onDataChange();
+        private onComplete;
+        private onAddedToStage;
+        private onRemovedFromStage;
+        private onSelectedObjectsChanged;
         updateView(): void;
         showData(data: any, removeBack?: boolean): void;
         onBackButton(): void;
@@ -1165,10 +1179,10 @@ declare namespace editor {
         constructor();
         $onAddToStage(stage: egret.Stage, nestLevel: number): void;
         $onRemoveFromStage(): void;
-        private setdargSource(dragSource);
-        private onclick();
+        private setdargSource;
+        private onclick;
         dataChanged(): void;
-        private onrightclick(e);
+        private onrightclick;
     }
 }
 declare namespace editor {
@@ -1181,14 +1195,14 @@ declare namespace editor {
          */
         private selectedNode;
         constructor();
-        private onComplete();
-        private onAddedToStage();
-        private onRemovedFromStage();
-        private invalidHierarchy();
-        private updateHierarchyTree();
-        private onListbackClick();
-        private onListClick(e);
-        private onListRightClick(e);
+        private onComplete;
+        private onAddedToStage;
+        private onRemovedFromStage;
+        private invalidHierarchy;
+        private updateHierarchyTree;
+        private onListbackClick;
+        private onListClick;
+        private onListRightClick;
     }
 }
 declare namespace feng3d {
@@ -1279,8 +1293,8 @@ declare namespace editor {
          * @param menuconfig 菜单
          * @param assetsFile 文件
          */
-        private parserMenu(menuconfig, file);
-        private showFloderChanged(property, oldValue, newValue);
+        private parserMenu;
+        private showFloderChanged;
     }
     var codeeditoWin: Window;
 }
@@ -1384,7 +1398,7 @@ declare namespace editor {
         /**
          * 获取一个新的不重名子文件名称
          */
-        private getnewname(path);
+        private getnewname;
         /**
          * 获取脚本类名称
          * @param callback 回调函数
@@ -1401,9 +1415,9 @@ declare namespace editor {
         $onAddToStage(stage: egret.Stage, nestLevel: number): void;
         $onRemoveFromStage(): void;
         dataChanged(): void;
-        private ondoubleclick();
-        private onclick();
-        private onrightclick(e);
+        private ondoubleclick;
+        private onclick;
+        private onrightclick;
     }
 }
 declare namespace editor {
@@ -1414,7 +1428,7 @@ declare namespace editor {
         };
         constructor();
         getNode(path: string): AssetsTreeNode;
-        private onShowFloderChanged(event);
+        private onShowFloderChanged;
     }
     class AssetsTreeNode extends TreeNode {
         path: string;
@@ -1427,7 +1441,7 @@ declare namespace editor {
         readonly assetsFile: AssetsFile;
         children: AssetsTreeNode[];
         constructor(path: string);
-        private openChanged();
+        private openChanged;
     }
 }
 declare namespace editor {
@@ -1440,8 +1454,8 @@ declare namespace editor {
         $onAddToStage(stage: egret.Stage, nestLevel: number): void;
         $onRemoveFromStage(): void;
         dataChanged(): void;
-        private onclick();
-        private onrightclick(e);
+        private onclick;
+        private onrightclick;
     }
 }
 declare namespace editor {
@@ -1459,19 +1473,19 @@ declare namespace editor {
         private fileDrag;
         private selectfile;
         constructor();
-        private onComplete();
+        private onComplete;
         $onAddToStage(stage: egret.Stage, nestLevel: number): void;
         $onRemoveFromStage(): void;
-        private initlist();
-        private update();
+        private initlist;
+        private update;
         invalidateAssetstree(): void;
-        private updateAssetsTree();
-        private updateShowFloder(host?, property?, oldvalue?);
-        private onfilter();
-        private selectedfilechanged();
-        private onfilelistclick(e);
-        private onfilelistrightclick(e);
-        private onfloderpathTxtLink(evt);
+        private updateAssetsTree;
+        private updateShowFloder;
+        private onfilter;
+        private selectedfilechanged;
+        private onfilelistclick;
+        private onfilelistrightclick;
+        private onfloderpathTxtLink;
     }
 }
 declare namespace editor {
@@ -1503,22 +1517,22 @@ declare namespace editor {
         qrcodeButton: eui.Button;
         playBtn: eui.Button;
         constructor();
-        private onComplete();
-        private onAddedToStage();
-        private onRemovedFromStage();
-        private onMainMenu(item);
-        private onHelpButtonClick();
-        private onButtonClick(event);
-        private updateview();
+        private onComplete;
+        private onAddedToStage;
+        private onRemovedFromStage;
+        private onMainMenu;
+        private onHelpButtonClick;
+        private onButtonClick;
+        private updateview;
     }
     var runwin: Window;
 }
 declare namespace editor {
     class MainView extends eui.Component implements eui.UIComponent {
         constructor();
-        private onComplete();
-        private onAddedToStage();
-        private onRemovedFromStage();
+        private onComplete;
+        private onAddedToStage;
+        private onRemovedFromStage;
     }
 }
 declare namespace editor {
@@ -1537,7 +1551,7 @@ declare namespace editor {
     class LoadingUI extends egret.Sprite {
         constructor();
         private textField;
-        private createView();
+        private createView;
         setProgress(current: number, total: number): void;
     }
 }
@@ -1555,35 +1569,35 @@ declare namespace editor {
          * 配置文件加载完成,开始预加载皮肤主题资源和preload资源组。
          * Loading of configuration file is complete, start to pre-load the theme configuration file and the preload resource group
          */
-        private onConfigComplete(event);
+        private onConfigComplete;
         private isThemeLoadEnd;
         /**
          * 主题文件加载完成,开始预加载
          * Loading of theme configuration file is complete, start to pre-load the
          */
-        private onThemeLoadComplete();
+        private onThemeLoadComplete;
         private isResourceLoadEnd;
         /**
          * preload资源组加载完成
          * preload resource group is loaded
          */
-        private onResourceLoadComplete(event);
-        private createScene();
+        private onResourceLoadComplete;
+        private createScene;
         /**
          * 资源组加载出错
          *  The resource group loading failed
          */
-        private onItemLoadError(event);
+        private onItemLoadError;
         /**
          * 资源组加载出错
          * Resource group loading failed
          */
-        private onResourceLoadError(event);
+        private onResourceLoadError;
         /**
          * preload资源组加载进度
          * loading process of preload resource
          */
-        private onResourceProgress(event);
+        private onResourceProgress;
     }
 }
 declare namespace editor {
@@ -1619,6 +1633,23 @@ declare namespace editor {
      */
     var editorData: EditorData;
     /**
+     * 游戏对象控制器类型
+     */
+    enum MRSToolType {
+        /**
+         * 移动
+         */
+        MOVE = 0,
+        /**
+         * 旋转
+         */
+        ROTATION = 1,
+        /**
+         * 缩放
+         */
+        SCALE = 2
+    }
+    /**
      * 编辑器数据
      */
     class EditorData {
@@ -1630,11 +1661,9 @@ declare namespace editor {
          * 选中对象，游戏对象与资源文件列表
          * 选中对象时尽量使用 selectObject 方法设置选中对象
          */
-        selectedObjects: (feng3d.GameObject | AssetsFile)[];
-        /**
-         * 位移旋转缩放工具对象
-         */
-        mrsToolObject: feng3d.GameObject;
+        readonly selectedObjects: (feng3d.GameObject | AssetsFile)[];
+        private _selectedObjects;
+        clearSelectedObjects(): void;
         /**
          * 选择对象
          * 该方法会处理 按ctrl键附加选中对象操作
@@ -1642,13 +1671,35 @@ declare namespace editor {
          */
         selectObject(...objs: (feng3d.GameObject | AssetsFile)[]): void;
         /**
+         * 使用的控制工具类型
+         */
+        toolType: MRSToolType;
+        private _toolType;
+        /**
          * 选中游戏对象列表
          */
         readonly selectedGameObjects: feng3d.GameObject[];
+        private _selectedGameObjects;
+        private _selectedGameObjectsInvalid;
         /**
-         * 第一个选中游戏对象
+         * 坐标原点是否在质心
          */
-        readonly firstSelectedGameObject: feng3d.GameObject;
+        isBaryCenter: boolean;
+        private _isBaryCenter;
+        /**
+         * 是否使用世界坐标
+         */
+        isWoldCoordinate: boolean;
+        private _isWoldCoordinate;
+        /**
+         * 变换对象
+         */
+        readonly transformGameObject: feng3d.GameObject;
+        private _transformGameObject;
+        private _transformGameObjectInvalid;
+        readonly transformBox: feng3d.Box;
+        private _transformBox;
+        private _transformBoxInvalid;
         /**
          * 获取 受 MRSTool 控制的Transform列表
          */
@@ -1656,7 +1707,9 @@ declare namespace editor {
         /**
          * 选中游戏对象列表
          */
-        readonly selectedAssetsFile: AssetsFile[];
+        readonly selectedAssetsFile: (feng3d.GameObject | AssetsFile)[];
+        private _selectedAssetsFileInvalid;
+        private _selectedAssetsFile;
         /**
          * 获取编辑器资源绝对路径
          * @param url 编辑器资源相对路径
@@ -1676,8 +1729,8 @@ declare namespace editor {
         controllerTool: feng3d.Transform;
         controllerTargets: feng3d.Transform[];
         constructor();
-        private onShowObjectTransformChanged(event);
-        private updateControllerImage();
+        private onShowObjectTransformChanged;
+        private updateControllerImage;
         /**
          * 开始移动
          */
@@ -1703,6 +1756,13 @@ declare namespace editor {
         startScale(): void;
         doScale(scale: feng3d.Vector3): void;
         stopScale(): void;
+        private getTransformData;
+        private rotateRotation;
+    }
+}
+declare namespace feng3d {
+    interface ComponentMap {
+        MToolModel: editor.MToolModel;
     }
 }
 declare namespace editor {
@@ -1718,7 +1778,7 @@ declare namespace editor {
         xyPlane: CoordinatePlane;
         oCube: CoordinateCube;
         init(gameObject: feng3d.GameObject): void;
-        private initModels();
+        private initModels;
     }
     class CoordinateAxis extends feng3d.Component {
         private isinit;
@@ -1757,6 +1817,21 @@ declare namespace editor {
         update(): void;
     }
 }
+declare namespace feng3d {
+    interface ComponentMap {
+        RToolModel: editor.RToolModel;
+    }
+}
+declare namespace feng3d {
+    interface ComponentMap {
+        SectorGameObject: editor.SectorGameObject;
+    }
+}
+declare namespace feng3d {
+    interface ComponentMap {
+        CoordinateRotationFreeAxis: editor.CoordinateRotationFreeAxis;
+    }
+}
 declare namespace editor {
     /**
      * 旋转工具模型组件
@@ -1768,7 +1843,7 @@ declare namespace editor {
         freeAxis: CoordinateRotationFreeAxis;
         cameraAxis: CoordinateRotationAxis;
         init(gameObject: feng3d.GameObject): void;
-        private initModels();
+        private initModels;
     }
     class CoordinateRotationAxis extends feng3d.Component {
         private isinit;
@@ -1785,7 +1860,7 @@ declare namespace editor {
          */
         filterNormal: feng3d.Vector3;
         init(gameObject: feng3d.GameObject): void;
-        private initModels();
+        private initModels;
         update(): void;
         showSector(startPos: feng3d.Vector3, endPos: feng3d.Vector3): void;
         hideSector(): void;
@@ -1817,8 +1892,13 @@ declare namespace editor {
         private selectedColor;
         selected: boolean;
         init(gameObject: feng3d.GameObject): void;
-        private initModels();
+        private initModels;
         update(): void;
+    }
+}
+declare namespace feng3d {
+    interface ComponentMap {
+        SToolModel: editor.SToolModel;
     }
 }
 declare namespace editor {
@@ -1831,7 +1911,7 @@ declare namespace editor {
         zCube: CoordinateScaleCube;
         oCube: CoordinateCube;
         init(gameObject: feng3d.GameObject): void;
-        private initModels();
+        private initModels;
     }
     class CoordinateScaleCube extends feng3d.Component {
         private isinit;
@@ -1859,7 +1939,7 @@ declare namespace editor {
         protected onRemovedFromScene(): void;
         protected onItemMouseDown(event: feng3d.Event<any>): void;
         protected toolModel: feng3d.Component;
-        selectedItem: CoordinateAxis | CoordinatePlane | CoordinateCube | CoordinateRotationAxis | CoordinateRotationFreeAxis | CoordinateScaleCube;
+        selectedItem: CoordinateRotationFreeAxis | CoordinateAxis | CoordinatePlane | CoordinateCube | CoordinateRotationAxis | CoordinateScaleCube;
         gameobjectControllerTarget: MRSToolTarget;
         protected updateToolModel(): void;
         protected onMouseDown(): void;
@@ -1869,6 +1949,11 @@ declare namespace editor {
          */
         protected getLocalMousePlaneCross(): feng3d.Vector3;
         protected getMousePlaneCross(): feng3d.Vector3;
+    }
+}
+declare namespace feng3d {
+    interface ComponentMap {
+        MTool: editor.MTool;
     }
 }
 declare namespace editor {
@@ -1887,9 +1972,14 @@ declare namespace editor {
         protected onAddedToScene(): void;
         protected onRemovedFromScene(): void;
         protected onItemMouseDown(event: feng3d.Event<any>): void;
-        private onMouseMove();
+        private onMouseMove;
         protected onMouseUp(): void;
         protected updateToolModel(): void;
+    }
+}
+declare namespace feng3d {
+    interface ComponentMap {
+        RTool: editor.RTool;
     }
 }
 declare namespace editor {
@@ -1902,9 +1992,14 @@ declare namespace editor {
         protected onAddedToScene(): void;
         protected onRemovedFromScene(): void;
         protected onItemMouseDown(event: feng3d.Event<any>): void;
-        private onMouseMove();
+        private onMouseMove;
         protected onMouseUp(): void;
         protected updateToolModel(): void;
+    }
+}
+declare namespace feng3d {
+    interface ComponentMap {
+        STool: editor.STool;
     }
 }
 declare namespace editor {
@@ -1920,49 +2015,16 @@ declare namespace editor {
         protected onAddedToScene(): void;
         protected onRemovedFromScene(): void;
         protected onItemMouseDown(event: feng3d.Event<any>): void;
-        private onMouseMove();
+        private onMouseMove;
         protected onMouseUp(): void;
     }
 }
+declare namespace feng3d {
+    interface ComponentMap {
+        MRSTool: editor.MRSTool;
+    }
+}
 declare namespace editor {
-    /**
-     * 游戏对象控制器类型
-     */
-    enum MRSToolType {
-        /**
-         * 移动
-         */
-        MOVE = 0,
-        /**
-         * 旋转
-         */
-        ROTATION = 1,
-        /**
-         * 缩放
-         */
-        SCALE = 2,
-    }
-    /**
-     * 控制器数据
-     */
-    class MRSToolData {
-        /**
-         * 使用的控制工具类型
-         */
-        toolType: MRSToolType;
-        /**
-         * 是否使用世界坐标
-         */
-        isWoldCoordinate: boolean;
-        /**
-         * 坐标原点是否在质心
-         */
-        isBaryCenter: boolean;
-    }
-    /**
-     * 控制器数据
-     */
-    var mrsTool: MRSToolData;
     /**
      * 位移旋转缩放工具
      */
@@ -1975,8 +2037,8 @@ declare namespace editor {
         private mrsToolObject;
         init(gameObject: feng3d.GameObject): void;
         dispose(): void;
-        private onSelectedGameObjectChange();
-        private onToolTypeChange();
+        private onSelectedGameObjectChange;
+        private onToolTypeChange;
         private currentTool;
     }
 }
@@ -2000,7 +2062,7 @@ declare namespace editor {
          * 销毁
          */
         destroy(): void;
-        private update();
+        private update;
     }
 }
 declare namespace editor {
@@ -2027,7 +2089,15 @@ declare namespace editor {
          * 获取节点
          */
         getNode(gameObject: feng3d.GameObject): HierarchyNode;
-        private onSelectedGameObjectChanged();
+        private onSelectedGameObjectChanged;
+    }
+}
+declare namespace feng3d {
+    interface Feng3dEventMap {
+        "editor.selectedObjectsChanged": any;
+        "editor.isBaryCenterChanged": any;
+        "editor.isWoldCoordinateChanged": any;
+        "editor.toolTypeChanged": any;
     }
 }
 declare namespace editor {
@@ -2035,24 +2105,33 @@ declare namespace editor {
         rootGameObject: feng3d.GameObject;
         private _rootGameObject;
         constructor();
-        private ongameobjectadded(event);
-        private ongameobjectremoved(event);
+        private ongameobjectadded;
+        private ongameobjectremoved;
         addGameoObjectFromAsset(path: string, parent?: feng3d.GameObject): void;
     }
     var hierarchy: Hierarchy;
+}
+declare namespace feng3d {
+    interface ComponentMap {
+        SceneRotateTool: editor.SceneRotateTool;
+    }
 }
 declare namespace editor {
     class SceneRotateTool extends feng3d.Component {
         showInInspector: boolean;
         serializable: boolean;
         init(gameObject: feng3d.GameObject): void;
-        private onLoaded(rotationToolModel);
+        private onLoaded;
+    }
+}
+declare namespace feng3d {
+    interface ComponentMap {
+        GroundGrid: editor.GroundGrid;
     }
 }
 declare namespace editor {
     /**
      * 地面网格
-     * @author feng 2016-10-29
      */
     class GroundGrid extends feng3d.Component {
         private num;
@@ -2068,6 +2147,7 @@ declare namespace editor {
         scene: feng3d.Scene3D;
         readonly camera: feng3d.Camera;
         private _scene;
+        wireframeColor: feng3d.Color4;
         /**
          * 绘制场景
          */
@@ -2075,14 +2155,18 @@ declare namespace editor {
     }
     /**
     * 编辑器3D入口
-    * @author feng 2016-10-29
     */
     class Main3D {
         constructor();
-        private init();
-        private onEditorCameraRotate(e);
+        private init;
+        private onEditorCameraRotate;
     }
     function creatNewScene(): feng3d.Scene3D;
+}
+declare namespace feng3d {
+    interface ComponentMap {
+        EditorComponent: editor.EditorComponent;
+    }
 }
 declare namespace editor {
     class EditorComponent extends feng3d.Component {
@@ -2093,13 +2177,18 @@ declare namespace editor {
          * 销毁
          */
         dispose(): void;
-        private onAddComponentToScene(event);
-        private onRemoveComponentFromScene(event);
-        private addLightIcon(light);
-        private removeLightIcon(light);
+        private onAddComponentToScene;
+        private onRemoveComponentFromScene;
+        private addLightIcon;
+        private removeLightIcon;
         private directionLightIconMap;
         private pointLightIconMap;
         private spotLightIconMap;
+    }
+}
+declare namespace feng3d {
+    interface ComponentMap {
+        Navigation: editor.Navigation;
     }
 }
 declare namespace editor {
@@ -2331,12 +2420,12 @@ declare namespace navigation {
             positions: number[];
             indices: number[];
         };
-        private debugShowLines1(line0s, length);
-        private debugShowLines(lines);
+        private debugShowLines1;
+        private debugShowLines;
         /**
          * 获取所有独立边
          */
-        private getAllSingleLine();
+        private getAllSingleLine;
     }
 }
 declare var segmentGeometry: feng3d.SegmentGeometry;
@@ -2379,7 +2468,7 @@ declare namespace editor {
 declare namespace editor {
     class MouseRayTestScript extends EditorScript {
         init(gameObject: feng3d.GameObject): void;
-        private onclick();
+        private onclick;
         update(): void;
         /**
          * 销毁
@@ -2398,8 +2487,8 @@ declare namespace editor {
         initicon(): void;
         update(): void;
         dispose(): void;
-        private onScenetransformChanged();
-        private onMousedown();
+        private onScenetransformChanged;
+        private onMousedown;
     }
 }
 declare namespace editor {
@@ -2416,8 +2505,8 @@ declare namespace editor {
         initicon(): void;
         update(): void;
         dispose(): void;
-        private onScenetransformChanged();
-        private onMousedown();
+        private onScenetransformChanged;
+        private onMousedown;
     }
 }
 declare namespace editor {
@@ -2434,14 +2523,15 @@ declare namespace editor {
         initicon(): void;
         update(): void;
         dispose(): void;
-        private onScenetransformChanged();
-        private onMousedown();
+        private onScenetransformChanged;
+        private onMousedown;
     }
 }
 declare namespace editor {
     var threejsLoader: {
-        load: (url: string | ArrayBuffer | File, onParseComplete?: (group: any) => void) => void;
+        load: typeof load;
     };
+    function load(url: string | File | ArrayBuffer, onParseComplete?: (group: any) => void): void;
 }
 declare namespace editor {
     var mainMenu: MenuItem[];
@@ -2474,10 +2564,12 @@ declare var shortcutConfig: ({
     key: string;
     command: string;
     when: string;
+    stateCommand?: undefined;
 } | {
     key: string;
     stateCommand: string;
     when: string;
+    command?: undefined;
 })[];
 declare namespace editor {
     interface EditorEventMap {
@@ -2492,20 +2584,18 @@ declare namespace editor {
     var editorData: EditorData;
     /**
      * feng3d的版本号
-     * @author feng 2015-03-20
      */
     var revision: string;
     /**
      * 编辑器
-     * @author feng 2016-10-29
      */
     class Editor extends eui.UILayer {
         private mainView;
         constructor();
-        private init();
-        private initMainView();
-        private onresize();
-        private initproject(callback);
-        private _onAddToStage();
+        private init;
+        private initMainView;
+        private onresize;
+        private initproject;
+        private _onAddToStage;
     }
 }

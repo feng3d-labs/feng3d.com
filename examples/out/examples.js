@@ -1,7 +1,10 @@
 var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    }
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -27,14 +30,14 @@ var TerrainMergeTest = /** @class */ (function (_super) {
         var root = 'resources/terrain/';
         //
         var terrain = feng3d.GameObject.create("terrain");
-        var meshRenderer = terrain.addComponent(feng3d.Model);
-        meshRenderer.geometry = new feng3d.TerrainGeometry({ heightMapUrl: root + 'terrain_heights.jpg' });
-        var material = feng3d.materialFactory.create("standard");
+        var model = terrain.addComponent(feng3d.Model);
+        model.geometry = new feng3d.TerrainGeometry({ heightMapUrl: root + 'terrain_heights.jpg' });
+        var material = new feng3d.StandardMaterial();
         material.uniforms.s_diffuse.url = root + 'terrain_diffuse.jpg';
         material.uniforms.s_normal.url = root + "terrain_normals.jpg";
         // var terrainMethod = new TerrainMergeMethod(root + 'terrain_splats.png',root + 'test3.jpg',new Vector3(50, 50, 50));
         // material.terrainMethod = new TerrainMergeMethod(root + 'terrain_splats.png', root + 'test1.jpg', new Vector3(50, 50, 50));
-        meshRenderer.material = material;
+        model.material = material;
         scene.gameObject.addChild(terrain);
         //初始化光源
         var light1 = feng3d.GameObject.create();
@@ -81,10 +84,10 @@ var TerrainTest = /** @class */ (function (_super) {
         var root = 'resources/terrain/';
         //
         var terrain = feng3d.GameObject.create("terrain");
-        var meshRenderer = terrain.addComponent(feng3d.Model);
-        // meshRenderer.geometry = new feng3d.TerrainGeometry();
-        meshRenderer.geometry = new feng3d.TerrainGeometry({ heightMapUrl: root + 'terrain_heights.jpg', width: 500, height: 100, depth: 500 });
-        var material = feng3d.materialFactory.create("terrain");
+        var model = terrain.addComponent(feng3d.Model);
+        // model.geometry = new feng3d.TerrainGeometry();
+        model.geometry = new feng3d.TerrainGeometry({ heightMapUrl: root + 'terrain_heights.jpg', width: 500, height: 100, depth: 500 });
+        var material = new feng3d.TerrainMaterial();
         material.uniforms.s_diffuse.url = root + 'terrain_diffuse.jpg';
         material.uniforms.s_normal.url = root + "terrain_normals.jpg";
         //
@@ -93,7 +96,7 @@ var TerrainTest = /** @class */ (function (_super) {
         material.uniforms.s_splatTexture2.url = root + 'grass.jpg';
         material.uniforms.s_splatTexture3.url = root + 'rock.jpg';
         material.uniforms.u_splatRepeats = new feng3d.Vector4(1, 50, 50, 50);
-        meshRenderer.material = material;
+        model.material = material;
         scene.gameObject.addChild(terrain);
         //初始化光源
         var light1 = feng3d.GameObject.create();
@@ -186,18 +189,18 @@ var Basic_Shading = /** @class */ (function (_super) {
             camera.gameObject.addComponent(feng3d.FPSController);
         }
         function initMaterials() {
-            planeMaterial = feng3d.materialFactory.create("standard");
+            planeMaterial = new feng3d.StandardMaterial();
             planeMaterial.uniforms.s_diffuse.url = "resources/floor_diffuse.jpg";
             planeMaterial.uniforms.s_normal.url = "resources/floor_normal.jpg";
             planeMaterial.uniforms.s_specular.url = "resources/floor_specular.jpg";
-            sphereMaterial = feng3d.materialFactory.create("standard");
+            sphereMaterial = new feng3d.StandardMaterial();
             sphereMaterial.uniforms.s_diffuse.url = "resources/beachball_diffuse.jpg";
             sphereMaterial.uniforms.s_specular.url = "resources/beachball_specular.jpg";
-            cubeMaterial = feng3d.materialFactory.create("standard");
+            cubeMaterial = new feng3d.StandardMaterial();
             cubeMaterial.uniforms.s_diffuse.url = "resources/trinket_diffuse.jpg";
             cubeMaterial.uniforms.s_normal.url = "resources/trinket_normal.jpg";
             cubeMaterial.uniforms.s_specular.url = "resources/trinket_specular.jpg";
-            torusMaterial = feng3d.materialFactory.create("standard");
+            torusMaterial = new feng3d.StandardMaterial();
             torusMaterial.uniforms.s_diffuse.url = "resources/weave_diffuse.jpg";
             torusMaterial.uniforms.s_normal.url = "resources/weave_normal.jpg";
             torusMaterial.uniforms.s_specular.url = "resources/weave_diffuse.jpg";
@@ -297,7 +300,7 @@ var Basic_SkyBox = /** @class */ (function (_super) {
         camera.transform.z = -6;
         camera.transform.lookAt(new feng3d.Vector3());
         camera.lens = new feng3d.PerspectiveLens(90);
-        var torusMaterial = feng3d.materialFactory.create("standard");
+        var torusMaterial = new feng3d.StandardMaterial();
         // torusMaterial.uniforms.u_specular.a = 0.5;
         // torusMaterial.uniforms.u_ambient.fromUnit(0x111111);
         // torusMaterial.uniforms.u_ambient.a = 0.25;
@@ -345,7 +348,7 @@ var Basic_View = /** @class */ (function (_super) {
         var plane = feng3d.GameObject.create();
         var model = plane.addComponent(feng3d.Model);
         model.geometry = new feng3d.PlaneGeometry({ width: 7, height: 7 });
-        var material = model.material = feng3d.materialFactory.create("standard");
+        var material = model.material = new feng3d.StandardMaterial();
         material.uniforms.s_diffuse.url = "resources/floor_diffuse.jpg";
         scene.gameObject.addChild(plane);
         feng3d.ticker.onframe(function () {
@@ -391,7 +394,7 @@ var BillboardTest = /** @class */ (function (_super) {
         //材质
         var model = gameObject.getComponent(feng3d.Model);
         model.geometry = new feng3d.PlaneGeometry({ width: 40, height: 40, segmentsW: 1, segmentsH: 1, yUp: false });
-        var textureMaterial = model.material = feng3d.materialFactory.create("standard");
+        var textureMaterial = model.material = new feng3d.StandardMaterial();
         // textureMaterial.cullFace = CullFace.NONE;
         //
         var texture = textureMaterial.uniforms.s_diffuse.url = 'resources/m.png';
@@ -440,7 +443,7 @@ var Container3DTest = /** @class */ (function (_super) {
         //初始化颜色材质
         this.cube = feng3d.gameObjectFactory.createCube();
         this.gameObject.addChild(this.cube);
-        this.colorMaterial = this.cube.getComponent(feng3d.Model).material = feng3d.materialFactory.create("color");
+        this.colorMaterial = this.cube.getComponent(feng3d.Model).material = new feng3d.ColorMaterial();
         var cylinder = feng3d.gameObjectFactory.createCylinder();
         cylinder.transform.x = 2;
         this.cube.addChild(cylinder);
@@ -462,44 +465,6 @@ var Container3DTest = /** @class */ (function (_super) {
     Container3DTest.prototype.dispose = function () {
     };
     return Container3DTest;
-}(feng3d.Script));
-var FogTest = /** @class */ (function (_super) {
-    __extends(FogTest, _super);
-    function FogTest() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-     * 初始化时调用
-     */
-    FogTest.prototype.init = function () {
-        var cube = feng3d.GameObject.create();
-        cube.transform.z = -7;
-        cube.transform.y = 0;
-        this.gameObject.addChild(cube);
-        var model = cube.addComponent(feng3d.Model);
-        model.geometry = new feng3d.CubeGeometry({ width: 1, height: 1, depth: 1, segmentsW: 1, segmentsH: 1, segmentsD: 1, tile6: false });
-        //材质
-        var material = model.material = feng3d.materialFactory.create("standard");
-        material.uniforms.s_diffuse.url = 'resources/m.png';
-        material.uniforms.u_fogMode = feng3d.FogMode.LINEAR;
-        material.uniforms.u_fogColor = new feng3d.Color3(1, 1, 0);
-        material.uniforms.u_fogMinDistance = 2;
-        material.uniforms.u_fogMaxDistance = 3;
-        feng3d.ticker.onframe(function () {
-            cube.transform.ry += 1;
-        });
-    };
-    /**
-     * 更新
-     */
-    FogTest.prototype.update = function () {
-    };
-    /**
-     * 销毁时调用
-     */
-    FogTest.prototype.dispose = function () {
-    };
-    return FogTest;
 }(feng3d.Script));
 var FPSControllerTest = /** @class */ (function (_super) {
     __extends(FPSControllerTest, _super);
@@ -544,6 +509,44 @@ var FPSControllerTest = /** @class */ (function (_super) {
     };
     return FPSControllerTest;
 }(feng3d.Script));
+var FogTest = /** @class */ (function (_super) {
+    __extends(FogTest, _super);
+    function FogTest() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * 初始化时调用
+     */
+    FogTest.prototype.init = function () {
+        var cube = feng3d.GameObject.create();
+        cube.transform.z = -7;
+        cube.transform.y = 0;
+        this.gameObject.addChild(cube);
+        var model = cube.addComponent(feng3d.Model);
+        model.geometry = new feng3d.CubeGeometry({ width: 1, height: 1, depth: 1, segmentsW: 1, segmentsH: 1, segmentsD: 1, tile6: false });
+        //材质
+        var material = model.material = new feng3d.StandardMaterial();
+        material.uniforms.s_diffuse.url = 'resources/m.png';
+        material.uniforms.u_fogMode = feng3d.FogMode.LINEAR;
+        material.uniforms.u_fogColor = new feng3d.Color3(1, 1, 0);
+        material.uniforms.u_fogMinDistance = 2;
+        material.uniforms.u_fogMaxDistance = 3;
+        feng3d.ticker.onframe(function () {
+            cube.transform.ry += 1;
+        });
+    };
+    /**
+     * 更新
+     */
+    FogTest.prototype.update = function () {
+    };
+    /**
+     * 销毁时调用
+     */
+    FogTest.prototype.dispose = function () {
+    };
+    return FogTest;
+}(feng3d.Script));
 var MousePickTest = /** @class */ (function (_super) {
     __extends(MousePickTest, _super);
     function MousePickTest() {
@@ -584,7 +587,7 @@ var MousePickTest = /** @class */ (function (_super) {
         scene.on("click", function (event) {
             var transform = event.target;
             if (transform.getComponent(feng3d.Model)) {
-                var material = transform.getComponent(feng3d.Model).material = feng3d.materialFactory.create("color");
+                var material = transform.getComponent(feng3d.Model).material = new feng3d.ColorMaterial();
                 material.uniforms.u_diffuseInput.fromUnit(Math.random() * (1 << 24));
             }
         });
@@ -704,7 +707,7 @@ var GeometryTest = /** @class */ (function (_super) {
         gameobject.transform.y = -1;
         scene.gameObject.addChild(gameobject);
         //初始化颜色材质
-        var colorMaterial = model.material = feng3d.materialFactory.create("color");
+        var colorMaterial = model.material = new feng3d.ColorMaterial();
         //变化旋转与颜色
         setInterval(function () {
             gameobject.transform.ry += 1;
@@ -811,7 +814,7 @@ var PointLightTest = /** @class */ (function (_super) {
             }
         });
         function initObjects() {
-            var material = feng3d.materialFactory.create("standard");
+            var material = new feng3d.StandardMaterial();
             material.uniforms.s_diffuse.url = 'resources/head_diffuse.jpg';
             material.uniforms.s_normal.url = 'resources/head_normals.jpg';
             material.uniforms.s_specular.url = 'resources/head_specular.jpg';
@@ -844,21 +847,21 @@ var PointLightTest = /** @class */ (function (_super) {
         function initLights() {
             //
             var lightColor0 = new feng3d.Color4(1, 0, 0, 1);
-            var meshRenderer = light0.addComponent(feng3d.Model);
-            meshRenderer.geometry = new feng3d.SphereGeometry({ radius: 0.05 });
+            var model = light0.addComponent(feng3d.Model);
+            model.geometry = new feng3d.SphereGeometry({ radius: 0.05 });
             //初始化点光源
             var pointLight0 = light0.addComponent(feng3d.PointLight);
             pointLight0.color = lightColor0.toColor3();
-            meshRenderer.material = feng3d.materialFactory.create("color", { uniforms: { u_diffuseInput: lightColor0 } });
+            model.material = new feng3d.ColorMaterial({ uniforms: { u_diffuseInput: lightColor0 } });
             scene.gameObject.addChild(light0);
             //
             var lightColor1 = new feng3d.Color4(0, 1, 0, 1);
-            meshRenderer = light1.addComponent(feng3d.Model);
-            meshRenderer.geometry = new feng3d.SphereGeometry({ radius: 0.05 });
+            model = light1.addComponent(feng3d.Model);
+            model.geometry = new feng3d.SphereGeometry({ radius: 0.05 });
             //初始化点光源
             var pointLight1 = light1.addComponent(feng3d.DirectionalLight);
             pointLight1.color = lightColor1.toColor3();
-            meshRenderer.material = feng3d.materialFactory.create("color", { uniforms: { u_diffuseInput: lightColor1 } });
+            model.material = new feng3d.ColorMaterial({ uniforms: { u_diffuseInput: lightColor1 } });
             scene.gameObject.addChild(light1);
         }
         function setPointLightPosition() {
@@ -1080,7 +1083,7 @@ var OBJParserTest = /** @class */ (function (_super) {
         }, 15);
         // var objUrl = "resources/cube.obj";
         var objUrl = "resources/head.obj";
-        var material = feng3d.materialFactory.create("standard");
+        var material = new feng3d.StandardMaterial();
         material.uniforms.s_diffuse.url = "resources/head_diffuse.jpg";
         material.uniforms.s_normal.url = "resources/head_normals.jpg";
         material.uniforms.s_specular.url = "resources/head_specular.jpg";
@@ -1093,8 +1096,8 @@ var OBJParserTest = /** @class */ (function (_super) {
             object.transform.sz = 20;
             object.transform.z = 300;
             scene.gameObject.addChild(gameObject);
-            var meshRenderers = gameObject.getComponentsInChildren(feng3d.Model);
-            meshRenderers.forEach(function (element) {
+            var models = gameObject.getComponentsInChildren(feng3d.Model);
+            models.forEach(function (element) {
                 element.material = material;
             });
         });
@@ -1127,7 +1130,7 @@ var ColorMaterialTest = /** @class */ (function (_super) {
         cube.transform.z = 3;
         scene.gameObject.addChild(cube);
         //初始化颜色材质
-        var colorMaterial = cube.getComponent(feng3d.Model).material = feng3d.materialFactory.create("color");
+        var colorMaterial = cube.getComponent(feng3d.Model).material = new feng3d.ColorMaterial();
         //变化旋转与颜色
         setInterval(function () {
             cube.transform.ry += 1;
@@ -1161,11 +1164,11 @@ var PointMaterialTest = /** @class */ (function (_super) {
         var camera = scene.getComponentsInChildren(feng3d.Camera)[0];
         var canvas = document.getElementById("glcanvas");
         var pointGeometry = new feng3d.PointGeometry();
-        var pointMaterial = feng3d.materialFactory.create("point", { renderParams: { renderMode: feng3d.RenderMode.POINTS } });
+        var pointMaterial = new feng3d.PointMaterial({ renderParams: { renderMode: feng3d.RenderMode.POINTS } });
         var gameObject = feng3d.GameObject.create("plane");
-        var meshRenderer = gameObject.addComponent(feng3d.Model);
-        meshRenderer.geometry = pointGeometry;
-        meshRenderer.material = pointMaterial;
+        var model = gameObject.addComponent(feng3d.Model);
+        model.geometry = pointGeometry;
+        model.material = pointMaterial;
         gameObject.transform.z = 3;
         scene.gameObject.addChild(gameObject);
         var length = 200;
@@ -1209,9 +1212,9 @@ var SegmentMaterialTest = /** @class */ (function (_super) {
         segment.transform.z = 3;
         scene.gameObject.addChild(segment);
         //初始化材质
-        var meshRenderer = segment.addComponent(feng3d.Model);
-        meshRenderer.material = feng3d.materialFactory.create("segment", { renderParams: { renderMode: feng3d.RenderMode.LINES } });
-        var segmentGeometry = meshRenderer.geometry = new feng3d.SegmentGeometry();
+        var model = segment.addComponent(feng3d.Model);
+        model.material = new feng3d.SegmentMaterial({ renderParams: { renderMode: feng3d.RenderMode.LINES } });
+        var segmentGeometry = model.geometry = new feng3d.SegmentGeometry();
         var length = 200;
         var height = 2 / Math.PI;
         var preVec;
@@ -1267,7 +1270,7 @@ var StandardMaterialTest = /** @class */ (function (_super) {
         model.geometry = new feng3d.CubeGeometry({ width: 1, height: 1, depth: 1, segmentsW: 1, segmentsH: 1, segmentsD: 1, tile6: false });
         // model.geometry = new PlaneGeometry();
         //材质
-        var textureMaterial = model.material = feng3d.materialFactory.create("standard");
+        var textureMaterial = model.material = new feng3d.StandardMaterial();
         textureMaterial.uniforms.s_diffuse.url = 'resources/m.png';
         // textureMaterial.uniforms.s_diffuse.url = 'resources/nonpowerof2.png';
         textureMaterial.uniforms.s_diffuse.format = feng3d.TextureFormat.RGBA;
@@ -1312,7 +1315,7 @@ var TextureMaterialTest = /** @class */ (function (_super) {
         model.geometry = new feng3d.CubeGeometry({ width: 1, height: 1, depth: 1, segmentsW: 1, segmentsH: 1, segmentsD: 1, tile6: false });
         // model.geometry = new PlaneGeometry();
         //材质
-        model.material = feng3d.materialFactory.create("texture", {
+        model.material = new feng3d.TextureMaterial({
             uniforms: { s_texture: { url: 'resources/m.png', flipY: false } }
         });
     };
@@ -1340,7 +1343,7 @@ var ScriptDemo = /** @class */ (function (_super) {
         var model = cube.addComponent(feng3d.Model);
         model.geometry = new feng3d.CubeGeometry({ width: 1, height: 1, depth: 1, segmentsW: 1, segmentsH: 1, segmentsD: 1, tile6: false });
         //材质
-        var material = model.material = feng3d.materialFactory.create("standard");
+        var material = model.material = new feng3d.StandardMaterial();
         material.uniforms.s_diffuse.url = 'resources/m.png';
         material.uniforms.u_fogMode = feng3d.FogMode.LINEAR;
         material.uniforms.u_fogColor = new feng3d.Color3(1, 1, 0);
@@ -1401,6 +1404,107 @@ Object.assign(Clock.prototype, {
         return diff;
     }
 });
+/**
+ * @author mrdoob / http://mrdoob.com
+ * @author Mugen87 / https://github.com/Mugen87
+ *
+ * Based on @tojiro's vr-samples-utils.js
+ */
+var WEBVR = {
+    createButton: function (renderer) {
+        function showEnterVR(display) {
+            button.style.display = '';
+            button.style.cursor = 'pointer';
+            button.style.left = 'calc(50% - 50px)';
+            button.style.width = '100px';
+            button.textContent = 'ENTER VR';
+            button.onmouseenter = function () { button.style.opacity = '1.0'; };
+            button.onmouseleave = function () { button.style.opacity = '0.5'; };
+            button.onclick = function () {
+                display.isPresenting ? display.exitPresent() : display.requestPresent([{ source: renderer.domElement }]);
+            };
+            renderer.vr.setDevice(display);
+        }
+        function showVRNotFound() {
+            button.style.display = '';
+            button.style.cursor = 'auto';
+            button.style.left = 'calc(50% - 75px)';
+            button.style.width = '150px';
+            button.textContent = 'VR NOT FOUND';
+            button.onmouseenter = null;
+            button.onmouseleave = null;
+            button.onclick = null;
+            renderer.vr.setDevice(null);
+        }
+        function stylizeElement(element) {
+            element.style.position = 'absolute';
+            element.style.bottom = '20px';
+            element.style.padding = '12px 6px';
+            element.style.border = '1px solid #fff';
+            element.style.borderRadius = '4px';
+            element.style.background = 'transparent';
+            element.style.color = '#fff';
+            element.style.font = 'normal 13px sans-serif';
+            element.style.textAlign = 'center';
+            element.style.opacity = '0.5';
+            element.style.outline = 'none';
+            element.style.zIndex = '999';
+        }
+        if ('getVRDisplays' in navigator) {
+            var button = document.createElement('button');
+            button.style.display = 'none';
+            stylizeElement(button);
+            window.addEventListener('vrdisplayconnect', function (event) {
+                showEnterVR(event.display);
+            }, false);
+            window.addEventListener('vrdisplaydisconnect', function (event) {
+                showVRNotFound();
+            }, false);
+            window.addEventListener('vrdisplaypresentchange', function (event) {
+                button.textContent = event.display.isPresenting ? 'EXIT VR' : 'ENTER VR';
+            }, false);
+            window.addEventListener('vrdisplayactivate', function (event) {
+                event.display.requestPresent([{ source: renderer.domElement }]);
+            }, false);
+            navigator["getVRDisplays"]()
+                .then(function (displays) {
+                if (displays.length > 0) {
+                    showEnterVR(displays[0]);
+                }
+                else {
+                    showVRNotFound();
+                }
+            });
+            return button;
+        }
+        else {
+            var message = document.createElement('a');
+            message.href = 'https://webvr.info';
+            message.innerHTML = 'WEBVR NOT SUPPORTED';
+            message.style.left = 'calc(50% - 90px)';
+            message.style.width = '180px';
+            message.style.textDecoration = 'none';
+            stylizeElement(message);
+            return message;
+        }
+    },
+    // DEPRECATED
+    checkAvailability: function () {
+        console.warn('WEBVR.checkAvailability has been deprecated.');
+        // return new Promise( function () {} );
+    },
+    getMessageContainer: function () {
+        console.warn('WEBVR.getMessageContainer has been deprecated.');
+        return document.createElement('div');
+    },
+    getButton: function () {
+        console.warn('WEBVR.getButton has been deprecated.');
+        return document.createElement('div');
+    },
+    getVRDisplay: function () {
+        console.warn('WEBVR.getVRDisplay has been deprecated.');
+    }
+};
 var webvr_cubes = /** @class */ (function (_super) {
     __extends(webvr_cubes, _super);
     function webvr_cubes() {
@@ -1441,7 +1545,7 @@ var webvr_cubes = /** @class */ (function (_super) {
             crosshair = feng3d.GameObject.create("crosshair");
             var model = crosshair.addComponent(feng3d.Model);
             model.geometry = new feng3d.TorusGeometry({ radius: 0.02, tubeRadius: 0.004, segmentsR: 32, segmentsT: 8, yUp: false });
-            var material = model.material = feng3d.materialFactory.create("standard");
+            var material = model.material = new feng3d.StandardMaterial();
             material.renderParams.enableBlend = true;
             material.uniforms.u_diffuse.a = 0.5;
             crosshair.transform.z = 2;
@@ -1457,7 +1561,7 @@ var webvr_cubes = /** @class */ (function (_super) {
                             segmentsW: 8, segmentsH: 8, segmentsD: 8,
                         },
                         material: {
-                            __class__: "feng3d.Material",
+                            __class__: "feng3d.StandardMaterial",
                             shaderName: "standard",
                             uniforms: { u_diffuse: { r: 0.25, g: 0.25, b: 0.25 } },
                             renderParams: { renderMode: feng3d.RenderMode.LINES },
@@ -1479,7 +1583,7 @@ var webvr_cubes = /** @class */ (function (_super) {
                 var object = feng3d.GameObject.create("box" + i);
                 object.addComponent(feng3d.Model, function (component) {
                     component.geometry = geometry;
-                    var material = component.material = feng3d.materialFactory.create("standard");
+                    var material = component.material = new feng3d.StandardMaterial();
                     material.uniforms.u_diffuse.fromUnit(Math.random() * 0xffffff);
                 });
                 object.transform.position = feng3d.Vector3.random().scale(4).subNumber(2);
@@ -1599,105 +1703,4 @@ var webvr_cubes = /** @class */ (function (_super) {
     };
     return webvr_cubes;
 }(feng3d.Script));
-/**
- * @author mrdoob / http://mrdoob.com
- * @author Mugen87 / https://github.com/Mugen87
- *
- * Based on @tojiro's vr-samples-utils.js
- */
-var WEBVR = {
-    createButton: function (renderer) {
-        function showEnterVR(display) {
-            button.style.display = '';
-            button.style.cursor = 'pointer';
-            button.style.left = 'calc(50% - 50px)';
-            button.style.width = '100px';
-            button.textContent = 'ENTER VR';
-            button.onmouseenter = function () { button.style.opacity = '1.0'; };
-            button.onmouseleave = function () { button.style.opacity = '0.5'; };
-            button.onclick = function () {
-                display.isPresenting ? display.exitPresent() : display.requestPresent([{ source: renderer.domElement }]);
-            };
-            renderer.vr.setDevice(display);
-        }
-        function showVRNotFound() {
-            button.style.display = '';
-            button.style.cursor = 'auto';
-            button.style.left = 'calc(50% - 75px)';
-            button.style.width = '150px';
-            button.textContent = 'VR NOT FOUND';
-            button.onmouseenter = null;
-            button.onmouseleave = null;
-            button.onclick = null;
-            renderer.vr.setDevice(null);
-        }
-        function stylizeElement(element) {
-            element.style.position = 'absolute';
-            element.style.bottom = '20px';
-            element.style.padding = '12px 6px';
-            element.style.border = '1px solid #fff';
-            element.style.borderRadius = '4px';
-            element.style.background = 'transparent';
-            element.style.color = '#fff';
-            element.style.font = 'normal 13px sans-serif';
-            element.style.textAlign = 'center';
-            element.style.opacity = '0.5';
-            element.style.outline = 'none';
-            element.style.zIndex = '999';
-        }
-        if ('getVRDisplays' in navigator) {
-            var button = document.createElement('button');
-            button.style.display = 'none';
-            stylizeElement(button);
-            window.addEventListener('vrdisplayconnect', function (event) {
-                showEnterVR(event.display);
-            }, false);
-            window.addEventListener('vrdisplaydisconnect', function (event) {
-                showVRNotFound();
-            }, false);
-            window.addEventListener('vrdisplaypresentchange', function (event) {
-                button.textContent = event.display.isPresenting ? 'EXIT VR' : 'ENTER VR';
-            }, false);
-            window.addEventListener('vrdisplayactivate', function (event) {
-                event.display.requestPresent([{ source: renderer.domElement }]);
-            }, false);
-            navigator["getVRDisplays"]()
-                .then(function (displays) {
-                if (displays.length > 0) {
-                    showEnterVR(displays[0]);
-                }
-                else {
-                    showVRNotFound();
-                }
-            });
-            return button;
-        }
-        else {
-            var message = document.createElement('a');
-            message.href = 'https://webvr.info';
-            message.innerHTML = 'WEBVR NOT SUPPORTED';
-            message.style.left = 'calc(50% - 90px)';
-            message.style.width = '180px';
-            message.style.textDecoration = 'none';
-            stylizeElement(message);
-            return message;
-        }
-    },
-    // DEPRECATED
-    checkAvailability: function () {
-        console.warn('WEBVR.checkAvailability has been deprecated.');
-        // return new Promise( function () {} );
-    },
-    getMessageContainer: function () {
-        console.warn('WEBVR.getMessageContainer has been deprecated.');
-        return document.createElement('div');
-    },
-    getButton: function () {
-        console.warn('WEBVR.getButton has been deprecated.');
-        return document.createElement('div');
-    },
-    getVRDisplay: function () {
-        console.warn('WEBVR.getVRDisplay has been deprecated.');
-    }
-};
 //# sourceMappingURL=examples.js.map

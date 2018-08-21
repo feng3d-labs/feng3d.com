@@ -1,7 +1,10 @@
 var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    }
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -817,183 +820,205 @@ var editor;
 (function (editor) {
     var Editorshortcut = /** @class */ (function () {
         function Editorshortcut() {
-        }
-        Editorshortcut.prototype.init = function () {
+            this.selectedObjectsHistory = [];
             //监听命令
-            feng3d.shortcut.on("deleteSeletedGameObject", onDeleteSeletedGameObject);
-            feng3d.shortcut.on("gameobjectMoveTool", function () {
-                editor.mrsTool.toolType = editor.MRSToolType.MOVE;
-            });
-            feng3d.shortcut.on("gameobjectRotationTool", function () {
-                editor.mrsTool.toolType = editor.MRSToolType.ROTATION;
-            });
-            feng3d.shortcut.on("gameobjectScaleTool", function () {
-                editor.mrsTool.toolType = editor.MRSToolType.SCALE;
-            });
-            feng3d.shortcut.on("selectGameObject", function () {
-                var gameObject = editor.engine.mouse3DManager.selectedGameObject;
-                if (!gameObject || !gameObject.scene) {
-                    editor.editorData.selectedObjects = null;
-                    return;
-                }
-                if (editor.editorData.mrsToolObject == gameObject)
-                    return;
+            feng3d.shortcut.on("deleteSeletedGameObject", this.onDeleteSeletedGameObject, this);
+            //
+            feng3d.shortcut.on("gameobjectMoveTool", this.onGameobjectMoveTool, this);
+            feng3d.shortcut.on("gameobjectRotationTool", this.onGameobjectRotationTool, this);
+            feng3d.shortcut.on("gameobjectScaleTool", this.onGameobjectScaleTool, this);
+            feng3d.shortcut.on("selectGameObject", this.onSelectGameObject, this);
+            feng3d.shortcut.on("sceneCameraForwardBackMouseMoveStart", this.onSceneCameraForwardBackMouseMoveStart, this);
+            feng3d.shortcut.on("sceneCameraForwardBackMouseMove", this.onSceneCameraForwardBackMouseMove, this);
+            //
+            feng3d.shortcut.on("lookToSelectedGameObject", this.onLookToSelectedGameObject, this);
+            feng3d.shortcut.on("dragSceneStart", this.onDragSceneStart, this);
+            feng3d.shortcut.on("dragScene", this.onDragScene, this);
+            feng3d.shortcut.on("fpsViewStart", this.onFpsViewStart, this);
+            feng3d.shortcut.on("fpsViewStop", this.onFpsViewStop, this);
+            feng3d.shortcut.on("mouseRotateSceneStart", this.onMouseRotateSceneStart, this);
+            feng3d.shortcut.on("mouseRotateScene", this.onMouseRotateScene, this);
+            feng3d.shortcut.on("mouseWheelMoveSceneCamera", this.onMouseWheelMoveSceneCamera, this);
+        }
+        Editorshortcut.prototype.onGameobjectMoveTool = function () {
+            editor.editorData.toolType = editor.MRSToolType.MOVE;
+        };
+        Editorshortcut.prototype.onGameobjectRotationTool = function () {
+            editor.editorData.toolType = editor.MRSToolType.ROTATION;
+        };
+        Editorshortcut.prototype.onGameobjectScaleTool = function () {
+            editor.editorData.toolType = editor.MRSToolType.SCALE;
+        };
+        Editorshortcut.prototype.onSceneCameraForwardBackMouseMoveStart = function () {
+            this.preMousePoint = new feng3d.Vector2(feng3d.windowEventProxy.clientX, feng3d.windowEventProxy.clientY);
+        };
+        Editorshortcut.prototype.onSceneCameraForwardBackMouseMove = function () {
+            var currentMousePoint = new feng3d.Vector2(feng3d.windowEventProxy.clientX, feng3d.windowEventProxy.clientY);
+            var moveDistance = (currentMousePoint.x + currentMousePoint.y - this.preMousePoint.x - this.preMousePoint.y) * editor.sceneControlConfig.sceneCameraForwardBackwardStep;
+            editor.sceneControlConfig.lookDistance -= moveDistance;
+            var forward = editor.editorCamera.transform.localToWorldMatrix.forward;
+            var camerascenePosition = editor.editorCamera.transform.scenePosition;
+            var newCamerascenePosition = new feng3d.Vector3(forward.x * moveDistance + camerascenePosition.x, forward.y * moveDistance + camerascenePosition.y, forward.z * moveDistance + camerascenePosition.z);
+            var newCameraPosition = editor.editorCamera.transform.inverseTransformPoint(newCamerascenePosition);
+            editor.editorCamera.transform.position = newCameraPosition;
+            this.preMousePoint = currentMousePoint;
+        };
+        Editorshortcut.prototype.onSelectGameObject = function () {
+            var gameObjects = feng3d.raycaster.pickAll(editor.editorCamera.getMouseRay3D(), editor.editorScene.mouseCheckObjects).sort(function (a, b) { return a.rayEntryDistance - b.rayEntryDistance; }).map(function (v) { return v.gameObject; });
+            if (gameObjects.length > 0)
+                return;
+            //
+            gameObjects = feng3d.raycaster.pickAll(editor.editorCamera.getMouseRay3D(), editor.engine.scene.mouseCheckObjects).sort(function (a, b) { return a.rayEntryDistance - b.rayEntryDistance; }).map(function (v) { return v.gameObject; });
+            if (gameObjects.length == 0) {
+                editor.editorData.clearSelectedObjects();
+                return;
+            }
+            //
+            gameObjects = gameObjects.reduce(function (pv, gameObject) {
                 var node = editor.hierarchyTree.getNode(gameObject);
                 while (!node && gameObject.parent) {
-                    if (editor.editorData.mrsToolObject == gameObject)
-                        return;
                     gameObject = gameObject.parent;
                     node = editor.hierarchyTree.getNode(gameObject);
                 }
                 if (gameObject != gameObject.scene.gameObject) {
-                    editor.editorData.selectObject(gameObject);
+                    pv.push(gameObject);
                 }
-                else {
-                    editor.editorData.selectedObjects = null;
-                }
-            });
-            var preMousePoint;
-            feng3d.shortcut.on("sceneCameraForwardBackMouseMoveStart", function () {
-                preMousePoint = new feng3d.Vector2(feng3d.windowEventProxy.clientX, feng3d.windowEventProxy.clientY);
-            });
-            feng3d.shortcut.on("sceneCameraForwardBackMouseMove", function () {
-                var currentMousePoint = new feng3d.Vector2(feng3d.windowEventProxy.clientX, feng3d.windowEventProxy.clientY);
-                var moveDistance = (currentMousePoint.x + currentMousePoint.y - preMousePoint.x - preMousePoint.y) * editor.sceneControlConfig.sceneCameraForwardBackwardStep;
-                editor.sceneControlConfig.lookDistance -= moveDistance;
-                var forward = editor.editorCamera.transform.localToWorldMatrix.forward;
-                var camerascenePosition = editor.editorCamera.transform.scenePosition;
-                var newCamerascenePosition = new feng3d.Vector3(forward.x * moveDistance + camerascenePosition.x, forward.y * moveDistance + camerascenePosition.y, forward.z * moveDistance + camerascenePosition.z);
-                var newCameraPosition = editor.editorCamera.transform.inverseTransformPoint(newCamerascenePosition);
-                editor.editorCamera.transform.position = newCameraPosition;
-                preMousePoint = currentMousePoint;
-            });
+                return pv;
+            }, []);
             //
-            feng3d.shortcut.on("lookToSelectedGameObject", onLookToSelectedGameObject);
-            feng3d.shortcut.on("dragSceneStart", onDragSceneStart);
-            feng3d.shortcut.on("dragScene", onDragScene);
-            feng3d.shortcut.on("fpsViewStart", onFpsViewStart);
-            feng3d.shortcut.on("fpsViewStop", onFpsViewStop);
-            feng3d.shortcut.on("mouseRotateSceneStart", onMouseRotateSceneStart);
-            feng3d.shortcut.on("mouseRotateScene", onMouseRotateScene);
-            feng3d.shortcut.on("mouseWheelMoveSceneCamera", onMouseWheelMoveSceneCamera);
+            if (gameObjects.length > 0) {
+                var selectedObjectsHistory = this.selectedObjectsHistory;
+                var gameObject = gameObjects.reduce(function (pv, cv) {
+                    if (pv)
+                        return pv;
+                    if (selectedObjectsHistory.indexOf(cv) == -1)
+                        pv = cv;
+                    return pv;
+                }, null);
+                if (!gameObject) {
+                    selectedObjectsHistory.length = 0;
+                    gameObject = gameObjects[0];
+                }
+                editor.editorData.selectObject(gameObject);
+                selectedObjectsHistory.push(gameObject);
+            }
+            else {
+                editor.editorData.clearSelectedObjects();
+            }
+        };
+        Editorshortcut.prototype.onDeleteSeletedGameObject = function () {
+            var selectedObject = editor.editorData.selectedObjects;
+            if (!selectedObject)
+                return;
+            //删除文件引用计数
+            var deletefileNum = 0;
+            selectedObject.forEach(function (element) {
+                if (element instanceof feng3d.GameObject) {
+                    element.remove();
+                }
+                else if (element instanceof editor.AssetsFile) {
+                    deletefileNum++;
+                    editor.editorAssets.deletefile(element.path, function () {
+                        deletefileNum--;
+                        // 等待删除所有文件 后清空选中对象
+                        if (deletefileNum == 0) {
+                            editor.editorData.clearSelectedObjects();
+                        }
+                    });
+                }
+            });
+            // 等待删除所有文件 后清空选中对象
+            if (deletefileNum == 0) {
+                editor.editorData.clearSelectedObjects();
+            }
+        };
+        Editorshortcut.prototype.onDragSceneStart = function () {
+            this.dragSceneMousePoint = new feng3d.Vector2(feng3d.windowEventProxy.clientX, feng3d.windowEventProxy.clientY);
+            this.dragSceneCameraGlobalMatrix3D = editor.editorCamera.transform.localToWorldMatrix.clone();
+        };
+        Editorshortcut.prototype.onDragScene = function () {
+            var mousePoint = new feng3d.Vector2(feng3d.windowEventProxy.clientX, feng3d.windowEventProxy.clientY);
+            var addPoint = mousePoint.subTo(this.dragSceneMousePoint);
+            var scale = editor.editorCamera.getScaleByDepth(editor.sceneControlConfig.lookDistance);
+            var up = this.dragSceneCameraGlobalMatrix3D.up;
+            var right = this.dragSceneCameraGlobalMatrix3D.right;
+            up.scale(addPoint.y * scale);
+            right.scale(-addPoint.x * scale);
+            var globalMatrix3D = this.dragSceneCameraGlobalMatrix3D.clone();
+            globalMatrix3D.appendTranslation(up.x + right.x, up.y + right.y, up.z + right.z);
+            editor.editorCamera.transform.localToWorldMatrix = globalMatrix3D;
+        };
+        Editorshortcut.prototype.onFpsViewStart = function () {
+            var fpsController = editor.editorCamera.getComponent(feng3d.FPSController);
+            fpsController.onMousedown();
+            feng3d.ticker.onframe(this.updateFpsView);
+        };
+        Editorshortcut.prototype.onFpsViewStop = function () {
+            var fpsController = editor.editorCamera.getComponent(feng3d.FPSController);
+            fpsController.onMouseup();
+            feng3d.ticker.offframe(this.updateFpsView);
+        };
+        Editorshortcut.prototype.updateFpsView = function () {
+            var fpsController = editor.editorCamera.getComponent(feng3d.FPSController);
+            fpsController.update();
+        };
+        Editorshortcut.prototype.onMouseRotateSceneStart = function () {
+            this.rotateSceneMousePoint = new feng3d.Vector2(feng3d.windowEventProxy.clientX, feng3d.windowEventProxy.clientY);
+            this.rotateSceneCameraGlobalMatrix3D = editor.editorCamera.transform.localToWorldMatrix.clone();
+            this.rotateSceneCenter = null;
+            //获取第一个 游戏对象
+            var transformBox = editor.editorData.transformBox;
+            if (transformBox) {
+                this.rotateSceneCenter = transformBox.getCenter();
+            }
+            else {
+                this.rotateSceneCenter = this.rotateSceneCameraGlobalMatrix3D.forward;
+                this.rotateSceneCenter.scale(editor.sceneControlConfig.lookDistance);
+                this.rotateSceneCenter = this.rotateSceneCenter.addTo(this.rotateSceneCameraGlobalMatrix3D.position);
+            }
+        };
+        Editorshortcut.prototype.onMouseRotateScene = function () {
+            var globalMatrix3D = this.rotateSceneCameraGlobalMatrix3D.clone();
+            var mousePoint = new feng3d.Vector2(feng3d.windowEventProxy.clientX, feng3d.windowEventProxy.clientY);
+            var view3DRect = editor.engine.viewRect;
+            var rotateX = (mousePoint.y - this.rotateSceneMousePoint.y) / view3DRect.height * 180;
+            var rotateY = (mousePoint.x - this.rotateSceneMousePoint.x) / view3DRect.width * 180;
+            globalMatrix3D.appendRotation(feng3d.Vector3.Y_AXIS, rotateY, this.rotateSceneCenter);
+            var rotateAxisX = globalMatrix3D.right;
+            globalMatrix3D.appendRotation(rotateAxisX, rotateX, this.rotateSceneCenter);
+            editor.editorCamera.transform.localToWorldMatrix = globalMatrix3D;
+        };
+        Editorshortcut.prototype.onLookToSelectedGameObject = function () {
+            var transformBox = editor.editorData.transformBox;
+            if (transformBox) {
+                var scenePosition = transformBox.getCenter();
+                var size = transformBox.getSize().length;
+                size = Math.max(size, 1);
+                var lookDistance = size;
+                var lens = editor.editorCamera.lens;
+                if (lens instanceof feng3d.PerspectiveLens) {
+                    lookDistance = size / Math.tan(lens.fov * Math.PI / 360);
+                }
+                //
+                editor.sceneControlConfig.lookDistance = lookDistance;
+                var lookPos = editor.editorCamera.transform.localToWorldMatrix.forward;
+                lookPos.scale(-editor.sceneControlConfig.lookDistance);
+                lookPos.add(scenePosition);
+                var localLookPos = lookPos.clone();
+                if (editor.editorCamera.transform.parent) {
+                    editor.editorCamera.transform.parent.worldToLocalMatrix.transformVector(lookPos, localLookPos);
+                }
+                egret.Tween.get(editor.editorCamera.transform).to({ x: localLookPos.x, y: localLookPos.y, z: localLookPos.z }, 300, egret.Ease.sineIn);
+            }
+        };
+        Editorshortcut.prototype.onMouseWheelMoveSceneCamera = function () {
+            var distance = feng3d.windowEventProxy.wheelDelta * editor.sceneControlConfig.mouseWheelMoveStep * editor.sceneControlConfig.lookDistance / 10;
+            editor.editorCamera.transform.localToWorldMatrix = editor.editorCamera.transform.localToWorldMatrix.moveForward(distance);
+            editor.sceneControlConfig.lookDistance -= distance;
         };
         return Editorshortcut;
     }());
     editor.Editorshortcut = Editorshortcut;
-    editor.editorshortcut = new Editorshortcut();
-    var dragSceneMousePoint;
-    var dragSceneCameraGlobalMatrix3D;
-    var rotateSceneCenter;
-    var rotateSceneCameraGlobalMatrix3D;
-    var rotateSceneMousePoint;
-    function onDeleteSeletedGameObject() {
-        var selectedObject = editor.editorData.selectedObjects;
-        if (!selectedObject)
-            return;
-        //删除文件引用计数
-        var deletefileNum = 0;
-        selectedObject.forEach(function (element) {
-            if (element instanceof feng3d.GameObject) {
-                element.remove();
-            }
-            else if (element instanceof editor.AssetsFile) {
-                deletefileNum++;
-                editor.editorAssets.deletefile(element.path, function () {
-                    deletefileNum--;
-                    // 等待删除所有文件 后清空选中对象
-                    if (deletefileNum == 0) {
-                        editor.editorData.selectedObjects = null;
-                    }
-                });
-            }
-        });
-        // 等待删除所有文件 后清空选中对象
-        if (deletefileNum == 0) {
-            editor.editorData.selectedObjects = null;
-        }
-    }
-    function onDragSceneStart() {
-        dragSceneMousePoint = new feng3d.Vector2(feng3d.windowEventProxy.clientX, feng3d.windowEventProxy.clientY);
-        dragSceneCameraGlobalMatrix3D = editor.editorCamera.transform.localToWorldMatrix.clone();
-    }
-    function onDragScene() {
-        var mousePoint = new feng3d.Vector2(feng3d.windowEventProxy.clientX, feng3d.windowEventProxy.clientY);
-        var addPoint = mousePoint.subTo(dragSceneMousePoint);
-        var scale = editor.editorCamera.getScaleByDepth(editor.sceneControlConfig.lookDistance);
-        var up = dragSceneCameraGlobalMatrix3D.up;
-        var right = dragSceneCameraGlobalMatrix3D.right;
-        up.scale(addPoint.y * scale);
-        right.scale(-addPoint.x * scale);
-        var globalMatrix3D = dragSceneCameraGlobalMatrix3D.clone();
-        globalMatrix3D.appendTranslation(up.x + right.x, up.y + right.y, up.z + right.z);
-        editor.editorCamera.transform.localToWorldMatrix = globalMatrix3D;
-    }
-    function onFpsViewStart() {
-        var fpsController = editor.editorCamera.getComponent(feng3d.FPSController);
-        fpsController.onMousedown();
-        feng3d.ticker.onframe(updateFpsView);
-    }
-    function onFpsViewStop() {
-        var fpsController = editor.editorCamera.getComponent(feng3d.FPSController);
-        fpsController.onMouseup();
-        feng3d.ticker.offframe(updateFpsView);
-    }
-    function updateFpsView() {
-        var fpsController = editor.editorCamera.getComponent(feng3d.FPSController);
-        fpsController.update();
-    }
-    function onMouseRotateSceneStart() {
-        rotateSceneMousePoint = new feng3d.Vector2(feng3d.windowEventProxy.clientX, feng3d.windowEventProxy.clientY);
-        rotateSceneCameraGlobalMatrix3D = editor.editorCamera.transform.localToWorldMatrix.clone();
-        rotateSceneCenter = null;
-        //获取第一个 游戏对象
-        var firstObject = editor.editorData.firstSelectedGameObject;
-        if (firstObject) {
-            rotateSceneCenter = firstObject.transform.scenePosition;
-        }
-        else {
-            rotateSceneCenter = rotateSceneCameraGlobalMatrix3D.forward;
-            rotateSceneCenter.scale(editor.sceneControlConfig.lookDistance);
-            rotateSceneCenter = rotateSceneCenter.addTo(rotateSceneCameraGlobalMatrix3D.position);
-        }
-    }
-    function onMouseRotateScene() {
-        var globalMatrix3D = rotateSceneCameraGlobalMatrix3D.clone();
-        var mousePoint = new feng3d.Vector2(feng3d.windowEventProxy.clientX, feng3d.windowEventProxy.clientY);
-        var view3DRect = editor.engine.viewRect;
-        var rotateX = (mousePoint.y - rotateSceneMousePoint.y) / view3DRect.height * 180;
-        var rotateY = (mousePoint.x - rotateSceneMousePoint.x) / view3DRect.width * 180;
-        globalMatrix3D.appendRotation(feng3d.Vector3.Y_AXIS, rotateY, rotateSceneCenter);
-        var rotateAxisX = globalMatrix3D.right;
-        globalMatrix3D.appendRotation(rotateAxisX, rotateX, rotateSceneCenter);
-        editor.editorCamera.transform.localToWorldMatrix = globalMatrix3D;
-    }
-    function onLookToSelectedGameObject() {
-        var selectedGameObject = editor.editorData.firstSelectedGameObject;
-        if (selectedGameObject) {
-            var worldBounds = selectedGameObject.getComponent(feng3d.Bounding).worldBounds;
-            var size = 1;
-            if (worldBounds)
-                size = worldBounds.getSize().length;
-            size = Math.max(size, 1);
-            //
-            var cameraGameObject = editor.editorCamera;
-            editor.sceneControlConfig.lookDistance = size;
-            var lookPos = cameraGameObject.transform.localToWorldMatrix.forward;
-            lookPos.scale(-editor.sceneControlConfig.lookDistance);
-            lookPos.add(selectedGameObject.transform.scenePosition);
-            var localLookPos = lookPos.clone();
-            if (cameraGameObject.transform.parent) {
-                cameraGameObject.transform.parent.worldToLocalMatrix.transformVector(lookPos, localLookPos);
-            }
-            egret.Tween.get(editor.editorCamera.transform).to({ x: localLookPos.x, y: localLookPos.y, z: localLookPos.z }, 300, egret.Ease.sineIn);
-        }
-    }
-    function onMouseWheelMoveSceneCamera() {
-        var distance = feng3d.windowEventProxy.wheelDelta * editor.sceneControlConfig.mouseWheelMoveStep * editor.sceneControlConfig.lookDistance / 10;
-        editor.editorCamera.transform.localToWorldMatrix = editor.editorCamera.transform.localToWorldMatrix.moveForward(distance);
-        editor.sceneControlConfig.lookDistance -= distance;
-    }
     var SceneControlConfig = /** @class */ (function () {
         function SceneControlConfig() {
             this.mouseWheelMoveStep = 0.004;
@@ -1108,7 +1133,7 @@ var editor;
         });
         CameraPreview.prototype.$onAddToStage = function (stage, nestLevel) {
             _super.prototype.$onAddToStage.call(this, stage, nestLevel);
-            feng3d.watcher.watch(editor.editorData, "selectedObjects", this.onDataChange, this);
+            feng3d.feng3dDispatcher.on("editor.selectedObjectsChanged", this.onDataChange, this);
             this.addEventListener(egret.Event.RESIZE, this.onResize, this);
             this.addEventListener(egret.Event.ENTER_FRAME, this.onResize, this);
             this.onResize();
@@ -1116,7 +1141,7 @@ var editor;
         };
         CameraPreview.prototype.$onRemoveFromStage = function () {
             _super.prototype.$onRemoveFromStage.call(this);
-            feng3d.watcher.unwatch(editor.editorData, "selectedObjects", this.onDataChange, this);
+            feng3d.feng3dDispatcher.off("editor.selectedObjectsChanged", this.onDataChange, this);
             this.removeEventListener(egret.Event.RESIZE, this.onResize, this);
             this.removeEventListener(egret.Event.ENTER_FRAME, this.onResize, this);
         };
@@ -2120,7 +2145,7 @@ var editor;
                 this.componentIcon.source = "Terrain_png";
             }
             else if (this.component instanceof feng3d.Model) {
-                this.componentIcon.source = "MeshRenderer_png";
+                this.componentIcon.source = "Model_png";
             }
             else if (this.component instanceof feng3d.ScriptComponent) {
                 this.componentIcon.source = "ScriptComponent_png";
@@ -2639,7 +2664,6 @@ var editor;
 (function (editor) {
     /**
      * 默认基础对象界面
-     * @author feng 2016-3-11
      */
     var OVBaseDefault = /** @class */ (function (_super) {
         __extends(OVBaseDefault, _super);
@@ -2700,7 +2724,6 @@ var editor;
 (function (editor) {
     /**
      * 默认使用块的对象界面
-     * @author feng 2016-3-22
      */
     var OVDefault = /** @class */ (function (_super) {
         __extends(OVDefault, _super);
@@ -2934,7 +2957,6 @@ var editor;
 (function (editor) {
     /**
      * 默认对象属性块界面
-     * @author feng 2016-3-22
      */
     var OBVDefault = /** @class */ (function (_super) {
         __extends(OBVDefault, _super);
@@ -3149,7 +3171,6 @@ var editor;
 (function (editor) {
     /**
      * 默认对象属性界面
-     * @author feng 2016-3-10
      */
     var OAVDefault = /** @class */ (function (_super) {
         __extends(OAVDefault, _super);
@@ -3285,7 +3306,6 @@ var editor;
 (function (editor) {
     /**
      * 默认对象属性界面
-     * @author feng 2016-3-10
      */
     var OAVNumber = /** @class */ (function (_super) {
         __extends(OAVNumber, _super);
@@ -3900,7 +3920,6 @@ var editor;
 (function (editor) {
     /**
      * 挑选（拾取）OAV界面
-     * @author feng 2016-3-10
      */
     var OAVPick = /** @class */ (function (_super) {
         __extends(OAVPick, _super);
@@ -4067,7 +4086,6 @@ var editor;
 (function (editor) {
     /**
      * 挑选（拾取）OAV界面
-     * @author feng 2016-3-10
      */
     var OAVTexture2D = /** @class */ (function (_super) {
         __extends(OAVTexture2D, _super);
@@ -4237,7 +4255,6 @@ var editor;
 (function (editor) {
     /**
      * 属性面板（检查器）
-     * @author feng     2017-03-20
      */
     var InspectorView = /** @class */ (function (_super) {
         __extends(InspectorView, _super);
@@ -4259,16 +4276,16 @@ var editor;
         InspectorView.prototype.onAddedToStage = function () {
             this.backButton.visible = this.viewDataList.length > 0;
             this.backButton.addEventListener(egret.MouseEvent.CLICK, this.onBackButton, this);
-            feng3d.watcher.watch(editor.editorData, "selectedObjects", this.onDataChange, this);
+            feng3d.feng3dDispatcher.on("editor.selectedObjectsChanged", this.onSelectedObjectsChanged, this);
         };
         InspectorView.prototype.onRemovedFromStage = function () {
             this.backButton.removeEventListener(egret.MouseEvent.CLICK, this.onBackButton, this);
-            feng3d.watcher.unwatch(editor.editorData, "selectedObjects", this.onDataChange, this);
+            feng3d.feng3dDispatcher.off("editor.selectedObjectsChanged", this.onSelectedObjectsChanged, this);
         };
-        InspectorView.prototype.onDataChange = function () {
-            var selectedObject = editor.editorData.selectedObjects;
-            if (selectedObject && selectedObject.length > 0)
-                this.showData(selectedObject[0], true);
+        InspectorView.prototype.onSelectedObjectsChanged = function () {
+            var selectedObjects = editor.editorData.selectedObjects;
+            if (selectedObjects && selectedObjects.length > 0)
+                this.showData(selectedObjects[0], true);
             else
                 this.showData(null, true);
         };
@@ -4642,7 +4659,7 @@ var editor;
                         },
                         {
                             label: "材质", click: function () {
-                                assetsFile.addfile("new material" + ".material.json", feng3d.materialFactory.create("standard"));
+                                assetsFile.addfile("new material" + ".material.json", new feng3d.StandardMaterial());
                             }
                         },
                     ]
@@ -5534,7 +5551,7 @@ var editor;
             this.floderpathTxt.touchEnabled = true;
             this.floderpathTxt.addEventListener(egret.TextEvent.LINK, this.onfloderpathTxtLink, this);
             feng3d.watcher.watch(editor.editorAssets, "showFloder", this.updateShowFloder, this);
-            feng3d.watcher.watch(editor.editorData, "selectedObjects", this.selectedfilechanged, this);
+            feng3d.feng3dDispatcher.on("editor.selectedObjectsChanged", this.selectedfilechanged, this);
         };
         AssetsView.prototype.$onRemoveFromStage = function () {
             _super.prototype.$onRemoveFromStage.call(this);
@@ -5544,7 +5561,7 @@ var editor;
             this.excludeTxt.removeEventListener(egret.Event.CHANGE, this.onfilter, this);
             this.floderpathTxt.removeEventListener(egret.TextEvent.LINK, this.onfloderpathTxtLink, this);
             feng3d.watcher.unwatch(editor.editorAssets, "showFloder", this.updateShowFloder, this);
-            feng3d.watcher.unwatch(editor.editorData, "selectedObjects", this.selectedfilechanged, this);
+            feng3d.feng3dDispatcher.off("editor.selectedObjectsChanged", this.selectedfilechanged, this);
             //
             editor.drag.unregister(this.filelistgroup);
             this.fileDrag.removeEventListener();
@@ -5737,7 +5754,7 @@ var editor;
     editor.AssetsFileTemplates = AssetsFileTemplates;
     editor.assetsFileTemplates = new AssetsFileTemplates();
     var scriptTemplate = "\nclass NewScript extends feng3d.Script\n{\n\n    /** \n     * \u6D4B\u8BD5\u5C5E\u6027 \n     */\n    @feng3d.serialize\n    @feng3d.oav()\n    t_attr = new feng3d.Color4();\n\n    /**\n     * \u521D\u59CB\u5316\u65F6\u8C03\u7528\n     */\n    init()\n    {\n\n    }\n\n    /**\n     * \u66F4\u65B0\n     */\n    update()\n    {\n\n    }\n\n    /**\n     * \u9500\u6BC1\u65F6\u8C03\u7528\n     */\n    dispose()\n    {\n\n    }\n}";
-    var shaderTemplate = "\nclass NewShaderUniforms\n{\n    /** \n     * \u989C\u8272 \n     */\n    @feng3d.serialize\n    @feng3d.oav()\n    u_color = new feng3d.Color4();\n}\n\nfeng3d.shaderConfig.shaders[\"NewShader\"] = {\n    cls: NewShaderUniforms,\n    vertex: `\n    \n    attribute vec3 a_position;\n    \n    uniform mat4 u_modelMatrix;\n    uniform mat4 u_viewProjection;\n    \n    void main(void) {\n    \n        vec4 globalPosition = u_modelMatrix * vec4(a_position, 1.0);\n        gl_Position = u_viewProjection * globalPosition;\n    }`,\n    fragment: `\n    \n    precision mediump float;\n    \n    uniform vec4 u_color;\n    \n    void main(void) {\n        \n        gl_FragColor = u_color;\n    }\n    `,\n};\n\ntype NewShaderMaterial = feng3d.Material & { uniforms: NewShaderUniforms; };\ninterface MaterialFactory\n{\n    create(shader: \"NewShader\", raw?: gPartial<NewShaderMaterial>): NewShaderMaterial;\n}\n\ninterface MaterialRawMap\n{\n    NewShader: gPartial<NewShaderMaterial>;\n}";
+    var shaderTemplate = "\nclass NewShaderUniforms\n{\n    /** \n     * \u989C\u8272 \n     */\n    @feng3d.serialize\n    @feng3d.oav()\n    u_color = new feng3d.Color4();\n}\n\nfeng3d.shaderConfig.shaders[\"NewShader\"] = {\n    cls: NewShaderUniforms,\n    vertex: `\n    \n    attribute vec3 a_position;\n    \n    uniform mat4 u_modelMatrix;\n    uniform mat4 u_viewProjection;\n    \n    void main() {\n    \n        vec4 globalPosition = u_modelMatrix * vec4(a_position, 1.0);\n        gl_Position = u_viewProjection * globalPosition;\n    }`,\n    fragment: `\n    \n    precision mediump float;\n    \n    uniform vec4 u_color;\n    \n    void main() {\n        \n        gl_FragColor = u_color;\n    }\n    `,\n};\n\ntype NewShaderMaterial = feng3d.Material & { uniforms: NewShaderUniforms; };\ninterface MaterialFactory\n{\n    create(shader: \"NewShader\", raw?: gPartial<NewShaderMaterial>): NewShaderMaterial;\n}\n\ninterface MaterialRawMap\n{\n    NewShader: gPartial<NewShaderMaterial>;\n}";
 })(editor || (editor = {}));
 var editor;
 (function (editor) {
@@ -5767,7 +5784,7 @@ var editor;
             this.helpButton.addEventListener(egret.MouseEvent.CLICK, this.onHelpButtonClick, this);
             this.settingButton.addEventListener(egret.MouseEvent.CLICK, this.onHelpButtonClick, this);
             this.qrcodeButton.addEventListener(egret.MouseEvent.CLICK, this.onButtonClick, this);
-            feng3d.watcher.watch(editor.mrsTool, "toolType", this.updateview, this);
+            feng3d.feng3dDispatcher.on("editor.toolTypeChanged", this.updateview, this);
             this.updateview();
         };
         TopView.prototype.onRemovedFromStage = function () {
@@ -5781,7 +5798,7 @@ var editor;
             this.helpButton.removeEventListener(egret.MouseEvent.CLICK, this.onHelpButtonClick, this);
             this.settingButton.removeEventListener(egret.MouseEvent.CLICK, this.onHelpButtonClick, this);
             this.qrcodeButton.removeEventListener(egret.MouseEvent.CLICK, this.onButtonClick, this);
-            feng3d.watcher.unwatch(editor.mrsTool, "toolType", this.updateview, this);
+            feng3d.feng3dDispatcher.off("editor.toolTypeChanged", this.updateview, this);
             if (editor.runwin)
                 editor.runwin.close();
             editor.runwin = null;
@@ -5798,19 +5815,19 @@ var editor;
                     editor.menu.popup(editor.mainMenu);
                     break;
                 case this.moveButton:
-                    editor.mrsTool.toolType = editor.MRSToolType.MOVE;
+                    editor.editorData.toolType = editor.MRSToolType.MOVE;
                     break;
                 case this.rotateButton:
-                    editor.mrsTool.toolType = editor.MRSToolType.ROTATION;
+                    editor.editorData.toolType = editor.MRSToolType.ROTATION;
                     break;
                 case this.scaleButton:
-                    editor.mrsTool.toolType = editor.MRSToolType.SCALE;
+                    editor.editorData.toolType = editor.MRSToolType.SCALE;
                     break;
                 case this.worldButton:
-                    editor.mrsTool.isWoldCoordinate = !editor.mrsTool.isWoldCoordinate;
+                    editor.editorData.isWoldCoordinate = !editor.editorData.isWoldCoordinate;
                     break;
                 case this.centerButton:
-                    editor.mrsTool.isBaryCenter = !editor.mrsTool.isBaryCenter;
+                    editor.editorData.isBaryCenter = !editor.editorData.isBaryCenter;
                     break;
                 case this.playBtn:
                     editor.editorAssets.saveScene("default.scene.json", editor.engine.scene, function (err) {
@@ -5843,11 +5860,11 @@ var editor;
             }
         };
         TopView.prototype.updateview = function () {
-            this.moveButton.selected = editor.mrsTool.toolType == editor.MRSToolType.MOVE;
-            this.rotateButton.selected = editor.mrsTool.toolType == editor.MRSToolType.ROTATION;
-            this.scaleButton.selected = editor.mrsTool.toolType == editor.MRSToolType.SCALE;
-            this.worldButton.selected = editor.mrsTool.isWoldCoordinate;
-            this.centerButton.selected = editor.mrsTool.isBaryCenter;
+            this.moveButton.selected = editor.editorData.toolType == editor.MRSToolType.MOVE;
+            this.rotateButton.selected = editor.editorData.toolType == editor.MRSToolType.ROTATION;
+            this.scaleButton.selected = editor.editorData.toolType == editor.MRSToolType.SCALE;
+            this.worldButton.selected = !editor.editorData.isWoldCoordinate;
+            this.centerButton.selected = editor.editorData.isBaryCenter;
         };
         return TopView;
     }(eui.Component));
@@ -6186,58 +6203,198 @@ var editor;
 var editor;
 (function (editor) {
     /**
+     * 游戏对象控制器类型
+     */
+    var MRSToolType;
+    (function (MRSToolType) {
+        /**
+         * 移动
+         */
+        MRSToolType[MRSToolType["MOVE"] = 0] = "MOVE";
+        /**
+         * 旋转
+         */
+        MRSToolType[MRSToolType["ROTATION"] = 1] = "ROTATION";
+        /**
+         * 缩放
+         */
+        MRSToolType[MRSToolType["SCALE"] = 2] = "SCALE";
+    })(MRSToolType = editor.MRSToolType || (editor.MRSToolType = {}));
+    /**
      * 编辑器数据
      */
     var EditorData = /** @class */ (function () {
         function EditorData() {
+            this._selectedObjects = [];
+            this._toolType = MRSToolType.MOVE;
+            this._selectedGameObjects = [];
+            this._selectedGameObjectsInvalid = true;
+            this._isBaryCenter = true;
+            this._isWoldCoordinate = false;
+            this._transformGameObjectInvalid = true;
+            this._transformBoxInvalid = true;
+            this._selectedAssetsFileInvalid = true;
+            this._selectedAssetsFile = [];
         }
+        Object.defineProperty(EditorData.prototype, "selectedObjects", {
+            /**
+             * 选中对象，游戏对象与资源文件列表
+             * 选中对象时尽量使用 selectObject 方法设置选中对象
+             */
+            get: function () {
+                return this._selectedObjects;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        EditorData.prototype.clearSelectedObjects = function () {
+            this._selectedObjects.length = 0;
+            this._selectedGameObjectsInvalid = true;
+            this._selectedAssetsFileInvalid = true;
+            this._transformGameObjectInvalid = true;
+            this._transformBoxInvalid = true;
+            feng3d.feng3dDispatcher.dispatch("editor.selectedObjectsChanged");
+        };
         /**
          * 选择对象
          * 该方法会处理 按ctrl键附加选中对象操作
          * @param objs 选中的对象
          */
         EditorData.prototype.selectObject = function () {
+            var _this = this;
             var objs = [];
             for (var _i = 0; _i < arguments.length; _i++) {
                 objs[_i] = arguments[_i];
             }
-            if (feng3d.shortcut.keyState.getKeyState("ctrl") && this.selectedObjects) {
-                var oldobjs = this.selectedObjects.concat();
-                if (objs) {
-                    objs.forEach(function (obj) {
-                        if (oldobjs.indexOf(obj) != -1)
-                            oldobjs.splice(oldobjs.indexOf(obj), 1);
-                        else
-                            oldobjs.push(obj);
-                    });
-                }
-                objs = oldobjs;
-            }
-            this.selectedObjects = objs;
+            var isAdd = feng3d.shortcut.keyState.getKeyState("ctrl");
+            if (!isAdd)
+                this._selectedObjects.length = 0;
+            objs.forEach(function (v) {
+                var index = _this._selectedObjects.indexOf(v);
+                if (index == -1)
+                    _this._selectedObjects.push(v);
+                else
+                    _this._selectedObjects.splice(index, 1);
+            });
+            this._selectedGameObjectsInvalid = true;
+            this._selectedAssetsFileInvalid = true;
+            this._transformGameObjectInvalid = true;
+            this._transformBoxInvalid = true;
+            feng3d.feng3dDispatcher.dispatch("editor.selectedObjectsChanged");
         };
+        Object.defineProperty(EditorData.prototype, "toolType", {
+            /**
+             * 使用的控制工具类型
+             */
+            get: function () {
+                return this._toolType;
+            },
+            set: function (v) {
+                if (this._toolType == v)
+                    return;
+                this._toolType = v;
+                feng3d.feng3dDispatcher.dispatch("editor.toolTypeChanged");
+            },
+            enumerable: true,
+            configurable: true
+        });
         Object.defineProperty(EditorData.prototype, "selectedGameObjects", {
             /**
              * 选中游戏对象列表
              */
             get: function () {
-                var result = [];
-                if (this.selectedObjects) {
-                    this.selectedObjects.forEach(function (element) {
-                        if (element instanceof feng3d.GameObject)
-                            result.push(element);
+                var _this = this;
+                if (this._selectedGameObjectsInvalid) {
+                    this._selectedGameObjects.length = 0;
+                    this._selectedObjects.forEach(function (v) {
+                        if (v instanceof feng3d.GameObject)
+                            _this._selectedGameObjects.push(v);
                     });
+                    this._selectedGameObjectsInvalid = false;
                 }
-                return result;
+                return this._selectedGameObjects;
             },
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(EditorData.prototype, "firstSelectedGameObject", {
+        Object.defineProperty(EditorData.prototype, "isBaryCenter", {
             /**
-             * 第一个选中游戏对象
+             * 坐标原点是否在质心
              */
             get: function () {
-                return this.selectedGameObjects[0];
+                return this._isBaryCenter;
+            },
+            set: function (v) {
+                if (this._isBaryCenter == v)
+                    return;
+                this._isBaryCenter = v;
+                this._transformBoxInvalid = true;
+                feng3d.feng3dDispatcher.dispatch("editor.isBaryCenterChanged");
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(EditorData.prototype, "isWoldCoordinate", {
+            /**
+             * 是否使用世界坐标
+             */
+            get: function () {
+                return this._isWoldCoordinate;
+            },
+            set: function (v) {
+                if (this._isWoldCoordinate == v)
+                    return;
+                this._isWoldCoordinate = v;
+                feng3d.feng3dDispatcher.dispatch("editor.isWoldCoordinateChanged");
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(EditorData.prototype, "transformGameObject", {
+            /**
+             * 变换对象
+             */
+            get: function () {
+                if (this._transformGameObjectInvalid) {
+                    var length = this.selectedGameObjects.length;
+                    if (length > 0)
+                        this._transformGameObject = this.selectedGameObjects[length - 1];
+                    else
+                        this._transformGameObject = null;
+                    this._transformGameObjectInvalid = false;
+                }
+                return this._transformGameObject;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(EditorData.prototype, "transformBox", {
+            get: function () {
+                var _this = this;
+                if (this._transformBoxInvalid) {
+                    var length = this.selectedGameObjects.length;
+                    if (length > 0) {
+                        this._transformBox = null;
+                        this.selectedGameObjects.forEach(function (cv) {
+                            var model = cv.getComponent(feng3d.Model);
+                            var box = new feng3d.Box(cv.transform.scenePosition, cv.transform.scenePosition);
+                            if (model && model.worldBounds) {
+                                box.copy(model.worldBounds);
+                            }
+                            if (editor.editorData.isBaryCenter || _this._transformBox == null) {
+                                _this._transformBox = box.clone();
+                            }
+                            else {
+                                _this._transformBox.union(box);
+                            }
+                        });
+                    }
+                    else {
+                        this._transformBox = null;
+                    }
+                    this._transformBoxInvalid = false;
+                }
+                return this._transformBox;
             },
             enumerable: true,
             configurable: true
@@ -6248,12 +6405,6 @@ var editor;
              */
             get: function () {
                 var transforms = this.selectedGameObjects.reduce(function (result, item) {
-                    if (item.getComponent(feng3d.Scene3D))
-                        return result;
-                    if (item.getComponent(editor.GroundGrid))
-                        return result;
-                    if (item.getComponent(feng3d.SkinnedMeshRenderer))
-                        return result;
                     result.push(item.transform);
                     return result;
                 }, []);
@@ -6267,14 +6418,16 @@ var editor;
              * 选中游戏对象列表
              */
             get: function () {
-                var result = [];
-                if (this.selectedObjects) {
-                    this.selectedObjects.forEach(function (element) {
-                        if (element instanceof editor.AssetsFile)
-                            result.push(element);
+                var _this = this;
+                if (this._selectedAssetsFileInvalid) {
+                    this._selectedAssetsFile.length = 0;
+                    this._selectedObjects.forEach(function (v) {
+                        if (v instanceof editor.AssetsFile)
+                            _this._selectedAssetsFile.push(v);
                     });
+                    this._selectedAssetsFileInvalid = false;
                 }
-                return result;
+                return this._selectedObjects;
             },
             enumerable: true,
             configurable: true
@@ -6297,8 +6450,8 @@ var editor;
         function MRSToolTarget() {
             this._startScaleVec = [];
             this._controllerToolTransfrom = feng3d.GameObject.create("controllerToolTransfrom").transform;
-            feng3d.watcher.watch(editor.mrsTool, "isWoldCoordinate", this.updateControllerImage, this);
-            feng3d.watcher.watch(editor.mrsTool, "isBaryCenter", this.updateControllerImage, this);
+            feng3d.feng3dDispatcher.on("editor.isWoldCoordinateChanged", this.updateControllerImage, this);
+            feng3d.feng3dDispatcher.on("editor.isBaryCenterChanged", this.updateControllerImage, this);
         }
         Object.defineProperty(MRSToolTarget.prototype, "showGameObject", {
             //
@@ -6356,9 +6509,9 @@ var editor;
         MRSToolTarget.prototype.updateControllerImage = function () {
             if (!this._controllerTargets || this._controllerTargets.length == 0)
                 return;
-            var transform = this._controllerTargets[0];
+            var transform = this._controllerTargets[this._controllerTargets.length - 1];
             var position = new feng3d.Vector3();
-            if (editor.mrsTool.isBaryCenter) {
+            if (editor.editorData.isBaryCenter) {
                 position.copy(transform.scenePosition);
             }
             else {
@@ -6368,7 +6521,7 @@ var editor;
                 position.scale(1 / this._controllerTargets.length);
             }
             var rotation = new feng3d.Vector3();
-            if (!editor.mrsTool.isWoldCoordinate) {
+            if (!editor.editorData.isWoldCoordinate) {
                 rotation = this._showGameObject.rotation;
             }
             this._controllerToolTransfrom.position = position;
@@ -6387,7 +6540,7 @@ var editor;
             objects.push(this._controllerTool);
             for (var i = 0; i < objects.length; i++) {
                 var transform = objects[i];
-                this._startTransformDic.set(transform, getTransformData(transform));
+                this._startTransformDic.set(transform, this.getTransformData(transform));
             }
         };
         MRSToolTarget.prototype.translation = function (addPos) {
@@ -6413,7 +6566,7 @@ var editor;
             objects.push(this._controllerTool);
             for (var i = 0; i < objects.length; i++) {
                 var transform = objects[i];
-                this._startTransformDic.set(transform, getTransformData(transform));
+                this._startTransformDic.set(transform, this.getTransformData(transform));
             }
         };
         /**
@@ -6426,29 +6579,29 @@ var editor;
             objects.push(this._controllerTool);
             var localnormal;
             var gameobject = objects[0];
-            if (!editor.mrsTool.isWoldCoordinate && editor.mrsTool.isBaryCenter) {
+            if (!editor.editorData.isWoldCoordinate && editor.editorData.isBaryCenter) {
                 if (gameobject.parent)
                     localnormal = gameobject.parent.worldToLocalMatrix.deltaTransformVector(normal);
             }
             for (var i = 0; i < objects.length; i++) {
                 gameobject = objects[i];
                 var tempTransform = this._startTransformDic.get(gameobject);
-                if (!editor.mrsTool.isWoldCoordinate && editor.mrsTool.isBaryCenter) {
-                    gameobject.rotation = rotateRotation(tempTransform.rotation, localnormal, angle);
+                if (!editor.editorData.isWoldCoordinate && editor.editorData.isBaryCenter) {
+                    gameobject.rotation = this.rotateRotation(tempTransform.rotation, localnormal, angle);
                 }
                 else {
                     localnormal = normal.clone();
                     if (gameobject.parent)
                         localnormal = gameobject.parent.worldToLocalMatrix.deltaTransformVector(localnormal);
-                    if (editor.mrsTool.isBaryCenter) {
-                        gameobject.rotation = rotateRotation(tempTransform.rotation, localnormal, angle);
+                    if (editor.editorData.isBaryCenter) {
+                        gameobject.rotation = this.rotateRotation(tempTransform.rotation, localnormal, angle);
                     }
                     else {
                         var localPivotPoint = this._controllerToolTransfrom.position;
                         if (gameobject.parent)
                             localPivotPoint = gameobject.parent.worldToLocalMatrix.transformVector(localPivotPoint);
                         gameobject.position = feng3d.Matrix4x4.fromPosition(tempTransform.position).appendRotation(localnormal, angle, localPivotPoint).position;
-                        gameobject.rotation = rotateRotation(tempTransform.rotation, localnormal, angle);
+                        gameobject.rotation = this.rotateRotation(tempTransform.rotation, localnormal, angle);
                     }
                 }
             }
@@ -6464,7 +6617,7 @@ var editor;
             var objects = this._controllerTargets.concat();
             objects.push(this._controllerTool);
             var gameobject = objects[0];
-            if (!editor.mrsTool.isWoldCoordinate && editor.mrsTool.isBaryCenter) {
+            if (!editor.editorData.isWoldCoordinate && editor.editorData.isBaryCenter) {
                 if (gameobject.parent) {
                     normal1 = gameobject.parent.worldToLocalMatrix.deltaTransformVector(normal1);
                     normal2 = gameobject.parent.worldToLocalMatrix.deltaTransformVector(normal2);
@@ -6475,9 +6628,9 @@ var editor;
                 var tempsceneTransform = this._startTransformDic.get(gameobject);
                 var tempPosition = tempsceneTransform.position.clone();
                 var tempRotation = tempsceneTransform.rotation.clone();
-                if (!editor.mrsTool.isWoldCoordinate && editor.mrsTool.isBaryCenter) {
-                    tempRotation = rotateRotation(tempRotation, normal2, angle2);
-                    gameobject.rotation = rotateRotation(tempRotation, normal1, angle1);
+                if (!editor.editorData.isWoldCoordinate && editor.editorData.isBaryCenter) {
+                    tempRotation = this.rotateRotation(tempRotation, normal2, angle2);
+                    gameobject.rotation = this.rotateRotation(tempRotation, normal1, angle1);
                 }
                 else {
                     var localnormal1 = normal1.clone();
@@ -6486,9 +6639,9 @@ var editor;
                         localnormal1 = gameobject.parent.worldToLocalMatrix.deltaTransformVector(localnormal1);
                         localnormal2 = gameobject.parent.worldToLocalMatrix.deltaTransformVector(localnormal2);
                     }
-                    if (editor.mrsTool.isBaryCenter) {
-                        tempRotation = rotateRotation(tempRotation, localnormal1, angle1);
-                        gameobject.rotation = rotateRotation(tempRotation, localnormal2, angle2);
+                    if (editor.editorData.isBaryCenter) {
+                        tempRotation = this.rotateRotation(tempRotation, localnormal1, angle1);
+                        gameobject.rotation = this.rotateRotation(tempRotation, localnormal2, angle2);
                     }
                     else {
                         var localPivotPoint = this._controllerToolTransfrom.position;
@@ -6497,8 +6650,8 @@ var editor;
                         //
                         tempPosition = feng3d.Matrix4x4.fromPosition(tempPosition).appendRotation(localnormal1, angle1, localPivotPoint).position;
                         gameobject.position = feng3d.Matrix4x4.fromPosition(tempPosition).appendRotation(localnormal1, angle1, localPivotPoint).position;
-                        tempRotation = rotateRotation(tempRotation, localnormal1, angle1);
-                        gameobject.rotation = rotateRotation(tempRotation, localnormal2, angle2);
+                        tempRotation = this.rotateRotation(tempRotation, localnormal1, angle1);
+                        gameobject.rotation = this.rotateRotation(tempRotation, localnormal2, angle2);
                     }
                 }
             }
@@ -6523,35 +6676,35 @@ var editor;
         MRSToolTarget.prototype.stopScale = function () {
             this._startScaleVec.length = 0;
         };
+        MRSToolTarget.prototype.getTransformData = function (transform) {
+            return { position: transform.position.clone(), rotation: transform.rotation.clone(), scale: transform.scale.clone() };
+        };
+        MRSToolTarget.prototype.rotateRotation = function (rotation, axis, angle) {
+            var rotationmatrix3d = new feng3d.Matrix4x4();
+            rotationmatrix3d.appendRotation(feng3d.Vector3.X_AXIS, rotation.x);
+            rotationmatrix3d.appendRotation(feng3d.Vector3.Y_AXIS, rotation.y);
+            rotationmatrix3d.appendRotation(feng3d.Vector3.Z_AXIS, rotation.z);
+            rotationmatrix3d.appendRotation(axis, angle);
+            var newrotation = rotationmatrix3d.decompose()[1];
+            newrotation.scale(180 / Math.PI);
+            var v = Math.round((newrotation.x - rotation.x) / 180);
+            if (v % 2 != 0) {
+                newrotation.x += 180;
+                newrotation.y = 180 - newrotation.y;
+                newrotation.z += 180;
+            }
+            function toround(a, b, c) {
+                if (c === void 0) { c = 360; }
+                return Math.round((b - a) / c) * c + a;
+            }
+            newrotation.x = toround(newrotation.x, rotation.x);
+            newrotation.y = toround(newrotation.y, rotation.y);
+            newrotation.z = toround(newrotation.z, rotation.z);
+            return newrotation;
+        };
         return MRSToolTarget;
     }());
     editor.MRSToolTarget = MRSToolTarget;
-    function getTransformData(transform) {
-        return { position: transform.position.clone(), rotation: transform.rotation.clone(), scale: transform.scale.clone() };
-    }
-    function rotateRotation(rotation, axis, angle) {
-        var rotationmatrix3d = new feng3d.Matrix4x4();
-        rotationmatrix3d.appendRotation(feng3d.Vector3.X_AXIS, rotation.x);
-        rotationmatrix3d.appendRotation(feng3d.Vector3.Y_AXIS, rotation.y);
-        rotationmatrix3d.appendRotation(feng3d.Vector3.Z_AXIS, rotation.z);
-        rotationmatrix3d.appendRotation(axis, angle);
-        var newrotation = rotationmatrix3d.decompose()[1];
-        newrotation.scale(180 / Math.PI);
-        var v = Math.round((newrotation.x - rotation.x) / 180);
-        if (v % 2 != 0) {
-            newrotation.x += 180;
-            newrotation.y = 180 - newrotation.y;
-            newrotation.z += 180;
-        }
-        function toround(a, b, c) {
-            if (c === void 0) { c = 360; }
-            return Math.round((b - a) / c) * c + a;
-        }
-        newrotation.x = toround(newrotation.x, rotation.x);
-        newrotation.y = toround(newrotation.y, rotation.y);
-        newrotation.z = toround(newrotation.z, rotation.z);
-        return newrotation;
-    }
 })(editor || (editor = {}));
 var editor;
 (function (editor) {
@@ -6617,28 +6770,26 @@ var editor;
         CoordinateAxis.prototype.init = function (gameObject) {
             _super.prototype.init.call(this, gameObject);
             var xLine = feng3d.GameObject.create();
-            var meshRenderer = xLine.addComponent(feng3d.Model);
-            var segmentGeometry = meshRenderer.geometry = new feng3d.SegmentGeometry();
+            var model = xLine.addComponent(feng3d.Model);
+            var segmentGeometry = model.geometry = new feng3d.SegmentGeometry();
             segmentGeometry.segments.push({ start: new feng3d.Vector3(), end: new feng3d.Vector3(0, this.length, 0) });
-            this.segmentMaterial = meshRenderer.material = feng3d.materialFactory.create("segment", { renderParams: { renderMode: feng3d.RenderMode.LINES, enableBlend: true } });
+            this.segmentMaterial = model.material = new feng3d.SegmentMaterial({ renderParams: { renderMode: feng3d.RenderMode.LINES, enableBlend: true } });
             this.gameObject.addChild(xLine);
             //
             this.xArrow = feng3d.GameObject.create();
-            meshRenderer = this.xArrow.addComponent(feng3d.Model);
-            meshRenderer.geometry = new feng3d.ConeGeometry({ bottomRadius: 5, height: 18 });
-            this.material = meshRenderer.material = feng3d.materialFactory.create("color");
+            model = this.xArrow.addComponent(feng3d.Model);
+            model.geometry = new feng3d.ConeGeometry({ bottomRadius: 5, height: 18 });
+            this.material = model.material = new feng3d.ColorMaterial();
             this.material.renderParams.enableBlend = true;
             this.xArrow.transform.y = this.length;
-            this.xArrow.mouselayer = feng3d.mouselayer.editor;
             this.gameObject.addChild(this.xArrow);
             var mouseHit = feng3d.GameObject.create("hitCoordinateAxis");
-            meshRenderer = mouseHit.addComponent(feng3d.Model);
-            meshRenderer.geometry = new feng3d.CylinderGeometry({ topRadius: 5, bottomRadius: 5, height: this.length });
-            //meshRenderer.material = materialFactory.create("color");
+            model = mouseHit.addComponent(feng3d.Model);
+            model.geometry = new feng3d.CylinderGeometry({ topRadius: 5, bottomRadius: 5, height: this.length });
+            //model.material = materialFactory.create("color");
             mouseHit.transform.y = 20 + (this.length - 20) / 2;
             mouseHit.visible = false;
             mouseHit.mouseEnabled = true;
-            mouseHit.mouselayer = feng3d.mouselayer.editor;
             this.gameObject.addChild(mouseHit);
             this.isinit = true;
             this.update();
@@ -6672,12 +6823,11 @@ var editor;
             _super.prototype.init.call(this, gameObject);
             //
             this.oCube = feng3d.GameObject.create();
-            var meshRenderer = this.oCube.addComponent(feng3d.Model);
-            meshRenderer.geometry = new feng3d.CubeGeometry({ width: 8, height: 8, depth: 8 });
-            this.colorMaterial = meshRenderer.material = feng3d.materialFactory.create("color");
+            var model = this.oCube.addComponent(feng3d.Model);
+            model.geometry = new feng3d.CubeGeometry({ width: 8, height: 8, depth: 8 });
+            this.colorMaterial = model.material = new feng3d.ColorMaterial();
             this.colorMaterial.renderParams.enableBlend = true;
             this.oCube.mouseEnabled = true;
-            this.oCube.mouselayer = feng3d.mouselayer.editor;
             this.gameObject.addChild(this.oCube);
             this.isinit = true;
             this.update();
@@ -6715,19 +6865,18 @@ var editor;
         CoordinatePlane.prototype.init = function (gameObject) {
             _super.prototype.init.call(this, gameObject);
             var plane = feng3d.GameObject.create("plane");
-            var meshRenderer = plane.addComponent(feng3d.Model);
+            var model = plane.addComponent(feng3d.Model);
             plane.transform.x = plane.transform.z = this._width / 2;
-            meshRenderer.geometry = new feng3d.PlaneGeometry({ width: this._width, height: this._width });
-            this.colorMaterial = meshRenderer.material = feng3d.materialFactory.create("color");
+            model.geometry = new feng3d.PlaneGeometry({ width: this._width, height: this._width });
+            this.colorMaterial = model.material = new feng3d.ColorMaterial();
             this.colorMaterial.renderParams.cullFace = feng3d.CullFace.NONE;
             this.colorMaterial.renderParams.enableBlend = true;
-            plane.mouselayer = feng3d.mouselayer.editor;
             plane.mouseEnabled = true;
             this.gameObject.addChild(plane);
             var border = feng3d.GameObject.create("border");
-            meshRenderer = border.addComponent(feng3d.Model);
-            this.segmentGeometry = meshRenderer.geometry = new feng3d.SegmentGeometry();
-            var material = meshRenderer.material = feng3d.materialFactory.create("segment", { renderParams: { renderMode: feng3d.RenderMode.LINES } });
+            model = border.addComponent(feng3d.Model);
+            this.segmentGeometry = model.geometry = new feng3d.SegmentGeometry();
+            var material = model.material = new feng3d.SegmentMaterial({ renderParams: { renderMode: feng3d.RenderMode.LINES } });
             material.uniforms.u_segmentColor = new feng3d.Color4(1, 1, 1, 0.99);
             material.renderParams.enableBlend = true;
             this.gameObject.addChild(border);
@@ -6815,20 +6964,19 @@ var editor;
         };
         CoordinateRotationAxis.prototype.initModels = function () {
             var border = feng3d.GameObject.create();
-            var meshRenderer = border.addComponent(feng3d.Model);
-            var material = meshRenderer.material = feng3d.materialFactory.create("segment", { renderParams: { renderMode: feng3d.RenderMode.LINES } });
+            var model = border.addComponent(feng3d.Model);
+            var material = model.material = new feng3d.SegmentMaterial({ renderParams: { renderMode: feng3d.RenderMode.LINES } });
             material.uniforms.u_segmentColor = new feng3d.Color4(1, 1, 1, 0.99);
             material.renderParams.enableBlend = true;
-            this.segmentGeometry = meshRenderer.geometry = new feng3d.SegmentGeometry();
+            this.segmentGeometry = model.geometry = new feng3d.SegmentGeometry();
             this.gameObject.addChild(border);
             this.sector = feng3d.GameObject.create("sector").addComponent(SectorGameObject);
             var mouseHit = feng3d.GameObject.create("hit");
-            meshRenderer = mouseHit.addComponent(feng3d.Model);
-            this.torusGeometry = meshRenderer.geometry = new feng3d.TorusGeometry({ radius: this.radius, tubeRadius: 2 });
-            meshRenderer.material = feng3d.materialFactory.create("standard");
+            model = mouseHit.addComponent(feng3d.Model);
+            this.torusGeometry = model.geometry = new feng3d.TorusGeometry({ radius: this.radius, tubeRadius: 2 });
+            model.material = new feng3d.StandardMaterial();
             mouseHit.transform.rx = 90;
             mouseHit.visible = false;
-            mouseHit.mouselayer = feng3d.mouselayer.editor;
             mouseHit.mouseEnabled = true;
             this.gameObject.addChild(mouseHit);
             this.isinit = true;
@@ -6910,17 +7058,17 @@ var editor;
         SectorGameObject.prototype.init = function (gameObject) {
             _super.prototype.init.call(this, gameObject);
             this.gameObject.name = "sector";
-            var meshRenderer = this.gameObject.addComponent(feng3d.Model);
-            this.geometry = meshRenderer.geometry = new feng3d.CustomGeometry();
-            meshRenderer.material = feng3d.materialFactory.create("color", { uniforms: { u_diffuseInput: new feng3d.Color4(0.5, 0.5, 0.5, 0.2) } });
-            meshRenderer.material.renderParams.enableBlend = true;
-            meshRenderer.material.renderParams.cullFace = feng3d.CullFace.NONE;
+            var model = this.gameObject.addComponent(feng3d.Model);
+            this.geometry = model.geometry = new feng3d.CustomGeometry();
+            model.material = new feng3d.ColorMaterial({ uniforms: { u_diffuseInput: new feng3d.Color4(0.5, 0.5, 0.5, 0.2) } });
+            model.material.renderParams.enableBlend = true;
+            model.material.renderParams.cullFace = feng3d.CullFace.NONE;
             var border = feng3d.GameObject.create("border");
-            meshRenderer = border.addComponent(feng3d.Model);
-            var material = meshRenderer.material = feng3d.materialFactory.create("segment", { renderParams: { renderMode: feng3d.RenderMode.LINES } });
+            model = border.addComponent(feng3d.Model);
+            var material = model.material = new feng3d.SegmentMaterial({ renderParams: { renderMode: feng3d.RenderMode.LINES } });
             material.uniforms.u_segmentColor = new feng3d.Color4(1, 1, 1, 0.99);
             material.renderParams.enableBlend = true;
-            this.segmentGeometry = meshRenderer.geometry = new feng3d.SegmentGeometry();
+            this.segmentGeometry = model.geometry = new feng3d.SegmentGeometry();
             this.gameObject.addChild(border);
             this.isinit = true;
             this.update(0, 0);
@@ -6982,17 +7130,16 @@ var editor;
         };
         CoordinateRotationFreeAxis.prototype.initModels = function () {
             var border = feng3d.GameObject.create("border");
-            var meshRenderer = border.addComponent(feng3d.Model);
-            var material = meshRenderer.material = feng3d.materialFactory.create("segment", { renderParams: { renderMode: feng3d.RenderMode.LINES } });
+            var model = border.addComponent(feng3d.Model);
+            var material = model.material = new feng3d.SegmentMaterial({ renderParams: { renderMode: feng3d.RenderMode.LINES } });
             material.uniforms.u_segmentColor = new feng3d.Color4(1, 1, 1, 0.99);
             material.renderParams.enableBlend = true;
-            this.segmentGeometry = meshRenderer.geometry = new feng3d.SegmentGeometry();
+            this.segmentGeometry = model.geometry = new feng3d.SegmentGeometry();
             this.gameObject.addChild(border);
             this.sector = feng3d.GameObject.create("sector").addComponent(SectorGameObject);
             this.sector.update(0, 360);
             this.sector.gameObject.visible = false;
             this.sector.gameObject.mouseEnabled = true;
-            this.sector.gameObject.mouselayer = feng3d.mouselayer.editor;
             this.gameObject.addChild(this.sector.gameObject);
             this.isinit = true;
             this.update();
@@ -7074,21 +7221,20 @@ var editor;
         CoordinateScaleCube.prototype.init = function (gameObject) {
             _super.prototype.init.call(this, gameObject);
             var xLine = feng3d.GameObject.create();
-            var meshRenderer = xLine.addComponent(feng3d.Model);
-            var material = meshRenderer.material = feng3d.materialFactory.create("segment", { renderParams: { renderMode: feng3d.RenderMode.LINES } });
+            var model = xLine.addComponent(feng3d.Model);
+            var material = model.material = new feng3d.SegmentMaterial({ renderParams: { renderMode: feng3d.RenderMode.LINES } });
             material.uniforms.u_segmentColor = new feng3d.Color4(1, 1, 1, 0.99);
             material.renderParams.enableBlend = true;
-            this.segmentGeometry = meshRenderer.geometry = new feng3d.SegmentGeometry();
+            this.segmentGeometry = model.geometry = new feng3d.SegmentGeometry();
             this.gameObject.addChild(xLine);
             this.coordinateCube = feng3d.GameObject.create("coordinateCube").addComponent(editor.CoordinateCube);
             this.gameObject.addChild(this.coordinateCube.gameObject);
             var mouseHit = feng3d.GameObject.create("hit");
-            meshRenderer = mouseHit.addComponent(feng3d.Model);
-            meshRenderer.geometry = new feng3d.CylinderGeometry({ topRadius: 5, bottomRadius: 5, height: this.length - 4 });
+            model = mouseHit.addComponent(feng3d.Model);
+            model.geometry = new feng3d.CylinderGeometry({ topRadius: 5, bottomRadius: 5, height: this.length - 4 });
             mouseHit.transform.y = 4 + (this.length - 4) / 2;
             mouseHit.visible = false;
             mouseHit.mouseEnabled = true;
-            mouseHit.mouselayer = feng3d.mouselayer.editor;
             this.gameObject.addChild(mouseHit);
             this.isinit = true;
             this.update();
@@ -7649,56 +7795,12 @@ var editor;
 var editor;
 (function (editor) {
     /**
-     * 游戏对象控制器类型
-     */
-    var MRSToolType;
-    (function (MRSToolType) {
-        /**
-         * 移动
-         */
-        MRSToolType[MRSToolType["MOVE"] = 0] = "MOVE";
-        /**
-         * 旋转
-         */
-        MRSToolType[MRSToolType["ROTATION"] = 1] = "ROTATION";
-        /**
-         * 缩放
-         */
-        MRSToolType[MRSToolType["SCALE"] = 2] = "SCALE";
-    })(MRSToolType = editor.MRSToolType || (editor.MRSToolType = {}));
-    /**
-     * 控制器数据
-     */
-    var MRSToolData = /** @class */ (function () {
-        function MRSToolData() {
-            /**
-             * 使用的控制工具类型
-             */
-            this.toolType = MRSToolType.MOVE;
-            /**
-             * 是否使用世界坐标
-             */
-            this.isWoldCoordinate = false;
-            /**
-             * 坐标原点是否在质心
-             */
-            this.isBaryCenter = true;
-        }
-        return MRSToolData;
-    }());
-    editor.MRSToolData = MRSToolData;
-    /**
-     * 控制器数据
-     */
-    editor.mrsTool = new MRSToolData();
-    /**
      * 设置永久可见
      */
     function setAwaysVisible(component) {
-        var meshRenderers = component.getComponentsInChildren(feng3d.Model);
-        meshRenderers.forEach(function (element) {
+        var models = component.getComponentsInChildren(feng3d.Model);
+        models.forEach(function (element) {
             if (element.material) {
-                // element.material.depthMask = false;
                 element.material.renderParams.depthtest = false;
             }
         });
@@ -7713,10 +7815,7 @@ var editor;
         }
         MRSTool.prototype.init = function (gameObject) {
             _super.prototype.init.call(this, gameObject);
-            var mrsToolObject = feng3d.GameObject.create("MRSTool");
-            mrsToolObject.serializable = false;
-            mrsToolObject.showinHierarchy = false;
-            this.mrsToolObject = editor.editorData.mrsToolObject = mrsToolObject;
+            this.mrsToolObject = feng3d.GameObject.create("MRSTool");
             this.controllerTarget = new editor.MRSToolTarget();
             this.mTool = feng3d.GameObject.create("MTool").addComponent(editor.MTool);
             this.rTool = feng3d.GameObject.create("RTool").addComponent(editor.RTool);
@@ -7730,8 +7829,8 @@ var editor;
             //
             this.currentTool = this.mTool;
             //
-            feng3d.watcher.watch(editor.editorData, "selectedObjects", this.onSelectedGameObjectChange, this);
-            feng3d.watcher.watch(editor.mrsTool, "toolType", this.onToolTypeChange, this);
+            feng3d.feng3dDispatcher.on("editor.selectedObjectsChanged", this.onSelectedGameObjectChange, this);
+            feng3d.feng3dDispatcher.on("editor.toolTypeChanged", this.onToolTypeChange, this);
         };
         MRSTool.prototype.dispose = function () {
             //
@@ -7739,7 +7838,6 @@ var editor;
             //
             this.mrsToolObject.dispose();
             this.mrsToolObject = null;
-            editor.editorData.mrsToolObject = null;
             //
             this.controllerTarget = null;
             this.mTool.dispose();
@@ -7749,8 +7847,8 @@ var editor;
             this.sTool.dispose();
             this.sTool = null;
             //
-            feng3d.watcher.unwatch(editor.editorData, "selectedObjects", this.onSelectedGameObjectChange, this);
-            feng3d.watcher.unwatch(editor.mrsTool, "toolType", this.onToolTypeChange, this);
+            feng3d.feng3dDispatcher.off("editor.selectedObjectsChanged", this.onSelectedGameObjectChange, this);
+            feng3d.feng3dDispatcher.off("editor.toolTypeChanged", this.onToolTypeChange, this);
             _super.prototype.dispose.call(this);
         };
         MRSTool.prototype.onSelectedGameObjectChange = function () {
@@ -7766,14 +7864,14 @@ var editor;
             }
         };
         MRSTool.prototype.onToolTypeChange = function () {
-            switch (editor.mrsTool.toolType) {
-                case MRSToolType.MOVE:
+            switch (editor.editorData.toolType) {
+                case editor.MRSToolType.MOVE:
                     this.currentTool = this.mTool;
                     break;
-                case MRSToolType.ROTATION:
+                case editor.MRSToolType.ROTATION:
                     this.currentTool = this.rTool;
                     break;
-                case MRSToolType.SCALE:
+                case editor.MRSToolType.SCALE:
                     this.currentTool = this.sTool;
                     break;
             }
@@ -7783,7 +7881,7 @@ var editor;
                 if (this._currentTool == value)
                     return;
                 if (this._currentTool) {
-                    this.mrsToolObject.removeChild(this._currentTool.gameObject);
+                    this._currentTool.gameObject.remove();
                 }
                 this._currentTool = value;
                 if (this._currentTool) {
@@ -7842,7 +7940,7 @@ var editor;
         function HierarchyTree() {
             var _this = _super.call(this) || this;
             _this.selectedGameObjects = [];
-            feng3d.watcher.watch(editor.editorData, "selectedObjects", _this.onSelectedGameObjectChanged, _this);
+            feng3d.feng3dDispatcher.on("editor.selectedObjectsChanged", _this.onSelectedGameObjectChanged, _this);
             return _this;
         }
         /**
@@ -7917,23 +8015,14 @@ var editor;
         HierarchyTree.prototype.onSelectedGameObjectChanged = function () {
             var _this = this;
             this.selectedGameObjects.forEach(function (element) {
-                //清除选中效果
-                var wireframeComponent = element.getComponent(feng3d.WireframeComponent);
-                if (wireframeComponent)
-                    element.removeComponent(wireframeComponent);
                 var node = _this.getNode(element);
-                if (!node) {
-                    // 为什么为空，是否被允许？
-                    debugger;
-                }
-                node.selected = false;
+                if (node)
+                    node.selected = false;
+                else
+                    debugger; // 为什么为空，是否被允许？
             });
             this.selectedGameObjects = editor.editorData.selectedGameObjects;
             this.selectedGameObjects.forEach(function (element) {
-                //新增选中效果
-                var wireframeComponent = element.getComponent(feng3d.WireframeComponent);
-                if (!wireframeComponent)
-                    element.addComponent(feng3d.WireframeComponent);
                 _this.getNode(element).selected = true;
             });
         };
@@ -8157,7 +8246,6 @@ var editor;
 (function (editor) {
     /**
      * 地面网格
-     * @author feng 2016-10-29
      */
     var GroundGrid = /** @class */ (function (_super) {
         __extends(GroundGrid, _super);
@@ -8174,9 +8262,9 @@ var editor;
             gameObject.addChild(groundGridObject);
             var __this = this;
             editor.editorCamera.transform.on("transformChanged", update, this);
-            var meshRenderer = groundGridObject.addComponent(feng3d.Model);
-            var segmentGeometry = meshRenderer.geometry = new feng3d.SegmentGeometry();
-            var material = meshRenderer.material = feng3d.materialFactory.create("segment", { renderParams: { renderMode: feng3d.RenderMode.LINES } });
+            var model = groundGridObject.addComponent(feng3d.Model);
+            var segmentGeometry = model.geometry = new feng3d.SegmentGeometry();
+            var material = model.material = new feng3d.SegmentMaterial({ renderParams: { renderMode: feng3d.RenderMode.LINES } });
             material.renderParams.enableBlend = true;
             update();
             function update() {
@@ -8216,7 +8304,9 @@ var editor;
     var EditorEngine = /** @class */ (function (_super) {
         __extends(EditorEngine, _super);
         function EditorEngine() {
-            return _super !== null && _super.apply(this, arguments) || this;
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.wireframeColor = new feng3d.Color4(125 / 255, 176 / 255, 250 / 255);
+            return _this;
         }
         Object.defineProperty(EditorEngine.prototype, "scene", {
             get: function () {
@@ -8247,19 +8337,23 @@ var editor;
          * 绘制场景
          */
         EditorEngine.prototype.render = function () {
+            var _this = this;
             _super.prototype.render.call(this);
             editor.editorScene.update();
             feng3d.forwardRenderer.draw(this.gl, editor.editorScene, this.camera);
             var selectedObject = this.mouse3DManager.pick(editor.editorScene, this.camera);
             if (selectedObject)
                 this.selectedObject = selectedObject;
+            editor.editorData.selectedGameObjects.forEach(function (element) {
+                if (element.getComponent(feng3d.Model))
+                    feng3d.wireframeRenderer.drawGameObject(_this.gl, element, _this.scene, _this.camera, _this.wireframeColor);
+            });
         };
         return EditorEngine;
     }(feng3d.Engine));
     editor.EditorEngine = EditorEngine;
     /**
     * 编辑器3D入口
-    * @author feng 2016-10-29
     */
     var Main3D = /** @class */ (function () {
         function Main3D() {
@@ -8540,7 +8634,7 @@ var editor;
                 navobject.mouseEnabled = false;
                 navobject.addComponent(feng3d.Model).set(function (space) {
                     space.geometry = new feng3d.CustomGeometry();
-                    space.material = feng3d.materialFactory.create("color", { uniforms: { u_diffuseInput: new feng3d.Color4(0, 1, 0, 0.5) } });
+                    space.material = new feng3d.ColorMaterial({ uniforms: { u_diffuseInput: new feng3d.Color4(0, 1, 0, 0.5) } });
                 });
                 navobject.transform.y = 0.01;
                 return navobject;
@@ -8556,8 +8650,8 @@ var editor;
                 geometrys = geometrys || [];
                 if (!gameobject.visible)
                     return geometrys;
-                var meshRenderer = gameobject.getComponent(feng3d.Model);
-                var geometry = meshRenderer && meshRenderer.geometry;
+                var model = gameobject.getComponent(feng3d.Model);
+                var geometry = model && model.geometry;
                 if (geometry && gameobject.navigationArea != -1) {
                     var matrix3d = gameobject.transform.localToWorldMatrix;
                     var positions = Array.apply(null, geometry.positions);
@@ -9117,10 +9211,12 @@ var navigation;
                     var rd = rs.getPointDistance(point.getPoint());
                     //
                     if (cd < agentRadius) {
-                        if (ld < agentRadius) {
+                        if (ld < agentRadius) //处理左夹角内点点
+                         {
                             point.setPoint(lp);
                         }
-                        else if (rd < agentRadius) {
+                        else if (rd < agentRadius) //处理右夹角内点点
+                         {
                             point.setPoint(rp);
                         }
                         else {
@@ -9531,19 +9627,19 @@ function createSegment() {
         debugSegment = feng3d.GameObject.create("segment");
         debugSegment.mouseEnabled = false;
         //初始化材质
-        var meshRenderer = debugSegment.addComponent(feng3d.Model);
-        var material = meshRenderer.material = feng3d.materialFactory.create("segment", { renderParams: { renderMode: feng3d.RenderMode.LINES } });
+        var model = debugSegment.addComponent(feng3d.Model);
+        var material = model.material = new feng3d.SegmentMaterial({ renderParams: { renderMode: feng3d.RenderMode.LINES } });
         material.uniforms.u_segmentColor.setTo(1.0, 0, 0);
-        segmentGeometry = meshRenderer.geometry = new feng3d.SegmentGeometry();
+        segmentGeometry = model.geometry = new feng3d.SegmentGeometry();
     }
     parentobject.addChild(debugSegment);
     //
     if (!debugPoint) {
         debugPoint = feng3d.GameObject.create("points");
         debugPoint.mouseEnabled = false;
-        var meshRenderer = debugPoint.addComponent(feng3d.Model);
-        pointGeometry = meshRenderer.geometry = new feng3d.PointGeometry();
-        var materialp = meshRenderer.material = feng3d.materialFactory.create("point", { renderParams: { renderMode: feng3d.RenderMode.POINTS } });
+        var model = debugPoint.addComponent(feng3d.Model);
+        pointGeometry = model.geometry = new feng3d.PointGeometry();
+        var materialp = model.material = new feng3d.PointMaterial({ renderParams: { renderMode: feng3d.RenderMode.POINTS } });
         materialp.uniforms.u_PointSize = 5;
         materialp.uniforms.u_color.setTo(0, 0, 0);
     }
@@ -9765,9 +9861,9 @@ var editor;
         };
         MouseRayTestScript.prototype.onclick = function () {
             var gameobject = feng3d.GameObject.create("test");
-            var meshRenderer = gameobject.addComponent(feng3d.Model);
-            meshRenderer.material = feng3d.materialFactory.create("standard");
-            meshRenderer.geometry = new feng3d.SphereGeometry({ radius: 10 });
+            var model = gameobject.addComponent(feng3d.Model);
+            model.material = new feng3d.StandardMaterial();
+            model.geometry = new feng3d.SphereGeometry({ radius: 10 });
             gameobject.mouseEnabled = false;
             var mouseRay3D = editor.engine.camera.getMouseRay3D();
             this.gameObject.addChild(gameobject);
@@ -9839,9 +9935,9 @@ var editor;
             lightIcon.showinHierarchy = false;
             var billboardComponent = lightIcon.addComponent(feng3d.BillboardComponent);
             billboardComponent.camera = editor.editorCamera;
-            var meshRenderer = lightIcon.addComponent(feng3d.Model);
-            meshRenderer.geometry = new feng3d.PlaneGeometry({ width: 1, height: 1, segmentsH: 1, segmentsW: 1, yUp: false });
-            var textureMaterial = this.textureMaterial = meshRenderer.material = feng3d.materialFactory.create("texture");
+            var model = lightIcon.addComponent(feng3d.Model);
+            model.geometry = new feng3d.PlaneGeometry({ width: 1, height: 1, segmentsH: 1, segmentsW: 1, yUp: false });
+            var textureMaterial = this.textureMaterial = model.material = new feng3d.TextureMaterial();
             var texture = new feng3d.UrlImageTexture2D();
             texture.url = editor.editorData.getEditorAssetsPath("assets/3d/icons/sun.png");
             texture.format = feng3d.TextureFormat.RGBA;
@@ -9857,10 +9953,10 @@ var editor;
             var holdSizeComponent = lightLines.addComponent(feng3d.HoldSizeComponent);
             holdSizeComponent.camera = editor.editorCamera;
             holdSizeComponent.holdSize = 1;
-            var meshRenderer = lightLines.addComponent(feng3d.Model);
-            var material = meshRenderer.material = feng3d.materialFactory.create("segment", { renderParams: { renderMode: feng3d.RenderMode.LINES } });
+            var model = lightLines.addComponent(feng3d.Model);
+            var material = model.material = new feng3d.SegmentMaterial({ renderParams: { renderMode: feng3d.RenderMode.LINES } });
             material.uniforms.u_segmentColor = new feng3d.Color4(163 / 255, 162 / 255, 107 / 255);
-            var segmentGeometry = meshRenderer.geometry = new feng3d.SegmentGeometry();
+            var segmentGeometry = model.geometry = new feng3d.SegmentGeometry();
             var num = 10;
             for (var i = 0; i < num; i++) {
                 var angle = i * Math.PI * 2 / num;
@@ -9882,6 +9978,8 @@ var editor;
             this.enabled = true;
         };
         DirectionLightIcon.prototype.update = function () {
+            if (!this.light)
+                return;
             this.textureMaterial.uniforms.u_color = this.light.color.toColor4();
             this.lightLines.visible = editor.editorData.selectedGameObjects.indexOf(this.light.gameObject) != -1;
         };
@@ -9944,9 +10042,9 @@ var editor;
             lightIcon.showinHierarchy = false;
             var billboardComponent = lightIcon.addComponent(feng3d.BillboardComponent);
             billboardComponent.camera = editor.editorCamera;
-            var meshRenderer = lightIcon.addComponent(feng3d.Model);
-            meshRenderer.geometry = new feng3d.PlaneGeometry({ width: 1, height: 1, segmentsW: 1, segmentsH: 1, yUp: false });
-            var textureMaterial = this.textureMaterial = meshRenderer.material = feng3d.materialFactory.create("texture", {
+            var model = lightIcon.addComponent(feng3d.Model);
+            model.geometry = new feng3d.PlaneGeometry({ width: 1, height: 1, segmentsW: 1, segmentsH: 1, yUp: false });
+            var textureMaterial = this.textureMaterial = model.material = new feng3d.TextureMaterial({
                 uniforms: {
                     s_texture: {
                         url: editor.editorData.getEditorAssetsPath("assets/3d/icons/light.png"),
@@ -9962,19 +10060,19 @@ var editor;
             lightLines.mouseEnabled = false;
             lightLines.serializable = false;
             lightLines.showinHierarchy = false;
-            var meshRenderer = lightLines.addComponent(feng3d.Model);
-            var material = meshRenderer.material = feng3d.materialFactory.create("segment", { renderParams: { renderMode: feng3d.RenderMode.LINES } });
+            var model = lightLines.addComponent(feng3d.Model);
+            var material = model.material = new feng3d.SegmentMaterial({ renderParams: { renderMode: feng3d.RenderMode.LINES } });
             material.uniforms.u_segmentColor = new feng3d.Color4(1, 1, 1, 0.5);
             material.renderParams.enableBlend = true;
-            this.segmentGeometry = meshRenderer.geometry = new feng3d.SegmentGeometry();
+            this.segmentGeometry = model.geometry = new feng3d.SegmentGeometry();
             this.gameObject.addChild(lightLines);
             //
             var lightpoints = this.lightpoints = feng3d.GameObject.create("points");
             lightpoints.mouseEnabled = false;
             lightpoints.serializable = false;
             lightpoints.showinHierarchy = false;
-            var meshRenderer = lightpoints.addComponent(feng3d.Model);
-            var pointGeometry = this.pointGeometry = meshRenderer.geometry = new feng3d.PointGeometry();
+            var model = lightpoints.addComponent(feng3d.Model);
+            var pointGeometry = this.pointGeometry = model.geometry = new feng3d.PointGeometry();
             pointGeometry.points = [
                 { position: new feng3d.Vector3(1, 0, 0), color: new feng3d.Color4(1, 0, 0) },
                 { position: new feng3d.Vector3(-1, 0, 0), color: new feng3d.Color4(1, 0, 0) },
@@ -9982,13 +10080,15 @@ var editor;
                 { position: new feng3d.Vector3(0, 0, 1), color: new feng3d.Color4(0, 0, 1) },
                 { position: new feng3d.Vector3(0, 0, -1), color: new feng3d.Color4(0, 0, 1) }
             ];
-            var pointMaterial = meshRenderer.material = feng3d.materialFactory.create("point", { renderParams: { renderMode: feng3d.RenderMode.POINTS } });
+            var pointMaterial = model.material = new feng3d.PointMaterial({ renderParams: { renderMode: feng3d.RenderMode.POINTS } });
             pointMaterial.renderParams.enableBlend = true;
             pointMaterial.uniforms.u_PointSize = 5;
             this.gameObject.addChild(lightpoints);
             this.enabled = true;
         };
         PointLightIcon.prototype.update = function () {
+            if (!this.light)
+                return;
             this.textureMaterial.uniforms.u_color = this.light.color.toColor4();
             this.lightLines.transform.scale =
                 this.lightpoints.transform.scale =
@@ -10143,9 +10243,9 @@ var editor;
             lightIcon.showinHierarchy = false;
             var billboardComponent = lightIcon.addComponent(feng3d.BillboardComponent);
             billboardComponent.camera = editor.editorCamera;
-            var meshRenderer = lightIcon.addComponent(feng3d.Model);
-            meshRenderer.geometry = new feng3d.PlaneGeometry({ width: 1, height: 1, segmentsW: 1, segmentsH: 1, yUp: false });
-            var textureMaterial = this.textureMaterial = meshRenderer.material = feng3d.materialFactory.create("texture", {
+            var model = lightIcon.addComponent(feng3d.Model);
+            model.geometry = new feng3d.PlaneGeometry({ width: 1, height: 1, segmentsW: 1, segmentsH: 1, yUp: false });
+            var textureMaterial = this.textureMaterial = model.material = new feng3d.TextureMaterial({
                 uniforms: {
                     s_texture: {
                         url: editor.editorData.getEditorAssetsPath("assets/3d/icons/spot.png"),
@@ -10161,19 +10261,19 @@ var editor;
             lightLines.mouseEnabled = false;
             lightLines.serializable = false;
             lightLines.showinHierarchy = false;
-            var meshRenderer = lightLines.addComponent(feng3d.Model);
-            var material = meshRenderer.material = feng3d.materialFactory.create("segment", { renderParams: { renderMode: feng3d.RenderMode.LINES } });
+            var model = lightLines.addComponent(feng3d.Model);
+            var material = model.material = new feng3d.SegmentMaterial({ renderParams: { renderMode: feng3d.RenderMode.LINES } });
             material.uniforms.u_segmentColor = new feng3d.Color4(1, 1, 1, 0.5);
             material.renderParams.enableBlend = true;
-            this.segmentGeometry = meshRenderer.geometry = new feng3d.SegmentGeometry();
+            this.segmentGeometry = model.geometry = new feng3d.SegmentGeometry();
             this.gameObject.addChild(lightLines);
             //
             var lightpoints = this.lightpoints = feng3d.GameObject.create("points");
             lightpoints.mouseEnabled = false;
             lightpoints.serializable = false;
             lightpoints.showinHierarchy = false;
-            var meshRenderer = lightpoints.addComponent(feng3d.Model);
-            var pointGeometry = this.pointGeometry = meshRenderer.geometry = new feng3d.PointGeometry();
+            var model = lightpoints.addComponent(feng3d.Model);
+            var pointGeometry = this.pointGeometry = model.geometry = new feng3d.PointGeometry();
             pointGeometry.points = [
                 { position: new feng3d.Vector3(1, 0, 0), color: new feng3d.Color4(1, 0, 0) },
                 { position: new feng3d.Vector3(-1, 0, 0), color: new feng3d.Color4(1, 0, 0) },
@@ -10181,13 +10281,15 @@ var editor;
                 { position: new feng3d.Vector3(0, 0, 1), color: new feng3d.Color4(0, 0, 1) },
                 { position: new feng3d.Vector3(0, 0, -1), color: new feng3d.Color4(0, 0, 1) }
             ];
-            var pointMaterial = meshRenderer.material = feng3d.materialFactory.create("point", { renderParams: { renderMode: feng3d.RenderMode.POINTS } });
+            var pointMaterial = model.material = new feng3d.PointMaterial({ renderParams: { renderMode: feng3d.RenderMode.POINTS } });
             pointMaterial.renderParams.enableBlend = true;
             pointMaterial.uniforms.u_PointSize = 5;
             this.gameObject.addChild(lightpoints);
             this.enabled = true;
         };
         SpotLightIcon.prototype.update = function () {
+            if (!this.light)
+                return;
             this.textureMaterial.uniforms.u_color = this.light.color.toColor4();
             if (editor.editorData.selectedGameObjects.indexOf(this.light.gameObject) != -1) {
                 //
@@ -10315,18 +10417,18 @@ var editor;
                     gameobject.addComponent(feng3d.Camera).lens = parsePerspectiveCamera(object3d);
                     break;
                 case "SkinnedMesh":
-                    var skinnedMeshRenderer = gameobject.addComponent(feng3d.SkinnedMeshRenderer);
-                    skinnedMeshRenderer.geometry = parseGeometry(object3d.geometry);
-                    skinnedMeshRenderer.material.renderParams.cullFace = feng3d.CullFace.NONE;
+                    var skinnedModel = gameobject.addComponent(feng3d.SkinnedModel);
+                    skinnedModel.geometry = parseGeometry(object3d.geometry);
+                    skinnedModel.material.renderParams.cullFace = feng3d.CullFace.NONE;
                     feng3d.assert(object3d.bindMode == "attached");
-                    skinnedMeshRenderer.skinSkeleton = parseSkinnedSkeleton(skeletonComponent, object3d.skeleton);
+                    skinnedModel.skinSkeleton = parseSkinnedSkeleton(skeletonComponent, object3d.skeleton);
                     if (parent)
-                        skinnedMeshRenderer.initMatrix3d = gameobject.transform.localToWorldMatrix.clone();
+                        skinnedModel.initMatrix3d = gameobject.transform.localToWorldMatrix.clone();
                     break;
                 case "Mesh":
-                    var meshRenderer = gameobject.addComponent(feng3d.Model);
-                    meshRenderer.geometry = parseGeometry(object3d.geometry);
-                    meshRenderer.material.renderParams.cullFace = feng3d.CullFace.NONE;
+                    var model = gameobject.addComponent(feng3d.Model);
+                    model.geometry = parseGeometry(object3d.geometry);
+                    model.material.renderParams.cullFace = feng3d.CullFace.NONE;
                     break;
                 case "Group":
                     if (object3d.skeleton) {
@@ -10877,7 +10979,13 @@ var editor;
      * @param particleSystem 粒子系统
      */
     function getCreateParticleComponentMenu(particleSystem) {
-        var menu = [];
+        var menu = [
+        //label:显示在创建列表中的名称 className:3d对象的类全路径，将通过classUtils.getDefinitionByName获取定义
+        // {
+        //     label: "SkyBox",
+        //     click: () => { gameobject.addComponent(feng3d.SkyBox); }
+        // },
+        ];
         return menu;
     }
     editor.getCreateParticleComponentMenu = getCreateParticleComponentMenu;
@@ -10981,13 +11089,11 @@ var editor;
 (function (editor) {
     /**
      * feng3d的版本号
-     * @author feng 2015-03-20
      */
-    editor.revision = "2018.08.02";
-    feng3d.log("Editor version " + editor.revision);
+    editor.revision = "2018.08.22";
+    feng3d.log("editor version " + editor.revision);
     /**
      * 编辑器
-     * @author feng 2016-10-29
      */
     var Editor = /** @class */ (function (_super) {
         __extends(Editor, _super);
@@ -11027,7 +11133,7 @@ var editor;
             //初始化feng3d
             new editor.Main3D();
             feng3d.shortcut.addShortCuts(shortcutConfig);
-            editor.editorshortcut.init();
+            new editor.Editorshortcut();
             this.once(egret.Event.ENTER_FRAME, function () {
                 //
                 egret.mouseEventEnvironment();
