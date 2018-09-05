@@ -39,7 +39,7 @@
                         ]
                     },
                     "material": {
-                        "__class__": "feng3d.StandardMaterial",
+                        "__class__": "feng3d.Material",
                         "shaderName": "segment",
                         "uniforms": {
                             "__class__": "feng3d.SegmentUniforms"
@@ -87,7 +87,7 @@
                         ]
                     },
                     "material": {
-                        "__class__": "feng3d.StandardMaterial",
+                        "__class__": "feng3d.Material",
                         "shaderName": "segment",
                         "uniforms": {
                             "__class__": "feng3d.SegmentUniforms"
@@ -135,7 +135,7 @@
                         ]
                     },
                     "material": {
-                        "__class__": "feng3d.StandardMaterial",
+                        "__class__": "feng3d.Material",
                         "shaderName": "segment",
                         "uniforms": {
                             "__class__": "feng3d.SegmentUniforms"
@@ -165,7 +165,7 @@
                         "height": 0.18
                     },
                     "material": {
-                        "__class__": "feng3d.ColorMaterial",
+                        "__class__": "feng3d.Material",
                         "shaderName": "color",
                         "uniforms": {
                             "__class__": "feng3d.ColorUniforms",
@@ -195,7 +195,7 @@
                         "height": 0.18
                     },
                     "material": {
-                        "__class__": "feng3d.ColorMaterial",
+                        "__class__": "feng3d.Material",
                         "shaderName": "color",
                         "uniforms": {
                             "__class__": "feng3d.ColorUniforms",
@@ -226,7 +226,7 @@
                         "height": 0.18
                     },
                     "material": {
-                        "__class__": "feng3d.ColorMaterial",
+                        "__class__": "feng3d.Material",
                         "shaderName": "color",
                         "uniforms": {
                             "__class__": "feng3d.ColorUniforms",
