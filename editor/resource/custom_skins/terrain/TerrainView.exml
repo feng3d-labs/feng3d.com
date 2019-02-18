@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="TerrainView" width="400" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing">
+	<e:Group width="100%" height="100%">
+		<e:Group width="100%" x="0" y="0" scaleX="1" scaleY="1">
+			<e:Button id="raiseLowerHeightBtn" label="" scaleX="1" scaleY="1">
+			<e:skinName>
+				<e:Skin states="up,down,disabled">
+				<e:Image width="100%" height="100%" source="raiseLowerHeight_up_png" source.down="raiseLowerHeight_down_png"/>
+				<e:Label id="labelDisplay" horizontalCenter="0" verticalCenter="0"/>
+				</e:Skin>
+			</e:skinName>
+			</e:Button>
+			<e:Button id="paintHeightBtn" label="" scaleX="1" scaleY="1">
+			<e:skinName>
+				<e:Skin states="up,down,disabled">
+				<e:Image width="100%" height="100%" source="paintHeight_up_png" source.down="paintHeight_down_png"/>
+				<e:Label id="labelDisplay" horizontalCenter="0" verticalCenter="0"/>
+				</e:Skin>
+			</e:skinName>
+			</e:Button>
+			<e:Button id="smoothHeightBtn" label="" scaleX="1" scaleY="1">
+			<e:skinName>
+				<e:Skin states="up,down,disabled">
+				<e:Image width="100%" height="100%" source="smoothHeight_up_png" source.down="smoothHeight_down_png"/>
+				<e:Label id="labelDisplay" horizontalCenter="0" verticalCenter="0"/>
+				</e:Skin>
+			</e:skinName>
+			</e:Button>
+			<e:Button id="paintTextureBtn" label="" scaleX="1" scaleY="1">
+			<e:skinName>
+				<e:Skin states="up,down,disabled">
+				<e:Image width="100%" height="100%" source="paintTexture_up_png" source.down="paintTexture_down_png"/>
+				<e:Label id="labelDisplay" horizontalCenter="0" verticalCenter="0"/>
+				</e:Skin>
+			</e:skinName>
+			</e:Button>
+			<e:Button id="settingsBtn" label="" scaleX="1" scaleY="1">
+			<e:skinName>
+				<e:Skin states="up,down,disabled">
+				<e:Image width="100%" height="100%" source="settings_up_png" source.down="settings_down_png"/>
+				<e:Label id="labelDisplay" horizontalCenter="0" verticalCenter="0"/>
+				</e:Skin>
+			</e:skinName>
+			</e:Button>
+			<e:layout>
+			<e:HorizontalLayout verticalAlign="middle" horizontalAlign="center" gap="-1"/>
+			</e:layout>
+		</e:Group>
+		<e:Group id="brushesGroup0" width="100%" x="211" y="421">
+			<e:Label size="12" bold="true" textColor="0x000000" touchEnabled="false" text="Brushes" scaleX="1" scaleY="1"/>
+			<e:Group width="100%">
+				<e:Rect scaleX="1" scaleY="1" fillColor="0xdedede" strokeWeight="1" strokeColor="0x555555" width="100%" height="100%"/>
+				<e:Group id="brushesGroup" width="100%">
+					<e:Image scaleX="1" scaleY="1" source="terrain_brushes_0_png" width="32" height="32"/>
+					<e:Image scaleX="1" scaleY="1" width="32" height="32" source="terrain_brushes_1_png"/>
+					<e:Image scaleX="1" scaleY="1" width="32" height="32" source="terrain_brushes_2_png"/>
+					<e:Image scaleX="1" scaleY="1" width="32" height="32" source="terrain_brushes_3_png"/>
+					<e:Image scaleX="1" scaleY="1" width="32" height="32" source="terrain_brushes_4_png"/>
+					<e:Image scaleX="1" scaleY="1" width="32" height="32" source="terrain_brushes_5_png"/>
+					<e:Image scaleX="1" scaleY="1" width="32" height="32" source="terrain_brushes_6_png"/>
+					<e:Image scaleX="1" scaleY="1" width="32" height="32" source="terrain_brushes_7_png"/>
+					<e:Image scaleX="1" scaleY="1" width="32" height="32" source="terrain_brushes_8_png"/>
+					<e:Image scaleX="1" scaleY="1" width="32" height="32" source="terrain_brushes_9_png"/>
+					<e:Image scaleX="1" scaleY="1" width="32" height="32" source="terrain_brushes_10_png"/>
+					<e:Image scaleX="1" scaleY="1" width="32" height="32" source="terrain_brushes_11_png"/>
+					<e:Image scaleX="1" scaleY="1" width="32" height="32" source="terrain_brushes_12_png"/>
+					<e:Image scaleX="1" scaleY="1" width="32" height="32" source="terrain_brushes_13_png"/>
+					<e:Image scaleX="1" scaleY="1" width="32" height="32" source="terrain_brushes_14_png"/>
+					<e:Image scaleX="1" scaleY="1" width="32" height="32" source="terrain_brushes_15_png"/>
+					<e:Image scaleX="1" scaleY="1" width="32" height="32" source="terrain_brushes_16_png"/>
+					<e:Image scaleX="1" scaleY="1" width="32" height="32" source="terrain_brushes_17_png"/>
+					<e:Image scaleX="1" scaleY="1" width="32" height="32" source="terrain_brushes_18_png"/>
+					<e:Image scaleX="1" scaleY="1" width="32" height="32" source="terrain_brushes_19_png"/>
+					<e:layout>
+						<e:BasicLayout/>
+					</e:layout>
+				</e:Group>
+			</e:Group>
+			<e:layout>
+				<e:VerticalLayout/>
+			</e:layout>
+		</e:Group>
+		<e:Group id="raiseLowerSettingsGroup" width="100%" x="454" y="248">
+			<e:Label size="12" bold="true" textColor="0x000000" touchEnabled="false" text="Settings" scaleX="1" scaleY="1" x="0" y="6"/>
+			<e:Group x="0" y="18" width="100%">
+				<e:Label id="raiseLowerBrushSizeLabel" text="Brush Size" size="12" width="20%" y="0" x="0" textColor="0x000000" verticalAlign="middle" multiline="false"/>
+				<e:Group x="86" y="0" width="80%">
+					<e:HSlider id="raiseLowerBrushSizeSlide" x="0" y="0" width="100%"/>
+					<e:TextInput id="raiseLowerBrushSizeInput" width="50" scaleX="1" scaleY="1"/>
+					<e:layout>
+						<e:HorizontalLayout verticalAlign="middle"/>
+					</e:layout>
+				</e:Group>
+				<e:layout>
+					<e:HorizontalLayout verticalAlign="middle"/>
+				</e:layout>
+			</e:Group>
+			<e:Group x="10" y="28" width="100%">
+				<e:Label id="raiseLowerOpacityLabel" text="Opacity" size="12" width="20%" y="0" x="0" textColor="0x000000" verticalAlign="middle" multiline="false"/>
+				<e:Group x="86" y="0" width="80%">
+				<e:HSlider id="raiseLowerOpacitySlide" x="0" y="0" width="100%"/>
+				<e:TextInput id="raiseLowerOpacityInput" width="50" scaleX="1" scaleY="1"/>
+				<e:layout>
+					<e:HorizontalLayout verticalAlign="middle"/>
+				</e:layout>
+				</e:Group>
+				<e:layout>
+				<e:HorizontalLayout verticalAlign="middle"/>
+				</e:layout>
+			</e:Group>
+			<e:layout>
+				<e:VerticalLayout/>
+			</e:layout>
+		</e:Group>
+		<e:Group id="paintHeightSettingsGroup" width="100%" x="464" y="258">
+			<e:Label size="12" bold="true" textColor="0x000000" touchEnabled="false" text="Settings" scaleX="1" scaleY="1" x="0" y="6"/>
+			<e:Group x="0" y="18" width="100%">
+			<e:Label id="paintHeightBrushSizeLabel" text="Brush Size" size="12" width="20%" y="0" x="0" textColor="0x000000" verticalAlign="middle" multiline="false"/>
+			<e:Group x="86" y="0" width="80%">
+				<e:HSlider id="paintHeightBrushSizeSlide" x="0" y="0" width="100%"/>
+				<e:TextInput id="paintHeightBrushSizeInput" width="50" scaleX="1" scaleY="1"/>
+				<e:layout>
+				<e:HorizontalLayout verticalAlign="middle"/>
+				</e:layout>
+			</e:Group>
+			<e:layout>
+				<e:HorizontalLayout verticalAlign="middle"/>
+			</e:layout>
+			</e:Group>
+			<e:Group x="10" y="28" width="100%">
+			<e:Label id="paintHeightOpacityLabel" text="Opacity" size="12" width="20%" y="0" x="0" textColor="0x000000" verticalAlign="middle" multiline="false"/>
+			<e:Group x="86" y="0" width="80%">
+				<e:HSlider id="paintHeightOpacitySlide" x="0" y="0" width="100%"/>
+				<e:TextInput id="paintHeightOpacityInput" width="50" scaleX="1" scaleY="1"/>
+				<e:layout>
+				<e:HorizontalLayout verticalAlign="middle"/>
+				</e:layout>
+			</e:Group>
+			<e:layout>
+				<e:HorizontalLayout verticalAlign="middle"/>
+			</e:layout>
+			</e:Group>
+			<e:Group x="20" y="38" width="100%">
+				<e:Label id="paintHeightHeightLabel" text="Opacity" size="12" width="20%" y="0" x="0" textColor="0x000000" verticalAlign="middle" multiline="false"/>
+				<e:Group x="86" y="0" width="80%">
+				<e:HSlider id="paintHeightHeightSlide" x="0" y="0" width="100%"/>
+				<e:TextInput id="paintHeightHeightInput" width="50" scaleX="1" scaleY="1"/>
+				<e:layout>
+					<e:HorizontalLayout verticalAlign="middle"/>
+				</e:layout>
+				</e:Group>
+				<e:layout>
+				<e:HorizontalLayout verticalAlign="middle"/>
+				</e:layout>
+			</e:Group>
+			<e:layout>
+			<e:VerticalLayout/>
+			</e:layout>
+		</e:Group>
+		<e:Group id="smoothSettingsGroup" width="100%" x="464" y="258">
+			<e:Label size="12" bold="true" textColor="0x000000" touchEnabled="false" text="Settings" scaleX="1" scaleY="1" x="0" y="6"/>
+			<e:Group x="0" y="18" width="100%">
+			<e:Label id="smoothBrushSizeLabel" text="Brush Size" size="12" width="20%" y="0" x="0" textColor="0x000000" verticalAlign="middle" multiline="false"/>
+			<e:Group x="86" y="0" width="80%">
+				<e:HSlider id="smoothBrushSizeSlide" x="0" y="0" width="100%"/>
+				<e:TextInput id="smoothBrushSizeInput" width="50" scaleX="1" scaleY="1"/>
+				<e:layout>
+				<e:HorizontalLayout verticalAlign="middle"/>
+				</e:layout>
+			</e:Group>
+			<e:layout>
+				<e:HorizontalLayout verticalAlign="middle"/>
+			</e:layout>
+			</e:Group>
+			<e:Group x="10" y="28" width="100%">
+			<e:Label id="smoothOpacityLabel" text="Opacity" size="12" width="20%" y="0" x="0" textColor="0x000000" verticalAlign="middle" multiline="false"/>
+			<e:Group x="86" y="0" width="80%">
+				<e:HSlider id="smoothOpacitySlide" x="0" y="0" width="100%"/>
+				<e:TextInput id="smoothOpacityInput" width="50" scaleX="1" scaleY="1"/>
+				<e:layout>
+				<e:HorizontalLayout verticalAlign="middle"/>
+				</e:layout>
+			</e:Group>
+			<e:layout>
+				<e:HorizontalLayout verticalAlign="middle"/>
+			</e:layout>
+			</e:Group>
+			<e:layout>
+			<e:VerticalLayout/>
+			</e:layout>
+		</e:Group>
+		<e:Group id="paintTextureSettingsGroup" width="100%" x="474" y="268">
+			<e:Label size="12" bold="true" textColor="0x000000" touchEnabled="false" text="Settings" scaleX="1" scaleY="1" x="0" y="6"/>
+			<e:Group x="0" y="18" width="100%">
+			<e:Label id="paintTextureBrushSizeLabel" text="Brush Size" size="12" width="20%" y="0" x="0" textColor="0x000000" verticalAlign="middle" multiline="false"/>
+			<e:Group x="86" y="0" width="80%">
+				<e:HSlider id="paintTextureBrushSizeSlide" x="0" y="0" width="100%"/>
+				<e:TextInput id="paintTextureBrushSizeInput" width="50" scaleX="1" scaleY="1"/>
+				<e:layout>
+				<e:HorizontalLayout verticalAlign="middle"/>
+				</e:layout>
+			</e:Group>
+			<e:layout>
+				<e:HorizontalLayout verticalAlign="middle"/>
+			</e:layout>
+			</e:Group>
+			<e:Group x="10" y="28" width="100%">
+			<e:Label id="paintTextureOpacityLabel" text="Opacity" size="12" width="20%" y="0" x="0" textColor="0x000000" verticalAlign="middle" multiline="false"/>
+			<e:Group x="86" y="0" width="80%">
+				<e:HSlider id="paintTextureOpacitySlide" x="0" y="0" width="100%"/>
+				<e:TextInput id="paintTextureOpacityInput" width="50" scaleX="1" scaleY="1"/>
+				<e:layout>
+				<e:HorizontalLayout verticalAlign="middle"/>
+				</e:layout>
+			</e:Group>
+			<e:layout>
+				<e:HorizontalLayout verticalAlign="middle"/>
+			</e:layout>
+			</e:Group>
+			<e:Group x="20" y="38" width="100%">
+				<e:Label id="paintTextureTargetStrengthLabel" text="Opacity" size="12" width="20%" y="0" x="0" textColor="0x000000" verticalAlign="middle" multiline="false"/>
+				<e:Group x="86" y="0" width="80%">
+				<e:HSlider id="paintTextureTargetStrengthSlide" x="0" y="0" width="100%"/>
+				<e:TextInput id="paintTextureTargetStrengthInput" width="50" scaleX="1" scaleY="1"/>
+				<e:layout>
+					<e:HorizontalLayout verticalAlign="middle"/>
+				</e:layout>
+				</e:Group>
+				<e:layout>
+				<e:HorizontalLayout verticalAlign="middle"/>
+				</e:layout>
+			</e:Group>
+			<e:layout>
+			<e:VerticalLayout/>
+			</e:layout>
+		</e:Group>
+		<e:layout>
+			<e:VerticalLayout/>
+		</e:layout>
+	</e:Group>
+</e:Skin>

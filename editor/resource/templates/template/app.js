@@ -2,7 +2,7 @@
 
 var view3D = new feng3d.Engine();
 
-feng3d.Loader.loadText("default.scene.json", (content) =>
+feng3d.loader.loadText("default.scene.json", (content) =>
 {
     var json = JSON.parse(content);
     var scene = feng3d.serialization.deserialize(json);

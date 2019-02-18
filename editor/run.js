@@ -9,7 +9,7 @@ if (fstype == "indexedDB")
     feng3d.assets.fs = feng3d.indexedDBfs;
     feng3d.indexedDBfs.projectname = decodeURI(GetQueryString("project"));
 
-    feng3d.assets.readFileAsString("project.js", (err, content) =>
+    feng3d.assets.readString("project.js", (err, content) =>
     {
         //
         var windowEval = eval.bind(window);
@@ -17,10 +17,8 @@ if (fstype == "indexedDB")
         windowEval(content);
 
         // 加载并初始化场景
-        feng3d.assets.readFileAsString("default.scene.json", (err, content) =>
+        feng3d.assets.readObject("default.scene.json", (err, scene) =>
         {
-            var json = JSON.parse(content);
-            var scene = feng3d.serialization.deserialize(json);
             if (scene.getComponent(feng3d.Scene3D))
                 view3D.scene = scene.getComponent(feng3d.Scene3D);
 

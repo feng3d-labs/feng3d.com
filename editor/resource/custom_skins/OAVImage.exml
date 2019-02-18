@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="OAVImage" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing">
+	<e:Group width="100%" x="0">
+		<e:Image width="100" height="100" y="0" scaleX="1" scaleY="1" id="image" x="0"/>
+		<e:layout>
+			<e:VerticalLayout horizontalAlign="center"/>
+		</e:layout>
+
+	</e:Group>
+</e:Skin>

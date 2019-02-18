@@ -2,6 +2,14 @@
 <e:Skin class="Feng3dViewSkin" width="400" height="300" xmlns:e="http://ns.egret.com/eui"
         xmlns:w="http://ns.egret.com/wing" xmlns:editor="editor.*">
 	<w:Config id="15a7d5dea78"></w:Config>
-	<e:Button id="fullbutton" label="Button" width="100%" height="100%" alpha="0" />
-	<editor:CameraPreview width="200" height="200" right="10" bottom="10" />
+	<e:Rect id="backRect" width="100%" height="100%" strokeWeight="1" fillAlpha="0"/>
+	<e:Group right="10" bottom="10">
+		<editor:CameraPreview skinName="CameraPreview" width="200" height="200"/>
+		<editor:ParticleEffectController skinName="ParticleEffectController" right="10" bottom="10" x="-329" y="-147" scaleX="1" scaleY="1"/>
+		<e:layout>
+		<e:VerticalLayout horizontalAlign="justify"/>
+		</e:layout>
+	</e:Group>
+
+
 </e:Skin>

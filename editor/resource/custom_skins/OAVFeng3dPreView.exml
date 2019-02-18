@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="OAVFeng3dPreView" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing">
+	<e:Group width="100%" x="0">
+		<e:layout>
+		<e:VerticalLayout horizontalAlign="center"/>
+		</e:layout>
+		<e:Image id="image" x="0" y="0" scaleX="1" scaleY="1"/>
+	</e:Group>
+</e:Skin>

@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="TabViewButtonSkin" states="normal,selected" 
+        xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing">
+	<e:Image source="TabViewButton_normal_png" includeIn="normal"/>
+	<e:Image source="TabViewButton_Selected_png" includeIn="selected"/>
+	<e:Group width="100%" verticalCenter="0">
+		<e:Image id="iconDisplay" x="18" y="8" source="InspectorIcon_png"/>
+		<e:Label id="labelDisplay" size="12" verticalAlign="middle" textAlign="center" text="Inspector" textColor="0x000000" x="0" y="0"/>
+		<e:layout>
+			<e:HorizontalLayout verticalAlign="middle" paddingLeft="5" paddingRight="5"/>
+		</e:layout>
+	</e:Group>
+</e:Skin>

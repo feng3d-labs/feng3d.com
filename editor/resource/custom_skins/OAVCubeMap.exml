@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="OAVCubeMap" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing">
+	<e:Group width="100%" x="0">
+		<e:Rect width="100%" height="100%" strokeAlpha="1" fillColor="0x68615b"/>
+		<e:Group id="pxGroup" width="100" height="100" x="200" y="100">
+			<e:Rect width="100%" height="100%" strokeWeight="1"/>
+			<e:Image id="px" width="100" height="100"/>
+			<e:Label text="right - px" size="12" verticalAlign="middle" multiline="false" textColor="0xFFFFFF" borderColor="0x000000" textAlign="center"/>
+			<e:Button id="pxBtn" label="选择" right="0" bottom="0"/>
+		</e:Group>
+		<e:Group id="pyGroup" width="100" height="100" x="100" y="0">
+			<e:Rect width="100%" height="100%" strokeWeight="1"/>
+			<e:Image id="py" width="100" height="100"/>
+			<e:Label text="top - py" size="12" verticalAlign="middle" multiline="false" textColor="0xffffff" borderColor="0x000000" textAlign="center"/>
+			<e:Button id="pyBtn" label="选择" right="0" bottom="0"/>
+		</e:Group>
+		<e:Group id="pzGroup" width="100" height="100" x="100" y="100">
+			<e:Rect width="100%" height="100%" strokeWeight="1"/>
+			<e:Image id="pz" width="100" height="100"/>
+			<e:Label text="front - pz" size="12" verticalAlign="middle" multiline="false" textColor="0xFFFFFF" borderColor="0x000000" textAlign="center"/>
+			<e:Button id="pzBtn" label="选择" right="0" bottom="0"/>
+		</e:Group>
+		<e:Group id="nxGroup" width="100" height="100" x="0" y="100">
+			<e:Rect width="100%" height="100%" strokeWeight="1"/>
+			<e:Image id="nx" width="100" height="100"/>
+			<e:Label text="left - nx" size="12" verticalAlign="middle" multiline="false" textColor="0xFFFFFF" borderColor="0x000000" textAlign="center"/>
+			<e:Button id="nxBtn" label="选择" right="0" bottom="0"/>
+		</e:Group>
+		<e:Group id="nyGroup" width="100" height="100" x="100" y="200">
+			<e:Rect width="100%" height="100%" strokeWeight="1"/>
+			<e:Image id="ny" width="100" height="100"/>
+			<e:Label text="bottom - ny" size="12" verticalAlign="middle" multiline="false" textColor="0xFFFFFF" borderColor="0x000000" textAlign="center"/>
+			<e:Button id="nyBtn" label="选择" right="0" bottom="0"/>
+		</e:Group>
+		<e:Group id="nzGroup" width="100" height="100" x="300" y="100">
+			<e:Rect width="100%" height="100%" strokeWeight="1"/>
+			<e:Image id="nz" width="100" height="100"/>
+			<e:Label text="back - nz" size="12" verticalAlign="middle" multiline="false" textColor="0xFFFFFF" borderColor="0x000000" textAlign="center"/>
+			<e:Button id="nzBtn" label="选择" right="0" bottom="0"/>
+		</e:Group>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		<e:layout>
+			<e:BasicLayout/>
+		</e:layout>
+
+
+	</e:Group>
+</e:Skin>

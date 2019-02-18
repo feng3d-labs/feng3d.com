@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="MinMaxCurveEditor" xmlns:e="http://ns.egret.com/eui" xmlns:ns1="*" xmlns:w="http://ns.egret.com/wing" xmlns:editor="editor.*" width="400">
+	<e:Rect width="100%" height="100%" strokeWeight="2" fillColor="0x565656"/>
+	<e:Group width="100%">
+		<e:Group id="viewGroup" width="100%" height="200" scaleX="1" scaleY="1">
+			<e:Image id="curveImage" width="100%" height="100%" scaleX="1" scaleY="1" x="0" y="0"/>
+			<e:Group id="curveGroup" top="20" left="40" right="40" bottom="30" x="40" y="20" scaleX="1" scaleY="1">
+			<e:TextInput id="multiplierInput" width="35" scaleX="1" scaleY="1" x="-40" text="1.0" y="-8" skinName="skins.TextInputRightSkin"/>
+			<e:Label id="y_0" text="0.0" size="12" width="35" textColor="0x000000" verticalAlign="middle" multiline="false" textAlign="right" x="-40" y="144" scaleX="1" scaleY="1"/>
+			<e:Label id="y_1" text="0.25" size="12" width="35" textColor="0x000000" verticalAlign="middle" multiline="false" textAlign="right" x="-40" scaleX="1" scaleY="1" y="106"/>
+			<e:Label id="y_2" text="0.5" size="12" width="35" textColor="0x000000" verticalAlign="middle" multiline="false" textAlign="right" x="-40" scaleX="1" scaleY="1" verticalCenter="0"/>
+			<e:Label id="y_3" text="0.5" size="12" width="35" textColor="0x000000" verticalAlign="middle" multiline="false" textAlign="right" x="-40" scaleX="1" scaleY="1" y="32"/>
+			<e:Label id="x_0" text="0.0" size="12" width="40" textColor="0x000000" verticalAlign="middle" multiline="false" textAlign="center" x="-20" y="156"/>
+			<e:Label id="x_1" text="0.1" size="12" width="40" textColor="0x000000" verticalAlign="middle" multiline="false" textAlign="center" x="12" y="156"/>
+			<e:Label id="x_2" text="0.2" size="12" width="40" textColor="0x000000" verticalAlign="middle" multiline="false" textAlign="center" x="44" y="156"/>
+			<e:Label id="x_3" text="0.3" size="12" width="40" textColor="0x000000" verticalAlign="middle" multiline="false" textAlign="center" x="76" y="156"/>
+			<e:Label id="x_4" text="0.4" size="12" width="40" textColor="0x000000" verticalAlign="middle" multiline="false" textAlign="center" x="108" y="156"/>
+			<e:Label id="x_5" text="0.5" size="12" width="40" textColor="0x000000" verticalAlign="middle" multiline="false" textAlign="center" x="140" y="156"/>
+			<e:Label id="x_6" text="0.6" size="12" width="40" textColor="0x000000" verticalAlign="middle" multiline="false" textAlign="center" x="172" y="156"/>
+			<e:Label id="x_7" text="0.7" size="12" width="40" textColor="0x000000" verticalAlign="middle" multiline="false" textAlign="center" x="204" y="156"/>
+			<e:Label id="x_8" text="0.8" size="12" width="40" textColor="0x000000" verticalAlign="middle" multiline="false" textAlign="center" x="236" y="156"/>
+			<e:Label id="x_9" text="0.9" size="12" width="40" textColor="0x000000" verticalAlign="middle" multiline="false" textAlign="center" x="268" y="156"/>
+			<e:Label id="x_10" text="1.0" size="12" width="40" textColor="0x000000" verticalAlign="middle" multiline="false" textAlign="center" x="300" y="156"/>
+			</e:Group>
+		</e:Group>
+		<e:Group width="100%" height="30" scaleX="1" scaleY="1">
+			<e:Rect width="100%" height="100%" scaleX="1" scaleY="1" fillAlpha="1" fillColor="0x313131"/>
+			<e:Button id="samplesOperationBtn" label="" scaleX="1" scaleY="1" verticalCenter="0" left="10" visible="false">
+				<e:skinName>
+				<e:Skin states="up,down,disabled">
+					<e:Image width="100%" height="100%" source="component_operation_png"/>
+					<e:Label id="labelDisplay" horizontalCenter="0" verticalCenter="0"/>
+				</e:Skin>
+				</e:skinName>
+			</e:Button>
+			<e:Group id="samplesGroup" horizontalCenter="0" verticalCenter="0">
+				<e:layout>
+					<e:HorizontalLayout/>
+				</e:layout>
+				<e:Image id="sample_0" width="32" height="16" x="530" y="-1" scaleX="1" scaleY="1"/>
+				<e:Image id="sample_1" width="32" height="16" x="540" y="9" scaleX="1" scaleY="1"/>
+				<e:Image id="sample_2" width="32" height="16" x="550" y="19" scaleX="1" scaleY="1"/>
+				<e:Image id="sample_3" width="32" height="16" x="560" y="29" scaleX="1" scaleY="1"/>
+				<e:Image id="sample_4" width="32" height="16" x="570" y="39" scaleX="1" scaleY="1"/>
+				<e:Image id="sample_5" width="32" height="16" x="580" y="49" scaleX="1" scaleY="1"/>
+				<e:Image id="sample_6" width="32" height="16" x="590" y="59" scaleX="1" scaleY="1"/>
+				<e:Image id="sample_7" width="32" height="16" x="600" y="69" scaleX="1" scaleY="1"/>
+			</e:Group>
+		</e:Group>
+		<e:layout>
+			<e:VerticalLayout/>
+		</e:layout>
+	</e:Group>
+</e:Skin>

@@ -98,7 +98,7 @@ declare class BillboardTest extends feng3d.Script {
  */
 declare class Container3DTest extends feng3d.Script {
     cube: feng3d.GameObject;
-    colorMaterial: feng3d.ColorMaterial;
+    colorMaterial: feng3d.Material;
     num: number;
     /**
      * 初始化时调用
@@ -225,7 +225,7 @@ declare class PointLightTest extends feng3d.Script {
     */
     dispose(): void;
 }
-declare class MD5LoaderTest extends feng3d.Script {
+declare class md5LoaderTest extends feng3d.Script {
     /**
      * 初始化时调用
      */
@@ -363,6 +363,11 @@ declare var WEBVR: {
     getButton: () => HTMLDivElement;
     getVRDisplay: () => void;
 };
+declare namespace feng3d {
+    interface GameObjectUserData {
+        velocity: Vector3;
+    }
+}
 declare class webvr_cubes extends feng3d.Script {
     /**
      * 初始化时调用

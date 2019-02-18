@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<e:Skin class="ColorPicker" xmlns:e="http://ns.egret.com/eui">
-	<e:Rect id="picker" width="20" height="20" strokeWeight="2" fillColor="0x000000"/>
+<e:Skin class="ColorPicker" xmlns:e="http://ns.egret.com/eui" width="20" height="20">
+	<e:Rect id="picker" width="100%" height="20" strokeWeight="2" fillColor="0x000000"/>
 </e:Skin>

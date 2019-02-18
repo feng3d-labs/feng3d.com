@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="ColorPickerView" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing">
+	<e:Rect width="100%" height="100%" fillColor="0xc1c1c1" strokeWeight="1"/>
+	<e:Group>
+		<e:Group id="group0" width="150" height="150" x="528" y="156">
+			<e:Group top="8" left="8" bottom="8" right="8">
+				<e:Rect width="100%" height="100%" scaleX="1" scaleY="1"/>
+				<e:Image id="image0" width="100%" height="100%" scaleX="1" scaleY="1"/>
+			</e:Group>
+			<e:Group id="pos0" width="16" height="16">
+				<e:Rect strokeColor="0xffffff" strokeWeight="1" fillAlpha="0" fillColor="0x228844" scaleX="1" scaleY="1" left="0" top="0" right="0" bottom="0"/>
+				<e:Rect strokeWeight="1" fillAlpha="0" scaleX="1" scaleY="1" left="1" top="1" right="1" bottom="1" strokeColor="0x000000" fillColor="0x000000"/>
+			</e:Group>
+		</e:Group>
+		<e:Group id="group1" width="20" height="150" x="538" y="166">
+			<e:Group left="4" top="4" right="4" bottom="4">
+				<e:Rect width="100%" height="100%" scaleX="1" scaleY="1"/>
+				<e:Image width="100%" height="100%" id="image1" scaleX="1" scaleY="1"/>
+			</e:Group>
+			<e:Group id="pos1" width="100%" height="8">
+				<e:Rect strokeColor="0xFFFFFF" strokeWeight="1" fillAlpha="0" fillColor="0x228844" scaleX="1" scaleY="1" left="0" top="0" right="0" bottom="0"/>
+				<e:Rect strokeWeight="1" fillAlpha="0" fillColor="0x228844" scaleX="1" scaleY="1" left="1" top="1" right="1" bottom="1" strokeColor="0x000000"/>
+			</e:Group>
+		</e:Group>
+		<e:Group height="150">
+			<e:Group height="20" y="0" scaleX="1" scaleY="1">
+				<e:Label text="R" size="12" width="20" y="0" x="0" textColor="0x000000" verticalAlign="middle" multiline="false"/>
+				<e:TextInput id="txtR" scaleX="1" scaleY="1"/>
+				<e:layout>
+				<e:HorizontalLayout verticalAlign="middle" paddingLeft="0"/>
+				</e:layout>
+			</e:Group>
+			<e:Group height="20" y="10" scaleX="1" scaleY="1" x="10">
+				<e:Label text="G" size="12" width="20" y="0" x="0" textColor="0x000000" verticalAlign="middle" multiline="false"/>
+				<e:TextInput id="txtG" scaleX="1" scaleY="1" x="10" y="10"/>
+				<e:layout>
+				<e:HorizontalLayout verticalAlign="middle" paddingLeft="0"/>
+				</e:layout>
+			</e:Group>
+			<e:Group height="20" y="10" scaleX="1" scaleY="1">
+				<e:Label text="B" size="12" width="20" y="0" x="0" textColor="0x000000" verticalAlign="middle" multiline="false"/>
+				<e:TextInput id="txtB" scaleX="1" scaleY="1" x="20" y="20"/>
+				<e:layout>
+				<e:HorizontalLayout verticalAlign="middle" paddingLeft="0"/>
+				</e:layout>
+			</e:Group>
+			<e:Group id="groupA" height="20" y="20" scaleX="1" scaleY="1" x="10">
+				<e:Label text="A" size="12" width="20" y="0" x="0" textColor="0x000000" verticalAlign="middle" multiline="false"/>
+				<e:TextInput id="txtA" scaleX="1" scaleY="1" x="20" y="20"/>
+				<e:layout>
+				<e:HorizontalLayout verticalAlign="middle" paddingLeft="0"/>
+				</e:layout>
+			</e:Group>
+			<e:Group height="20" y="20" scaleX="1" scaleY="1" x="10">
+				<e:Label text="#" size="12" width="20" y="0" x="0" textColor="0x000000" verticalAlign="middle" multiline="false"/>
+				<e:TextInput id="txtColor" scaleX="1" scaleY="1" x="20" y="20"/>
+				<e:layout>
+				<e:HorizontalLayout verticalAlign="middle" paddingLeft="0"/>
+				</e:layout>
+			</e:Group>
+			<e:layout>
+				<e:VerticalLayout/>
+			</e:layout>
+		</e:Group>
+		<e:layout>
+			<e:HorizontalLayout paddingLeft="5" paddingRight="5" paddingBottom="5" paddingTop="5"/>
+		</e:layout>
+	</e:Group>
+</e:Skin>

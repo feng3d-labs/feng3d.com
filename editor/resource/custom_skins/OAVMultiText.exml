@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="OAVMultiText" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing">
+	<e:Group width="100%">
+		<e:Rect width="100%" height="100%" fillColor="0xdedede" strokeWeight="1" strokeColor="0x000000"/>
+		<e:Label id="txtLab" size="12" textColor="0x000000" verticalAlign="middle" multiline="true" textAlign="left" left="5" top="5" bottom="5" right="5" minHeight="12" x="0" y="5" scaleX="1" scaleY="1"  text=""/>
+	</e:Group>
+
+</e:Skin>

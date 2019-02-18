@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="NavigationView" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing">
+	<e:Group x="0" y="0" width="100%" height="100%">
+		<e:Group width="100%" x="0" y="0" scaleX="1" scaleY="1">
+			<e:Button id="agentsBtn" label="Agents" scaleX="1" scaleY="1"/>
+			<e:Button id="areasBtn" label="Areas" scaleX="1" scaleY="1"/>
+			<e:Button id="bakeBtn" label="Bake" scaleX="1" scaleY="1"/>
+			<e:Button id="objectBtn" label="Object" scaleX="1" scaleY="1"/>
+			<e:layout>
+			<e:HorizontalLayout verticalAlign="middle" horizontalAlign="center" gap="1"/>
+			</e:layout>
+		</e:Group>
+		<e:Group width="100%" x="10" y="10" scaleX="1" scaleY="1">
+			<e:layout>
+				<e:VerticalLayout/>
+			</e:layout>
+			<e:Group width="100%" height="20" x="0" y="6" scaleX="1" scaleY="1">
+				<e:Label id="nameLab" text="Name" size="12" width="80" y="0" x="0" textColor="0x000000" verticalAlign="middle" multiline="false"/>
+				<e:TextInput id="nameInput" width="100%" scaleX="1" scaleY="1"/>
+				<e:layout>
+				<e:HorizontalLayout verticalAlign="middle" paddingLeft="0"/>
+				</e:layout>
+			</e:Group>
+			<e:Group width="100%" height="20">
+				<e:Label text="Radius" size="12" width="80" y="0" x="0" textColor="0x000000" verticalAlign="middle" multiline="false"/>
+				<e:TextInput id="radiusInput" width="100%" scaleX="1" scaleY="1"/>
+				<e:layout>
+				<e:HorizontalLayout verticalAlign="middle" paddingLeft="0"/>
+				</e:layout>
+			</e:Group>
+			<e:Group width="100%" height="20">
+				<e:Label text="Height" size="12" width="80" y="0" x="0" textColor="0x000000" verticalAlign="middle" multiline="false"/>
+				<e:TextInput id="heightInput" width="100%" scaleX="1" scaleY="1"/>
+				<e:layout>
+				<e:HorizontalLayout verticalAlign="middle" paddingLeft="0"/>
+				</e:layout>
+			</e:Group>
+			<e:Group width="100%" height="20">
+				<e:Label text="Step Height" size="12" width="80" y="0" x="0" textColor="0x000000" verticalAlign="middle" multiline="false"/>
+				<e:TextInput id="stepHeightInput" width="100%" scaleX="1" scaleY="1"/>
+				<e:layout>
+				<e:HorizontalLayout verticalAlign="middle" paddingLeft="0"/>
+				</e:layout>
+			</e:Group>
+			<e:Group x="0" y="18" width="100%">
+				<e:Label text="Max Slope" size="12" width="80" y="0" x="0" textColor="0x000000" verticalAlign="middle" multiline="false"/>
+				<e:Group x="86" y="0" width="100%">
+				<e:HSlider id="maxSlopeSlider" x="0" y="0" width="100%"/>
+				<e:TextInput id="maxSlopeInput" width="50" scaleX="1" scaleY="1"/>
+				<e:layout>
+					<e:HorizontalLayout verticalAlign="middle"/>
+				</e:layout>
+				</e:Group>
+				<e:layout>
+				<e:HorizontalLayout verticalAlign="middle"/>
+				</e:layout>
+			</e:Group>
+		</e:Group>
+		<e:layout>
+			<e:VerticalLayout/>
+		</e:layout>
+	</e:Group>
+</e:Skin>

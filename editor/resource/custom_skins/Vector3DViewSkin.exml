@@ -3,28 +3,28 @@
 	<w:Config id="15a6adcd3c5" ></w:Config>
 	<e:Group id="group" width="100%">
 		<e:Group x="0" y="0" width="100%">
-		<e:Label text="x" size="12" textAlign="right" x="0" y="0" textColor="0x000000"/>
+		<e:Label text="X" size="12" textAlign="right" x="0" y="0" textColor="0x000000"/>
 			<e:TextInput id="xTextInput" width="100%" x="113" y="117"/>
 		<e:layout>
 			<e:HorizontalLayout verticalAlign="middle"/>
 		</e:layout>
 		</e:Group>
 		<e:Group x="112" y="0" width="100%">
-		<e:Label text="y" size="12" textAlign="right" x="0" y="0" textColor="0x000000" verticalAlign="middle"/>
+		<e:Label text="Y" size="12" textAlign="right" x="0" y="0" textColor="0x000000" verticalAlign="middle"/>
 			<e:TextInput id="yTextInput" width="100%" x="123" y="127"/>
 		<e:layout>
 			<e:HorizontalLayout verticalAlign="middle"/>
 		</e:layout>
 		</e:Group>
 		<e:Group x="122" y="10" width="100%">
-		<e:Label text="z" size="12" textAlign="right" x="0" y="0" textColor="0x000000" verticalAlign="middle"/>
+		<e:Label text="Z" size="12" textAlign="right" x="0" y="0" textColor="0x000000" verticalAlign="middle"/>
 			<e:TextInput id="zTextInput" width="100%" x="133" y="137"/>
 		<e:layout>
 			<e:HorizontalLayout verticalAlign="middle"/>
 		</e:layout>
 		</e:Group>
 		<e:Group id="wGroup" x="132" y="20" width="100%" includeIn="showw">
-			<e:Label text="w" size="12" textAlign="right" x="0" y="0" textColor="0x000000" verticalAlign="middle"/>
+			<e:Label text="W" size="12" textAlign="right" x="0" y="0" textColor="0x000000" verticalAlign="middle"/>
 			<e:TextInput id="wTextInput" width="100%" x="133" y="137"/>
 			<e:layout>
 			<e:HorizontalLayout verticalAlign="middle"/>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="MinMaxCurveVector3View" width="400" xmlns:e="http://ns.egret.com/eui" xmlns:editor="editor.*" xmlns:w="http://ns.egret.com/wing">
+	<e:Group width="100%">
+		<e:Label text="X" size="12" y="0" x="0" textColor="0x000000" verticalAlign="middle" multiline="false"/>
+		<editor:MinMaxCurveView id="xMinMaxCurveView" scaleX="1" scaleY="1" width="100%"/>
+		<e:Label text="Y" size="12" y="10" x="10" textColor="0x000000" verticalAlign="middle" multiline="false"/>
+		<editor:MinMaxCurveView id="yMinMaxCurveView" scaleX="1" scaleY="1" width="100%"/>
+		<e:Label text="Z" size="12" y="20" x="20" textColor="0x000000" verticalAlign="middle" multiline="false"/>
+		<editor:MinMaxCurveView id="zMinMaxCurveView" scaleX="1" scaleY="1" width="100%"/>
+		<e:layout>
+			<e:HorizontalLayout verticalAlign="middle"/>
+		</e:layout>
+	</e:Group>
+</e:Skin>

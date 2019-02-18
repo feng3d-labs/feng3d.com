@@ -2,7 +2,7 @@
 <e:Skin class="OVDefault" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing" xmlns:editor="editor.*">
 	<e:Group id="group" scaleX="1" scaleY="1" width="100%" height="100%">
 		<e:layout>
-		<e:VerticalLayout horizontalAlign="left" gap="10" paddingLeft="0" paddingRight="0"/>
+		<e:VerticalLayout horizontalAlign="left" paddingLeft="0" paddingRight="0" gap="-1"/>
 		</e:layout>
 	</e:Group>
 </e:Skin>

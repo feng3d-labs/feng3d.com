@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="MinMaxCurveView" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing">
+    <e:Group width="100%" height="16">
+        <e:Group x="378" y="78" width="100%" height="100%">
+            <e:Group id="constantGroup" width="100%" height="100%">
+                <e:TextInput id="constantTextInput" width="100%" scaleX="1" scaleY="1" />
+            </e:Group>
+            <e:Group id="curveGroup" width="100%" height="100%">
+							<e:Rect width="100%" height="100%" scaleX="1" scaleY="1" minWidth="40" strokeAlpha="1" fillAlpha="0" strokeWeight="1"/>
+                <e:Image id="curveImage" scaleX="1" scaleY="1"  left="1" top="1" right="1" bottom="1"/>
+            </e:Group>
+            <e:Group id="randomBetweenTwoConstantsGroup" width="100%" height="100%">
+                <e:TextInput id="minValueTextInput" width="100%" scaleX="1" scaleY="1" />
+                <e:TextInput id="maxValueTextInput" width="100%" scaleX="1" scaleY="1" />
+                <e:layout>
+                    <e:HorizontalLayout/>
+                </e:layout>
+            </e:Group>
+        </e:Group>
+        <e:Button id="modeBtn" label="" x="285" y="45" width="13">
+            <e:skinName>
+                <e:Skin states="up,down,disabled" xmlns:w="http://ns.egret.com/wing">
+                    <e:Image width="100%" height="100%" source="MinMaxGradientView_down_png" />
+                    <e:Label id="labelDisplay" horizontalCenter="0" verticalCenter="0" />
+                </e:Skin>
+            </e:skinName>
+        </e:Button>
+        <e:layout>
+            <e:HorizontalLayout gap="0" verticalAlign="middle" />
+        </e:layout>
+    </e:Group>
+</e:Skin>

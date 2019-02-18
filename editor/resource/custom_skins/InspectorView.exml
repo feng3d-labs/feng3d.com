@@ -4,7 +4,7 @@
 	<e:Rect minHeight="50" minWidth="50" width="100%" x="0" height="100%" y="1" fillColor="0xc2c2c2" strokeColor="0x828282" />
 	<e:Group width="100%" height="100%">
 		<e:Group x="0" y="0" width="100%">
-			<e:Label text="Inspector" y="3" size="12" bold="true" x="5" textColor="0x000000" />
+			<e:Label id="typeLab" text="Inspector" y="3" size="12" bold="true" x="5" textColor="0x000000" />
 			<e:Button id="backButton" label="" right="0" width="20" icon="back_png" height="20" verticalCenter="0" />
 			<e:layout>
 				<e:BasicLayout/>

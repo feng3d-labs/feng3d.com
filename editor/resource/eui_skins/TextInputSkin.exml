@@ -6,5 +6,5 @@
 	<e:EditableText id="textDisplay" verticalCenter="0" left="5" right="5"
 	                width="100%" size="12"  height="12" textColor="0x000000" textColor.disabled="0x000000" text="" textAlign="left"/>
 	<e:Label id="promptDisplay" verticalCenter="0" left="5" right="5" width="100%"
-	         touchEnabled="false" includeIn="normalWithPrompt,disabledWithPrompt"  size="12" textColor="0xa9a9a9"/>
+	         touchEnabled="false" includeIn="normalWithPrompt,disabledWithPrompt"  size="12" textColor="0xa9a9a9" text=""/>
 </e:Skin>
